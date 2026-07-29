@@ -24,7 +24,7 @@ function Home() {
 
   try {
     const response = await fetch(
-      `http://localhost:5000/api/cities?q=${inputValue}`
+      `https://aetherix-backend-eoj8.onrender.com/api/cities?q=${inputValue}`
 
   );
 
