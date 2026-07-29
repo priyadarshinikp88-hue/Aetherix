@@ -58,7 +58,7 @@ function Home() {
 
 
    const response = await fetch(
-  `http://localhost:5000/api/weather?lat=${lat}&lon=${lon}`
+  `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${lat}&lon=${lon}`
 );
 
     const data = await response.json();
