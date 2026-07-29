@@ -1,0 +1,155 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI',sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,#071426,#0d3b74,#1e88ff);
+}
+
+.register-container{
+  min-height:100vh;
+  display:flex;
+}
+
+/* LEFT PANEL */
+
+.register-left{
+  width:50%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  padding:60px;
+  text-align:center;
+}
+
+.register-logo{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  background:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:50px;
+  margin-bottom:25px;
+  box-shadow:0 0 25px rgba(255,255,255,.4);
+}
+
+.register-left h1{
+  font-size:40px;
+  margin-bottom:10px;
+}
+
+.register-left h2{
+  margin-bottom:20px;
+  color:#dbeafe;
+}
+
+.register-left p{
+  max-width:450px;
+  line-height:28px;
+  font-size:18px;
+}
+
+/* RIGHT PANEL */
+
+.register-right{
+  width:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.register-card{
+  width:430px;
+  background:rgba(255,255,255,.12);
+  backdrop-filter:blur(15px);
+  border-radius:20px;
+  padding:40px;
+  color:white;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+
+.register-card h2{
+  text-align:center;
+  margin-bottom:25px;
+}
+
+.register-card input{
+  width:100%;
+  padding:15px;
+  margin-bottom:18px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+}
+
+.register-button,
+.back-button{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:17px;
+  margin-top:12px;
+  transition:.3s;
+}
+
+.register-button{
+  background:#1976d2;
+  color:white;
+}
+
+.register-button:hover{
+  background:#1565c0;
+}
+
+.back-button{
+  background:white;
+  color:#1976d2;
+}
+
+.back-button:hover{
+  background:#e3f2fd;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+.register-container{
+  flex-direction:column;
+}
+
+.register-left,
+.register-right{
+  width:100%;
+  padding:40px 20px;
+}
+
+.register-card{
+  width:90%;
+}
+
+}
+.logo-box{
+    width:180px;
+    height:180px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+
+.logo-image{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
