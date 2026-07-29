@@ -69,6 +69,11 @@ function Home() {
     }
 
     setWeather(data);
+    // Clear search for next city
+setCity("");
+setLat("");
+setLon("");
+setCityOptions([]);
 
   } catch (error) {
     console.error(error);
@@ -107,7 +112,7 @@ function Home() {
   <li>Alerts</li>
   <li
   style={{ cursor: "pointer" }}
-  onClick={() => setShowAbout(!showAbout)}
+ onClick={() => setShowAbout(false)}
 >
   About
 </li>
@@ -199,18 +204,27 @@ function Home() {
   options={cityOptions}
   placeholder="Search City..."
   isSearchable
+  isClearable
   inputValue={city}
-  onInputChange={(value) => {
-    setCity(value);
-    searchCities(value);
+  onInputChange={(value, actionMeta) => {
+    if (actionMeta.action === "input-change") {
+      setCity(value);
+      searchCities(value);
+    }
   }}
   onChange={(selected) => {
-  if (selected) {
-    setCity(selected.value);
-    setLat(selected.lat);
-    setLon(selected.lon);
-  }
-}}
+    if (selected) {
+      setCity(selected.label);
+      setLat(selected.lat);
+      setLon(selected.lon);
+    } else {
+      setCity("");
+      setLat("");
+      setLon("");
+      setCityOptions([]);
+    }
+  }}
+/>
   styles={{
     control: (provided) => ({
       ...provided,
@@ -245,7 +259,32 @@ function Home() {
       color: "#777",
     }),
   }}
-/>
+<Select
+  options={cityOptions}
+  placeholder="Search City..."
+  isSearchable
+  isClearable
+  inputValue={city}
+  onInputChange={(value, actionMeta) => {
+    if (actionMeta.action === "input-change") {
+      setCity(value);
+      searchCities(value);
+    }
+  }}
+  onChange={(selected) => {
+    if (selected) {
+      setCity(selected.label);
+      setLat(selected.lat);
+      setLon(selected.lon);
+    } else {
+      setCity("");
+      setLat("");
+      setLon("");
+      setCityOptions([]);
+    }
+  }}
+  />
+
  <button onClick={getWeather}>
   Get Weather
 </button> 
