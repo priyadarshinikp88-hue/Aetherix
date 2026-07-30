@@ -1,4 +1,5 @@
 import "./dashboard.css";
+import Navbar from "./Navbar";
 
 import {
   Chart as ChartJS,
@@ -50,6 +51,7 @@ function Dashboard() {
 
 return (
     <div className="dashboard-page">
+      <Navbar />
 
       <h1>📊 AI Weather Dashboard</h1>
 

@@ -1,4 +1,5 @@
 import "./alerts.css";
+import Navbar from "./Navbar";
 
 function Alerts() {
 
@@ -7,7 +8,9 @@ function Alerts() {
   if (!weather) {
     return (
       <div className="alerts-page">
-        <h1>🚨 Weather Alerts</h1>
+
+    <Navbar />
+          <h1>🚨 Weather Alerts</h1>
         <h2>Please search a city from the Home page first.</h2>
       </div>
     );

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./forecast.css";
+import Navbar from "./Navbar";
 
 function Forecast() {
     const [forecast, setForecast] = useState([]);
@@ -25,14 +26,16 @@ const getForecast = async () => {
 
     const data = await response.json();
 
-    setForecast(data.list);
+    setForecast(data.list || []);
 
   } catch (error) {
     console.log(error);
   }
 };
-  return (
+ return (
   <div className="forecast-page">
+
+    <Navbar />
 
     <h1>🌦 Live 5-Day Weather Forecast</h1>
 
@@ -44,7 +47,7 @@ const getForecast = async () => {
     <div className="forecast-container">
 
      { forecast
-  .filter((item) => item.dt_txt.includes("12:00:00"))
+  .forecast?.filter(item => item.dt_txt.includes("12:00:00"))
   .slice(0, 5)
   .map((item, index) => (
         <div className="forecast-card" key={index}>

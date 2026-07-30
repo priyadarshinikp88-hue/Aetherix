@@ -6,7 +6,7 @@ import ceo from "./assets/ceo.jpg";
 
 function Home() {
 
-
+  const [activeSection, setActiveSection] = useState("home");
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -87,12 +87,7 @@ const getCurrentLocation = () => {
   );
 };
 
-  const getWeather = async () => {
-  if (!selectedCity) {
-    alert("Please select a city from the suggestions");
-    return;
-  }
-
+ const getWeather = async () => {
   try {
     setLoading(true);
 
@@ -105,10 +100,14 @@ const getCurrentLocation = () => {
 
     const data = await response.json();
 
-    ...
-  }finally {
-  setLoading(false);
-}
+    setWeather(data);
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to fetch weather.");
+  } finally {
+    setLoading(false);
+  }
 };
   return (
 
@@ -136,19 +135,19 @@ const getCurrentLocation = () => {
 
         
    <ul>
-  <li onClick={() => navigate("/home")} style={{ cursor: "pointer" }}>
+  <li onClick={() => setActiveSection("home")} style={{ cursor: "pointer" }}>
     Home
   </li>
 
-  <li onClick={() => navigate("/forecast")} style={{ cursor: "pointer" }}>
+  <li onClick={() => setActiveSection("forecast")} style={{ cursor: "pointer" }}>
     Forecast
   </li>
 
-  <li onClick={() => navigate("/dashboard")} style={{ cursor: "pointer" }}>
+  <li onClick={() => setActiveSection("dashboard")} style={{ cursor: "pointer" }}>
     Dashboard
   </li>
 
-  <li onClick={() => navigate("/alerts")} style={{ cursor: "pointer" }}>
+  <li onClick={() => setActiveSection("alerts")} style={{ cursor: "pointer" }}>
     Alerts
   </li>
 
@@ -169,6 +168,7 @@ const getCurrentLocation = () => {
   </li>
 </ul>
       </nav>
+
     {/* ABOUT */}
 
 {showAbout && (
