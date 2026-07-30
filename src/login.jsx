@@ -2,6 +2,8 @@ import logo from "./assets/logo.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "./firebase";
 
 function Login() {
   const navigate = useNavigate();
@@ -57,6 +59,24 @@ function Login() {
   }
 
 };
+  const handleGoogleLogin = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+
+    localStorage.setItem("user", JSON.stringify(result.user));
+
+    alert("Google Login Successful!");
+
+    window.location.href = "/home";
+  }
+ catch (error) {
+  console.log("Error Code:", error.code);
+  console.log("Error Message:", error.message);
+  console.error(error);
+
+  alert(error.code);
+}
+  };
   return (
     <div className="login-container">
 
@@ -143,6 +163,16 @@ function Login() {
           >
             Login
           </button>
+
+          <div style={{ marginTop: "15px" }}>
+  <button
+    type="button"
+    onClick={handleGoogleLogin}
+    className="google-btn"
+  >
+    Continue with Google
+  </button>
+</div>
 
           <button
             className="register-btn"
