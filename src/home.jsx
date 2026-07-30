@@ -259,31 +259,6 @@ setCityOptions([]);
       color: "#777",
     }),
   }}
-<Select
-  options={cityOptions}
-  placeholder="Search City..."
-  isSearchable
-  isClearable
-  inputValue={city}
-  onInputChange={(value, actionMeta) => {
-    if (actionMeta.action === "input-change") {
-      setCity(value);
-      searchCities(value);
-    }
-  }}
-  onChange={(selected) => {
-    if (selected) {
-      setCity(selected.label);
-      setLat(selected.lat);
-      setLon(selected.lon);
-    } else {
-      setCity("");
-      setLat("");
-      setLon("");
-      setCityOptions([]);
-    }
-  }}
-  />
 
  <button onClick={getWeather}>
   Get Weather
