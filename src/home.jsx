@@ -12,7 +12,7 @@ function Home() {
 
   const [cityOptions, setCityOptions] = useState([]);
   const [showAbout, setShowAbout] = useState(false);
-
+const [selectedCity, setSelectedCity] = useState(null);
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
 
@@ -32,6 +32,7 @@ function Home() {
   );
 
     const data = await response.json();
+    console.log("API Response:", data);
 
    const options = data.map((item) => ({
   label: `${item.name}${item.state ? ", " + item.state : ""}, ${item.country}`,
@@ -39,6 +40,7 @@ function Home() {
   lat: item.lat,
   lon: item.lon,
 }));
+    console.log("Options:", options);
     setCityOptions(options);
   } catch (error) {
     console.log(error);
@@ -48,21 +50,16 @@ function Home() {
 
   const getWeather = async () => {
 
-  console.log("City:", city);
-  console.log("Latitude:", lat);
-  console.log("Longitude:", lon);
-
-  if (!lat || !lon) {
+  if (!selectedCity) {
     alert("Please select a city from the suggestions");
     return;
   }
 
   try {
 
-
-   const response = await fetch(
-  `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${lat}&lon=${lon}`
-);
+    const response = await fetch(
+      `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}`
+    );
 
     const data = await response.json();
 
@@ -72,13 +69,17 @@ function Home() {
     }
 
     setWeather(data);
-    localStorage.setItem("lat", lat);
-    localStorage.setItem("lon", lon);
-    // Clear search for next city
-setCity("");
-setLat("");
-setLon("");
-setCityOptions([]);
+
+    localStorage.setItem("weather", JSON.stringify(data));
+    localStorage.setItem("lat", selectedCity.lat);
+    localStorage.setItem("lon", selectedCity.lon);
+
+    // Clear search
+    setSelectedCity(null);
+    setCity("");
+    setLat("");
+    setLon("");
+    setCityOptions([]);
 
   } catch (error) {
     console.error(error);
@@ -216,6 +217,8 @@ setCityOptions([]);
 
   <h2>Search Weather</h2>
 
+  <p>Options: {cityOptions.length}</p>
+
  <Select
   options={cityOptions}
   placeholder="Search City..."
@@ -262,18 +265,21 @@ setCityOptions([]);
       searchCities(value);
     }
   }}
-  onChange={(selected) => {
-    if (selected) {
-      setCity(selected.label);
-      setLat(selected.lat);
-      setLon(selected.lon);
-    } else {
-      setCity("");
-      setLat("");
-      setLon("");
-      setCityOptions([]);
-    }
-  }}
+ onChange={(selected) => {
+  if (selected) {
+    setSelectedCity(selected);
+    setCity(selected.label);
+
+    setLat(selected.lat);
+    setLon(selected.lon);
+  } else {
+    setSelectedCity(null);
+    setCity("");
+    setLat("");
+    setLon("");
+    setCityOptions([]);
+  }
+}}
 />
  <button onClick={getWeather}>
   Get Weather
@@ -297,6 +303,9 @@ setCityOptions([]);
       </h3>
 
       <p>{weather.weather[0].description}</p>
+      <p style={{ marginTop: "10px", fontSize: "14px", color: "#ddd" }}>
+  Last Updated: {new Date().toLocaleTimeString()}
+</p>
     </div>
 
   </div>
@@ -311,12 +320,33 @@ setCityOptions([]);
 
       <section className="cards">
 
+        <div className="card">
+  <h3>🌍 Air Quality</h3>
+
+  <h2>
+    {weather?.air?.main?.aqi ?? "--"}
+  </h2>
+
+  <p>
+    {weather?.air?.main?.aqi
+  ? ["Good", "Fair", "Moderate", "Poor", "Very Poor"][
+      weather.air.main.aqi - 1
+    ]
+  : "Not Available"}
+  </p>
+</div>
+
               <div className="card">
           <h3>🌡 Temperature</h3>
           <h2>
             {weather ? `${weather.main.temp} °C` : "-- °C"}
           </h2>
         </div>
+
+        <div className="card">
+  <h3>🌡 Feels Like</h3>
+  <h2>{weather ? `${weather.main.feels_like} °C` : "-- °C"}</h2>
+</div>
 
         <div className="card">
           <h3>💧 Humidity</h3>

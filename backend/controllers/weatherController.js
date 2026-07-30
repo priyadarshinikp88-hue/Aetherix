@@ -20,8 +20,15 @@ export const getWeather = async (req, res) => {
 
     const response = await axios.get(url);
 
-    res.json(response.data);
+// Fetch Air Quality Index
+const aqiResponse = await axios.get(
+  `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+);
 
+res.json({
+  ...response.data,
+  air: aqiResponse.data.list[0],
+});
   } catch (error) {
     console.error("Weather Error:", error.response?.data || error.message);
 
