@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import "./login.css";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "./firebase";
+import { signOut } from "firebase/auth";
+
+await signOut(auth);
 
 function Login() {
   const navigate = useNavigate();
