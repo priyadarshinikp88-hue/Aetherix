@@ -92,15 +92,20 @@ return (
 <div className="dashboard-grid">
 
   <div className="dashboard-card">
-    <h2>🌍 Air Quality</h2>
-    <h1>{weather.air?.main?.aqi ?? "--"}</h1>
-    <p>
-      {weather.air
-        ? ["Good", "Fair", "Moderate", "Poor", "Very Poor"][weather.air.main.aqi - 1]
-        : "Not Available"}
-    </p>
-  </div>
+  <h2>🌍 Air Quality</h2>
 
+  <h1>{weather.air?.main?.aqi ?? "--"}</h1>
+
+  <p>
+    {{
+      1: "🟢 Good",
+      2: "🟡 Fair",
+      3: "🟠 Moderate",
+      4: "🔴 Poor",
+      5: "🟣 Very Poor",
+    }[weather.air?.main?.aqi] || "Not Available"}
+  </p>
+</div>
   <div className="dashboard-card ai-card">
     <h2>🤖 AI Weather Summary</h2>
 
