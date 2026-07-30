@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { useState } from "react";
 import "./home.css";
@@ -14,6 +15,8 @@ function Home() {
 
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
+
+  const navigate = useNavigate();
 
   const searchCities = async (inputValue) => {
 
@@ -104,29 +107,40 @@ setCityOptions([]);
 
         </div>
 
-        <ul>
+        
+   <ul>
+  <li onClick={() => navigate("/home")} style={{ cursor: "pointer" }}>
+    Home
+  </li>
 
-  <li>Home</li>
-  <li>Forecast</li>
-  <li>Dashboard</li>
-  <li>Alerts</li>
+  <li onClick={() => navigate("/forecast")} style={{ cursor: "pointer" }}>
+    Forecast
+  </li>
+
+  <li onClick={() => navigate("/dashboard")} style={{ cursor: "pointer" }}>
+    Dashboard
+  </li>
+
+  <li onClick={() => navigate("/alerts")} style={{ cursor: "pointer" }}>
+    Alerts
+  </li>
+
   <li
-  style={{ cursor: "pointer" }}
- onClick={() => setShowAbout(!showAbout)}
->
-  About
-</li>
+    onClick={() => setShowAbout(!showAbout)}
+    style={{ cursor: "pointer" }}
+  >
+    About
+  </li>
+
   <li>
     <button
       className="logout-btn"
-      onClick={() => window.location.href = "/"}
+      onClick={() => navigate("/")}
     >
       Logout
     </button>
   </li>
-
 </ul>
-
       </nav>
     {/* ABOUT */}
 

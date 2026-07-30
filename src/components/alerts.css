@@ -1,0 +1,20 @@
+.alerts-page{
+    min-height:100vh;
+    background:#0b1f3a;
+    color:white;
+    padding:40px;
+    text-align:center;
+}
+
+.alert-card{
+    background:#294b73;
+    margin:20px auto;
+    padding:20px;
+    border-radius:12px;
+    width:70%;
+    font-size:20px;
+}
+
+.safe{
+    background:#1f8f4d;
+}

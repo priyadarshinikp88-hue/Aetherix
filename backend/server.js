@@ -9,6 +9,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import weatherRoutes from "./routes/weather.js";
 import cityRoutes from "./routes/city.js";
+import forecastRoutes from "./routes/forecast.js";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/weather", weatherRoutes);
+app.use("/api/forecast", forecastRoutes);
 app.use("/api/cities", (req, res, next) => {
   console.log("➡️ Request reached /api/cities");
   next();
