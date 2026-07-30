@@ -48,6 +48,45 @@ const [selectedCity, setSelectedCity] = useState(null);
 
 };
 
+const getCurrentLocation = () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      try {
+        const response = await fetch(
+          `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${lat}&lon=${lon}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert("Unable to fetch weather");
+          return;
+        }
+
+        setWeather(data);
+
+        localStorage.setItem("weather", JSON.stringify(data));
+        localStorage.setItem("lat", lat);
+        localStorage.setItem("lon", lon);
+      } catch (err) {
+        console.error(err);
+        alert("Location weather failed");
+      }
+    },
+    () => {
+      alert("Please allow location access.");
+    }
+  );
+};
+
   const getWeather = async () => {
 
   if (!selectedCity) {
@@ -154,14 +193,6 @@ const [selectedCity, setSelectedCity] = useState(null);
   {/* CEO */}
 
   <img src={ceo} alt="CEO" className="ceo-image" />
-
-  <h3 className="ceo-name">
-    SHRINIVASA H P
-  </h3>
-
-  <h4 className="ceo-role">
-    Founder & CEO
-  </h4>
 
 
   <p className="about-text">
@@ -284,6 +315,13 @@ const [selectedCity, setSelectedCity] = useState(null);
  <button onClick={getWeather}>
   Get Weather
 </button> 
+
+<button
+    className="location-btn"
+    onClick={getCurrentLocation}
+>
+    🧭 Use My Current Location
+</button>
 
   {weather && (
   <div className="city-box">
