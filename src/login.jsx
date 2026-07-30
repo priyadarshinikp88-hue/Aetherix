@@ -14,6 +14,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
  const handleLogin = async () => {
 
@@ -62,8 +63,10 @@ function Login() {
   }
 
 };
-  const handleGoogleLogin = async () => {
+ const handleGoogleLogin = async () => {
   try {
+    setLoading(true);
+
     const result = await signInWithPopup(auth, provider);
 
     localStorage.setItem("user", JSON.stringify(result.user));
@@ -71,15 +74,13 @@ function Login() {
     alert("Google Login Successful!");
 
     window.location.href = "/home";
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  } finally {
+    setLoading(false);
   }
- catch (error) {
-  console.log("Error Code:", error.code);
-  console.log("Error Message:", error.message);
-  console.error(error);
-
-  alert(error.code);
-}
-  };
+};
   return (
     <div className="login-container">
 
@@ -169,12 +170,13 @@ function Login() {
 
           <div style={{ marginTop: "15px" }}>
   <button
-    type="button"
-    onClick={handleGoogleLogin}
-    className="google-btn"
-  >
-    Continue with Google
-  </button>
+  type="button"
+  onClick={handleGoogleLogin}
+  className="google-btn"
+  disabled={loading}
+>
+  {loading ? "⏳ Signing in..." : "Continue with Google"}
+</button>
 </div>
 
           <button
