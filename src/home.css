@@ -591,3 +591,33 @@ padding:20px;
     background:#27ae60;
     transform:translateY(-2px);
 }
+
+.loading-container{
+    text-align:center;
+    margin-top:25px;
+}
+
+.loader{
+    width:55px;
+    height:55px;
+    border:6px solid rgba(255,255,255,0.3);
+    border-top:6px solid #4aa3ff;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:0 auto 15px;
+}
+
+@keyframes spin{
+    0%{
+        transform:rotate(0deg);
+    }
+    100%{
+        transform:rotate(360deg);
+    }
+}
+
+.loading-container p{
+    color:white;
+    font-size:18px;
+    font-weight:600;
+}

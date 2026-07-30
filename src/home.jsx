@@ -9,7 +9,7 @@ function Home() {
 
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const [cityOptions, setCityOptions] = useState([]);
   const [showAbout, setShowAbout] = useState(false);
 const [selectedCity, setSelectedCity] = useState(null);
@@ -88,13 +88,16 @@ const getCurrentLocation = () => {
 };
 
   const getWeather = async () => {
-
   if (!selectedCity) {
     alert("Please select a city from the suggestions");
     return;
   }
 
   try {
+    setLoading(true);
+
+    // Makes the loader visible for at least 1 second
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const response = await fetch(
       `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}`
@@ -102,28 +105,10 @@ const getCurrentLocation = () => {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      alert(data.message || "City not found");
-      return;
-    }
-
-    setWeather(data);
-
-    localStorage.setItem("weather", JSON.stringify(data));
-    localStorage.setItem("lat", selectedCity.lat);
-    localStorage.setItem("lon", selectedCity.lon);
-
-    // Clear search
-    setSelectedCity(null);
-    setCity("");
-    setLat("");
-    setLon("");
-    setCityOptions([]);
-
-  } catch (error) {
-    console.error(error);
-    alert("Unable to fetch weather");
-  }
+    ...
+  }finally {
+  setLoading(false);
+}
 };
   return (
 
@@ -323,6 +308,13 @@ const getCurrentLocation = () => {
     🧭 Use My Current Location
 </button>
 
+  {loading && (
+  <div className="loading-container">
+    <div className="loader"></div>
+    <p>🌤 Fetching live weather data...</p>
+  </div>
+)}
+
   {weather && (
   <div className="city-box">
 
@@ -399,7 +391,28 @@ const getCurrentLocation = () => {
             {weather ? `${weather.wind.speed} m/s` : "-- m/s"}
           </h2>
         </div>
-
+        <div className="card">
+  <h3>🌅 Sunrise</h3>
+  <h2>
+    {weather
+      ? new Date(weather.sys.sunrise * 1000).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "--:--"}
+  </h2>
+</div>
+      <div className="card">
+  <h3>🌇 Sunset</h3>
+  <h2>
+    {weather
+      ? new Date(weather.sys.sunset * 1000).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "--:--"}
+  </h2>
+</div>
         <div className="card">
 
   <h3>☁ Weather</h3>
