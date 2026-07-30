@@ -23,7 +23,10 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/weather", weatherRoutes);
+
+console.log("Forecast route loaded");
 app.use("/api/forecast", forecastRoutes);
+
 app.use("/api/cities", (req, res, next) => {
   console.log("➡️ Request reached /api/cities");
   next();

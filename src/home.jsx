@@ -72,6 +72,8 @@ function Home() {
     }
 
     setWeather(data);
+    localStorage.setItem("lat", lat);
+    localStorage.setItem("lon", lon);
     // Clear search for next city
 setCity("");
 setLat("");
