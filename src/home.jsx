@@ -112,7 +112,7 @@ setCityOptions([]);
   <li>Alerts</li>
   <li
   style={{ cursor: "pointer" }}
- onClick={() => setShowAbout(false)}
+ onClick={() => setShowAbout(!showAbout)}
 >
   About
 </li>
@@ -200,31 +200,12 @@ setCityOptions([]);
 
   <h2>Search Weather</h2>
 
-  <Select
+ <Select
   options={cityOptions}
   placeholder="Search City..."
   isSearchable
   isClearable
   inputValue={city}
-  onInputChange={(value, actionMeta) => {
-    if (actionMeta.action === "input-change") {
-      setCity(value);
-      searchCities(value);
-    }
-  }}
-  onChange={(selected) => {
-    if (selected) {
-      setCity(selected.label);
-      setLat(selected.lat);
-      setLon(selected.lon);
-    } else {
-      setCity("");
-      setLat("");
-      setLon("");
-      setCityOptions([]);
-    }
-  }}
-/>
   styles={{
     control: (provided) => ({
       ...provided,
@@ -259,7 +240,25 @@ setCityOptions([]);
       color: "#777",
     }),
   }}
-
+  onInputChange={(value, actionMeta) => {
+    if (actionMeta.action === "input-change") {
+      setCity(value);
+      searchCities(value);
+    }
+  }}
+  onChange={(selected) => {
+    if (selected) {
+      setCity(selected.label);
+      setLat(selected.lat);
+      setLon(selected.lon);
+    } else {
+      setCity("");
+      setLat("");
+      setLon("");
+      setCityOptions([]);
+    }
+  }}
+/>
  <button onClick={getWeather}>
   Get Weather
 </button> 
