@@ -7,7 +7,7 @@ import ForgotPassword from "./forgotpassword";
 import Forecast from "./components/forecast";
 import Dashboard from "./components/dashboard";
 import Alerts from "./components/alerts";
-import WeatherMap from "./components/WeatherMap";
+import WeatherMap from "./components/weathermap";
 function App() {
   return (
     <BrowserRouter>
