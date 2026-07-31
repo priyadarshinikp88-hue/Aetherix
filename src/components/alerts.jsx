@@ -2,13 +2,14 @@ import "./alerts.css";
 import Navbar from "./navbar";
 
 function Alerts() {
+
   const weather = JSON.parse(localStorage.getItem("weather"));
 
   if (!weather) {
     return (
       <div className="alerts-page">
         <Navbar />
-        <h1>🚨 Weather Alerts</h1>
+        <h1>🚨 AI Weather Alerts</h1>
         <h2>Please search a city first.</h2>
       </div>
     );
@@ -16,59 +17,123 @@ function Alerts() {
 
   const condition = weather.weather[0].main;
 
+  let title = "Weather Update";
+  let message = "Current weather conditions are safe.";
+  let icon = "☀️";
+
+  if (condition === "Rain") {
+    title = "Rain Alert";
+    icon = "🌧️";
+    message =
+      `Heavy rain expected in ${weather.name}. Carry an umbrella and avoid waterlogged roads.`;
+  }
+
+  else if (condition === "Thunderstorm") {
+    title = "Thunderstorm Warning";
+    icon = "⛈️";
+    message =
+      `Thunderstorm detected in ${weather.name}. Stay indoors and avoid open areas.`;
+  }
+
+  else if (condition === "Snow") {
+    title = "Snow Alert";
+    icon = "❄️";
+    message =
+      `Snowfall expected in ${weather.name}. Wear warm clothes and drive carefully.`;
+  }
+
+  else if (condition === "Mist" || condition === "Fog" || condition === "Haze") {
+    title = "Fog Alert";
+    icon = "🌫️";
+    message =
+      `Low visibility detected in ${weather.name}. Drive carefully and use headlights.`;
+  }
+
+  else if (weather.main.temp >= 35) {
+    title = "Heat Wave";
+    icon = "🔥";
+    message =
+      `High temperature detected in ${weather.name}. Stay hydrated and avoid direct sunlight.`;
+  }
+
+  else if (weather.wind.speed >= 12) {
+    title = "Strong Wind Alert";
+    icon = "🌬️";
+    message =
+      `Strong winds are expected in ${weather.name}. Secure loose outdoor objects.`;
+  }
+
   return (
     <div className="alerts-page">
+
       <Navbar />
 
       <h1>🚨 AI Weather Alerts</h1>
 
       <div className="alerts-container">
 
-        {condition === "Rain" && (
-          <div className="alert-card">
-            🌧 Rain Alert
-            <p>Carry an umbrella. Roads may be slippery.</p>
-          </div>
-        )}
+        <div className="alert-card">
 
-        {condition === "Thunderstorm" && (
-          <div className="alert-card">
-            ⛈ Thunderstorm Warning
-            <p>Avoid open areas and stay indoors.</p>
+          <div className="weather-icon">
+            {icon}
           </div>
-        )}
 
-        {condition === "Snow" && (
-          <div className="alert-card">
-            ❄ Snow Alert
-            <p>Drive carefully and wear warm clothes.</p>
+          <div className="alert-title">
+            AetherixCloud Weather Alert
           </div>
-        )}
 
-        {weather.main.temp > 35 && (
-          <div className="alert-card">
-            🔥 Heat Wave
-            <p>Stay hydrated and avoid direct sunlight.</p>
+          <div className="alert-message">
+
+            <strong>{title}</strong>
+
+            <br /><br />
+
+            {message}
+
           </div>
-        )}
 
-        {weather.wind.speed > 12 && (
-          <div className="alert-card">
-            🌬 Strong Wind
-            <p>Secure loose objects and travel carefully.</p>
+          <div className="weather-info">
+
+            <p>
+              <span>📍 City</span>
+              {weather.name}, {weather.sys.country}
+            </p>
+
+            <p>
+              <span>🌡 Temperature</span>
+              {weather.main.temp} °C
+            </p>
+
+            <p>
+              <span>🌬 Wind Speed</span>
+              {weather.wind.speed} m/s
+            </p>
+
+            <p>
+              <span>💧 Humidity</span>
+              {weather.main.humidity} %
+            </p>
+
+            <p>
+              <span>☁ Condition</span>
+              {weather.weather[0].description}
+            </p>
+
+            <p>
+              <span>🕒 Last Updated</span>
+              {new Date().toLocaleTimeString()}
+            </p>
+
           </div>
-        )}
 
-        {!["Rain", "Thunderstorm", "Snow"].includes(condition) &&
-          weather.main.temp <= 35 &&
-          weather.wind.speed <= 12 && (
-            <div className="alert-card safe">
-              ✅ No Active Alerts
-              <p>Current weather conditions are safe.</p>
-            </div>
-          )}
+          <div className="stay-safe">
+            🛡 Stay Safe. Monitor weather updates regularly.
+          </div>
+
+        </div>
 
       </div>
+
     </div>
   );
 }
