@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./login.css";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "./firebase";
-import { signOut } from "firebase/auth";
 
-await signOut(auth);
 
 function Login() {
   const navigate = useNavigate();
@@ -82,123 +80,141 @@ function Login() {
   }
 };
   return (
-    <div className="login-container">
+  <div className="login-container">
 
-      {/* Left Panel */}
+    {/* LEFT PANEL */}
 
-      <div className="left-panel">
+    <div className="left-panel">
 
-        <div className="logo-box">
-          <img
-            src={logo}
-            alt="Aetherix Logo"
-            className="logo-image"
-          />
-        </div>
-
-        <h1>Aetherix Technologies</h1>
-
-        <h2>AI Weather Forecast Platform</h2>
-
-        
-          <p>
-  Smart weather prediction powered by Artificial Intelligence.
-  Get accurate forecasts, weather alerts and real-time updates.
-</p>
-
-<div className="contact-info">
-
-  <p>
-  📧 <strong>Email:</strong>{" "}
-  <a href="mailto:hpsthegame@gmail.com">
-    hpsthegame@gmail.com
-  </a>
-</p>
-
-
-</div>
-    
-
+      <div className="logo-box">
+        <img
+          src={logo}
+          alt="Aetherix Logo"
+          className="logo-image"
+        />
       </div>
 
-      {/* Right Panel */}
+      <h1>Aetherix Technologies</h1>
 
-      <div className="right-panel">
+      <h2>AI-Powered Digital Innovation Platform</h2>
 
-        <div className="login-card">
+      <p>
+        Building intelligent digital solutions for businesses,
+        education, climate intelligence, cloud computing,
+        cybersecurity, artificial intelligence and digital
+        transformation.
+      </p>
 
-          <h2>Welcome Back 👋</h2>
+      <br />
 
-          <p>Login to continue</p>
+      <p>
+        Empowering organizations with secure, scalable and
+        innovative technology platforms that drive growth,
+        intelligence and sustainability.
+      </p>
 
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+      <div className="contact-info">
 
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <p>🌐 www.aetherixcloud.com</p>
 
-          <div className="show-password">
-
-            <label>
-
-              <input
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-              />
-
-              Show Password
-
-            </label>
-
-          </div>
-
-          <button
-            className="login-btn"
-            onClick={handleLogin}
-          >
-            Login
-          </button>
-
-          <div style={{ marginTop: "15px" }}>
-  <button
-  type="button"
-  onClick={handleGoogleLogin}
-  className="google-btn"
-  disabled={loading}
->
-  {loading ? "⏳ Signing in..." : "Continue with Google"}
-</button>
-</div>
-
-          <button
-            className="register-btn"
-            onClick={() => navigate("/register")}
-          >
-            Create Account
-          </button>
-
-          <p
-  className="forgot-password"
-  onClick={() => navigate("/forgot-password")}
->
-  Forgot Password?
-</p>
-
-        </div>
+        <p>
+          📧
+          <a href="mailto:hpsthegame@gmail.com">
+            hpsthegame@gmail.com
+          </a>
+        </p>
 
       </div>
 
     </div>
-  );
+
+    {/* RIGHT PANEL */}
+
+    <div className="right-panel">
+
+      <div className="login-card">
+
+        <h2>
+          Welcome to <span>Aetherix Cloud</span>
+        </h2>
+
+        <p>
+          Securely sign in to access the Aetherix Platform.
+        </p>
+
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <div className="show-password">
+
+          <label>
+
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() =>
+                setShowPassword(!showPassword)
+              }
+            />
+
+            Show Password
+
+          </label>
+
+        </div>
+
+        <button
+          className="login-btn"
+          onClick={handleLogin}
+        >
+          Login
+        </button>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="google-btn"
+          disabled={loading}
+        >
+          {loading
+            ? "Signing in..."
+            : "Continue with Google"}
+        </button>
+
+        <button
+          className="register-btn"
+          onClick={() => navigate("/register")}
+        >
+          Create Account
+        </button>
+
+        <p
+          className="forgot-password"
+          onClick={() =>
+            navigate("/forgot-password")
+          }
+        >
+          Forgot Password?
+        </p>
+
+           </div>
+
+    </div>
+
+  </div>
+
+);
 }
 
 export default Login;

@@ -222,7 +222,7 @@ const getCurrentLocation = () => {
     fontWeight: "700"
   }}
  >
-  AI Weather Forecast
+  Aetherix Cloud
   <br />
   Intelligence Platform
 </h1>
