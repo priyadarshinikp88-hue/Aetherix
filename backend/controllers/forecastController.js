@@ -1,75 +1,37 @@
-import { useState, useEffect } from "react";
-import "./forecast.css";
-import Navbar from "./navbar";
+import axios from "axios";
+import dotenv from "dotenv";
 
-function Forecast() {
-  const [forecast, setForecast] = useState([]);
+dotenv.config();
 
-  useEffect(() => {
-    getForecast();
-  }, []);
-
-  const getForecast = async () => {
-    const lat = localStorage.getItem("lat");
-    const lon = localStorage.getItem("lon");
+export const getForecast = async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
 
     if (!lat || !lon) {
-      return;
+      return res.status(400).json({
+        message: "Latitude and Longitude are required",
+      });
     }
 
-    try {
-      const response = await fetch(
-        `https://aetherix-backend-eoj8.onrender.com/api/forecast?lat=${lat}&lon=${lon}`
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message);
-        return;
+    const response = await axios.get(
+      "https://api.openweathermap.org/data/2.5/forecast",
+      {
+        params: {
+          lat,
+          lon,
+          units: "metric",
+          appid: process.env.OPENWEATHER_API_KEY,
+        },
       }
+    );
 
-      setForecast(data.list || []);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    res.json(response.data);
 
-  return (
-    <div className="forecast-page">
-      <Navbar />
+  } catch (error) {
+    console.error(error.message);
 
-      <h1>🌦 Live 5-Day Weather Forecast</h1>
-
-      <div className="forecast-container">
-        {forecast.length > 0 ? (
-          forecast
-            .filter((item) => item.dt_txt.includes("12:00:00"))
-            .slice(0, 5)
-            .map((item, index) => (
-              <div className="forecast-card" key={index}>
-                <h3>
-                  {new Date(item.dt_txt).toLocaleDateString("en-US", {
-                    weekday: "long",
-                  })}
-                </h3>
-
-                <img
-                  src={`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`}
-                  alt="Weather"
-                />
-
-                <h2>{item.main.temp}°C</h2>
-
-                <p>{item.weather[0].description}</p>
-              </div>
-            ))
-        ) : (
-          <h2>No Forecast Available</h2>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default Forecast;
+    res.status(500).json({
+      message: "Unable to fetch forecast",
+    });
+  }
+};

@@ -9,7 +9,12 @@ function Home() {
   const [activeSection, setActiveSection] = useState("home");
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
+
   const [loading, setLoading] = useState(false);
+  const [locationEnabled, setLocationEnabled] = useState(
+  localStorage.getItem("locationEnabled") !== "false"
+);
+
   const [cityOptions, setCityOptions] = useState([]);
   const [showAbout, setShowAbout] = useState(false);
 const [selectedCity, setSelectedCity] = useState(null);
@@ -49,23 +54,32 @@ const [selectedCity, setSelectedCity] = useState(null);
 };
 
 const getCurrentLocation = () => {
+
+  if (!locationEnabled) {
+    alert("Location Services are OFF");
+    return;
+  }
+
   if (!navigator.geolocation) {
-    alert("Geolocation is not supported by your browser.");
+    alert("Geolocation is not supported.");
     return;
   }
 
   navigator.geolocation.getCurrentPosition(
+
     async (position) => {
+
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
 
       try {
+
         const response = await fetch(
           `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${lat}&lon=${lon}`
         );
 
         const data = await response.json();
-          console.log("API Response:", data);
+
         if (!response.ok) {
           alert("Unable to fetch weather");
           return;
@@ -76,24 +90,36 @@ const getCurrentLocation = () => {
         localStorage.setItem("weather", JSON.stringify(data));
         localStorage.setItem("lat", lat);
         localStorage.setItem("lon", lon);
+
         navigate("/dashboard");
-      } catch (err) {
-        console.error(err);
-        alert("Location weather failed");
+
+      } catch (error) {
+
+        console.error(error);
+
       }
+
     },
+
     () => {
-      alert("Please allow location access.");
+      alert("Please allow location permission.");
     }
+
   );
+
 };
 
  const getWeather = async () => {
 
-  if (!selectedCity) {
-    alert("Please select a city first.");
-    return;
-  }
+ if (locationEnabled) {
+  getCurrentLocation();
+  return;
+}
+
+if (!selectedCity) {
+  alert("Please select a city first.");
+  return;
+}
 
   try {
     setLoading(true);
@@ -254,12 +280,71 @@ const getCurrentLocation = () => {
 
   <p>Options: {cityOptions.length}</p>
 
+  <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "15px",
+    color: "white",
+  }}
+>
+
+  <h4> Location Services</h4>
+
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      cursor: "pointer",
+    }}
+  >
+
+   <span style={{ fontWeight: "600" }}>
+  {locationEnabled ? "ON" : "OFF"}
+</span>
+
+<div
+  onClick={() => {
+    const newValue = !locationEnabled;
+    setLocationEnabled(newValue);
+    localStorage.setItem("locationEnabled", newValue);
+  }}
+  style={{
+    width: "52px",
+    height: "28px",
+    borderRadius: "50px",
+    background: locationEnabled ? "#2ecc71" : "#777",
+    position: "relative",
+    cursor: "pointer",
+    transition: "0.3s",
+  }}
+>
+  <div
+    style={{
+      width: "22px",
+      height: "22px",
+      borderRadius: "50%",
+      background: "#fff",
+      position: "absolute",
+      top: "3px",
+      left: locationEnabled ? "27px" : "3px",
+      transition: "0.3s",
+    }}
+  />
+</div>
+  </label>
+
+</div>
+
  <Select
   options={cityOptions}
+  value={selectedCity}
   placeholder="Search City..."
   isSearchable
   isClearable
-  inputValue={city}
+  
   styles={{
     control: (provided) => ({
       ...provided,
@@ -294,26 +379,45 @@ const getCurrentLocation = () => {
       color: "#777",
     }),
   }}
-  onInputChange={(value, actionMeta) => {
-    if (actionMeta.action === "input-change") {
-      setCity(value);
+ onInputChange={(value, actionMeta) => {
+
+  if (actionMeta.action === "input-change") {
+
+    setCity(value);
+
+    if (value.length >= 2) {
       searchCities(value);
+    } else {
+      setCityOptions([]);
     }
-  }}
- onChange={(selected) => {
+
+  }
+
+}}
+onChange={(selected) => {
+
+  setSelectedCity(selected);
+
   if (selected) {
-    setSelectedCity(selected);
+
     setCity(selected.label);
 
     setLat(selected.lat);
+
     setLon(selected.lon);
+
   } else {
-    setSelectedCity(null);
+
     setCity("");
+
     setLat("");
+
     setLon("");
+
     setCityOptions([]);
+
   }
+
 }}
 />
  <button onClick={getWeather}>
@@ -321,11 +425,18 @@ const getCurrentLocation = () => {
 </button> 
 
 <button
-    className="location-btn"
-    onClick={getCurrentLocation}
->
-    🧭 Use My Current Location
-</button>
+className="location-btn"
+
+onClick={getCurrentLocation}
+
+disabled={!locationEnabled}
+
+style={{
+opacity: locationEnabled ? 1 : 0.5,
+cursor: locationEnabled ? "pointer" : "not-allowed"
+}}
+
+></button>
 
   {loading && (
   <div className="loading-container">
