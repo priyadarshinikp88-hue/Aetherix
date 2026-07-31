@@ -65,7 +65,7 @@ const getCurrentLocation = () => {
         );
 
         const data = await response.json();
-
+          console.log("API Response:", data);
         if (!response.ok) {
           alert("Unable to fetch weather");
           return;
@@ -76,6 +76,7 @@ const getCurrentLocation = () => {
         localStorage.setItem("weather", JSON.stringify(data));
         localStorage.setItem("lat", lat);
         localStorage.setItem("lon", lon);
+        navigate("/dashboard");
       } catch (err) {
         console.error(err);
         alert("Location weather failed");
@@ -88,10 +89,15 @@ const getCurrentLocation = () => {
 };
 
  const getWeather = async () => {
+
+  if (!selectedCity) {
+    alert("Please select a city first.");
+    return;
+  }
+
   try {
     setLoading(true);
 
-    // Makes the loader visible for at least 1 second
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const response = await fetch(
@@ -99,8 +105,21 @@ const getCurrentLocation = () => {
     );
 
     const data = await response.json();
+      console.log("API Response:", data);
+    if (!response.ok) {
+      alert(data.message || "Unable to fetch weather");
+      return;
+    }
 
     setWeather(data);
+
+    // Save for Dashboard, Forecast and Alerts
+    localStorage.setItem("weather", JSON.stringify(data));
+    localStorage.setItem("lat", selectedCity.lat);
+    localStorage.setItem("lon", selectedCity.lon);
+
+    // Open Dashboard automatically
+    navigate("/dashboard");
 
   } catch (error) {
     console.error(error);
@@ -135,21 +154,21 @@ const getCurrentLocation = () => {
 
         
    <ul>
-  <li onClick={() => setActiveSection("home")} style={{ cursor: "pointer" }}>
-    Home
-  </li>
+ <li onClick={() => navigate("/home")} style={{ cursor: "pointer" }}>
+  Home
+</li>
 
-  <li onClick={() => setActiveSection("forecast")} style={{ cursor: "pointer" }}>
-    Forecast
-  </li>
+<li onClick={() => navigate("/forecast")} style={{ cursor: "pointer" }}>
+  Forecast
+</li>
 
-  <li onClick={() => setActiveSection("dashboard")} style={{ cursor: "pointer" }}>
-    Dashboard
-  </li>
+<li onClick={() => navigate("/dashboard")} style={{ cursor: "pointer" }}>
+  Dashboard
+</li>
 
-  <li onClick={() => setActiveSection("alerts")} style={{ cursor: "pointer" }}>
-    Alerts
-  </li>
+<li onClick={() => navigate("/alerts")} style={{ cursor: "pointer" }}>
+  Alerts
+</li> 
 
   <li
     onClick={() => setShowAbout(!showAbout)}
@@ -394,7 +413,7 @@ const getCurrentLocation = () => {
         <div className="card">
   <h3>🌅 Sunrise</h3>
   <h2>
-    {weather
+    {weather?.sys?.sunrise
       ? new Date(weather.sys.sunrise * 1000).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -402,10 +421,11 @@ const getCurrentLocation = () => {
       : "--:--"}
   </h2>
 </div>
-      <div className="card">
+
+<div className="card">
   <h3>🌇 Sunset</h3>
   <h2>
-    {weather
+    {weather?.sys?.sunset
       ? new Date(weather.sys.sunset * 1000).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",

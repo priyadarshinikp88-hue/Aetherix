@@ -1,0 +1,15 @@
+.map-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+}
+
+.map-title {
+  color: white;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 35px;
+}
+
+.leaflet-container {
+  border: 3px solid #4aa3ff;
+}

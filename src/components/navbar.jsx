@@ -27,6 +27,8 @@ function Navbar() {
 
         <li onClick={() => navigate("/home")}>About</li>
 
+        <li onClick={() => navigate("/map")}>Map</li>
+
         <li>
           <button
             className="logout-btn"

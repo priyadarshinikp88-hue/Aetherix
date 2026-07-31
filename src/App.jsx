@@ -7,6 +7,7 @@ import ForgotPassword from "./forgotpassword";
 import Forecast from "./components/forecast";
 import Dashboard from "./components/dashboard";
 import Alerts from "./components/alerts";
+import WeatherMap from "./components/WeatherMap";
 function App() {
   return (
     <BrowserRouter>
@@ -18,6 +19,7 @@ function App() {
         <Route path="/forecast" element={<Forecast />} />
 <Route path="/dashboard" element={<Dashboard />} />
 <Route path="/alerts" element={<Alerts />} />
+<Route path="/map" element={<WeatherMap />} />
       </Routes>
     </BrowserRouter>
   );

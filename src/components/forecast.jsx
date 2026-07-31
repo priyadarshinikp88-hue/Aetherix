@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./forecast.css";
-import Navbar from "./Navbar";
+import Navbar from "./navbar";
 
 function Forecast() {
     const [forecast, setForecast] = useState([]);
@@ -26,7 +26,12 @@ const getForecast = async () => {
 
     const data = await response.json();
 
-    setForecast(data.list || []);
+if (!response.ok) {
+  alert(data.message || "Unable to fetch forecast");
+  return;
+}
+
+setForecast(data.list || []);
 
   } catch (error) {
     console.log(error);
@@ -46,8 +51,8 @@ const getForecast = async () => {
 
     <div className="forecast-container">
 
-     { forecast
-  .forecast?.filter(item => item.dt_txt.includes("12:00:00"))
+    {forecast
+  .filter((item) => item.dt_txt.includes("12:00:00"))
   .slice(0, 5)
   .map((item, index) => (
         <div className="forecast-card" key={index}>
