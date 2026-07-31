@@ -22,7 +22,6 @@ const [selectedCity, setSelectedCity] = useState(null);
   const [lon, setLon] = useState("");
 
   const navigate = useNavigate();
-
   const searchCities = async (inputValue) => {
 
   if (inputValue.length < 2) {
@@ -31,28 +30,30 @@ const [selectedCity, setSelectedCity] = useState(null);
   }
 
   try {
+
     const response = await fetch(
       `https://aetherix-backend-eoj8.onrender.com/api/cities?q=${inputValue}`
-
-  );
+    );
 
     const data = await response.json();
-    console.log("API Response:", data);
 
-   const options = data.map((item) => ({
-  label: `${item.name}${item.state ? ", " + item.state : ""}, ${item.country}`,
-  value: item.name,
-  lat: item.lat,
-  lon: item.lon,
-}));
-    console.log("Options:", options);
-    setCityOptions(options);
+    console.log(JSON.stringify(data, null, 2));
+
+    setCityOptions(
+  data.map((item) => ({
+    label: `${item.name}${item.state ? ", " + item.state : ""}, ${item.country}`,
+    value: `${item.lat},${item.lon}`,
+    lat: item.lat,
+    lon: item.lon,
+  }))
+);
+    console.log("City Options:", data);
+
   } catch (error) {
     console.log(error);
   }
 
 };
-
 const getCurrentLocation = () => {
 
   if (!locationEnabled) {
@@ -79,6 +80,7 @@ const getCurrentLocation = () => {
         );
 
         const data = await response.json();
+        console.log(data);
 
         if (!response.ok) {
           alert("Unable to fetch weather");
@@ -341,9 +343,20 @@ if (!selectedCity) {
  <Select
   options={cityOptions}
   value={selectedCity}
+   inputValue={city}
+  getOptionLabel={(option) => option.label}
+  getOptionValue={(option) => option.value}
+  filterOption={() => true}
+  menuPortalTarget={document.body}
+menuPosition="fixed"
   placeholder="Search City..."
   isSearchable
   isClearable
+  noOptionsMessage={() =>
+  city.length < 2
+    ? "Type at least 2 letters"
+    : "No matching cities"
+}
   
   styles={{
     control: (provided) => ({
