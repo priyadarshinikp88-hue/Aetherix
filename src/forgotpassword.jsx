@@ -5,32 +5,33 @@ function ForgotPassword() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
 
-  const handleSubmit = async () => {
-    if (!email.trim()) {
-      alert("Please enter your email.");
-      return;
-    }
+   const handleSubmit = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/auth/forgot-password",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      }
+    );
 
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/forgot-password",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+    const text = await response.text();
 
-      const data = await response.json();
-      alert(data.message);
+    console.log("STATUS:", response.status);
+    console.log("BODY:", text);
 
-    } catch (error) {
-      console.error(error);
-      alert("Server Error");
-    }
-  };
+    alert(text);
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  }
+};
 
   return (
     <div style={{ padding: "50px", maxWidth: "400px", margin: "auto" }}>

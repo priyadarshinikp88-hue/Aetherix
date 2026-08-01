@@ -6,6 +6,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import connectDB from "./config/db.js";
+
 import authRoutes from "./routes/authRoutes.js";
 import weatherRoutes from "./routes/weather.js";
 import cityRoutes from "./routes/cityRoutes.js";
@@ -20,24 +21,47 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Request Logger
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Home
+app.get("/", (req, res) => {
+  res.send("🚀 Aetherix Backend Running");
+});
+
+// Auth
 app.use("/api/auth", authRoutes);
+
+// Weather
 app.use("/api/weather", weatherRoutes);
 
-console.log("Forecast route loaded");
+// Forecast
 app.use("/api/forecast", forecastRoutes);
 
-app.use("/api/cities", (req, res, next) => {
-  console.log("➡️ Request reached /api/cities");
-  next();
-}, cityRoutes);
+// Cities
+app.use("/api/cities", cityRoutes);
 
-app.get("/", (req, res) => {
-  res.send("🚀 Aetherix Backend Running...");
+// 404
+app.use((req, res) => {
+  res.status(404).json({
+    message: "Route Not Found",
+  });
+});
+
+// Error Handler
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  res.status(500).json({
+    message: err.message,
+  });
 });
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

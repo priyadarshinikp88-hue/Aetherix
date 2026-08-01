@@ -8,14 +8,24 @@ import {
 
 const router = express.Router();
 
-router.post("/register", register);
-router.post("/login", login);
+console.log("✅ authRoutes.js Loaded");
 
-router.get("/forgot-password", (req, res) => {
-  res.send("Forgot Password Route Working");
+// Test Route
+router.get("/test", (req, res) => {
+  res.json({
+    message: "Auth Route Working",
+  });
 });
 
+// Register
+router.post("/register", register);
+
+// Login
+router.post("/login", login);
+
 router.post("/forgot-password", forgotPassword);
+
+// Reset Password
 router.post("/reset-password/:token", resetPassword);
 
 export default router;
