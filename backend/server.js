@@ -6,9 +6,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import connectDB from "./config/db.js";
-import authRoutes from "./routes/auth.js";
+import authRoutes from "./routes/authRoutes.js";
 import weatherRoutes from "./routes/weather.js";
-import cityRoutes from "./routes/city.js";
+import cityRoutes from "./routes/cityRoutes.js";
 import forecastRoutes from "./routes/forecast.js";
 
 dotenv.config();
