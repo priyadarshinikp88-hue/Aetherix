@@ -4,6 +4,7 @@ import Login from "./login";
 import Register from "./register";
 import Home from "./home";
 import ForgotPassword from "./forgotpassword";
+import ResetPassword from "./ResetPassword";
 import Forecast from "./components/forecast";
 import Dashboard from "./components/dashboard";
 import Alerts from "./components/alerts";
@@ -16,6 +17,10 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<Home />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+  path="/reset-password/:token"
+  element={<ResetPassword />}
+/>
         <Route path="/forecast" element={<Forecast />} />
 <Route path="/dashboard" element={<Dashboard />} />
 <Route path="/alerts" element={<Alerts />} />
