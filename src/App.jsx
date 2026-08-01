@@ -1,3 +1,4 @@
+import PhoneLogin from "./PhoneLogin";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./login";
@@ -17,6 +18,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<Home />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/phone-login" element={<PhoneLogin />} />
         <Route
   path="/reset-password/:token"
   element={<ResetPassword />}
