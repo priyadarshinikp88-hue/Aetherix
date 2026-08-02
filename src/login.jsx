@@ -2,219 +2,265 @@ import logo from "./assets/logo.png";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
+
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "./firebase";
 
+import {
+  FiMail,
+  FiLock,
+  FiEye,
+  FiEyeOff,
+} from "react-icons/fi";
 
 function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const [loading, setLoading] = useState(false);
 
- const handleLogin = async () => {
-
-  if (email.trim() === "" || password.trim() === "") {
-    alert("Please enter Email and Password");
-    return;
-  }
-
-  try {
-
-    const response = await fetch(
-  "https://aetherix-backend-eoj8.onrender.com/api/auth/login",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-  }
-);
-
-    const data = await response.json();
-
-    if (response.ok) {
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-
-      navigate("/home");
-
-    } else {
-
-      alert(data.message);
-
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      alert("Please enter Email and Password");
+      return;
     }
 
-  } catch (error) {
+    try {
+      const response = await fetch(
+        "https://aetherix-backend-eoj8.onrender.com/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
-    console.error(error);
-    alert("Server Error");
+      const data = await response.json();
 
-  }
+      if (response.ok) {
+        localStorage.setItem(
+          "token",
+          data.token
+        );
 
-};
- const handleGoogleLogin = async () => {
-  try {
-    setLoading(true);
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
 
-    const result = await signInWithPopup(auth, provider);
+        navigate("/home");
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Server Error");
+    }
+  };
 
-    localStorage.setItem("user", JSON.stringify(result.user));
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
 
-    alert("Google Login Successful!");
+      const result = await signInWithPopup(
+        auth,
+        provider
+      );
 
-    window.location.href = "/home";
-  } catch (error) {
-    console.error(error);
-    alert(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      localStorage.setItem(
+        "user",
+        JSON.stringify(result.user)
+      );
+
+      navigate("/home");
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-  <div className="login-container">
+    <div className="login-container">
 
-    {/* LEFT PANEL */}
+      {/* LEFT */}
 
-    <div className="left-panel">
+      <div className="left-panel">
 
-      <div className="logo-box">
-        <img
-          src={logo}
-          alt="Aetherix Logo"
-          className="logo-image"
-        />
-      </div>
+        <div className="logo-box">
+          <img
+            src={logo}
+            alt="logo"
+            className="logo-image"
+          />
+        </div>
 
-      <h1>Aetherix Technologies</h1>
-
-      <h2>AI-Powered Digital Innovation Platform</h2>
-
-      <p>
-        Building intelligent digital solutions for businesses,
-        education, climate intelligence, cloud computing,
-        cybersecurity, artificial intelligence and digital
-        transformation.
-      </p>
-
-      <br />
-
-      <p>
-        Empowering organizations with secure, scalable and
-        innovative technology platforms that drive growth,
-        intelligence and sustainability.
-      </p>
-
-      <div className="contact-info">
-
-        <p>🌐 www.aetherixcloud.com</p>
-
-        <p>
-          📧
-          <a href="mailto:hpsthegame@gmail.com">
-            hpsthegame@gmail.com
-          </a>
-        </p>
-
-      </div>
-
-    </div>
-
-    {/* RIGHT PANEL */}
-
-    <div className="right-panel">
-
-      <div className="login-card">
+        <h1>Aetherix Technologies</h1>
 
         <h2>
-          Welcome to <span>Aetherix Cloud</span>
+          AI-Powered Digital Innovation Platform
         </h2>
 
         <p>
-          Securely sign in to access the Aetherix Platform.
+          Building intelligent digital
+          solutions for businesses,
+          education, climate intelligence,
+          cloud computing, cybersecurity,
+          artificial intelligence and
+          digital transformation.
         </p>
 
-        <input
-          type="email"
-          placeholder="Email Address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <br />
 
-        <input
-          type={showPassword ? "text" : "password"}
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <p>
+          Empowering organizations with
+          secure, scalable and innovative
+          technology platforms that drive
+          growth, intelligence and
+          sustainability.
+        </p>
 
-        <div className="show-password">
+        <div className="contact-info">
 
-          <label>
+          <p>
+            🌐 www.aetherixcloud.com
+          </p>
 
-            <input
-              type="checkbox"
-              checked={showPassword}
-              onChange={() =>
-                setShowPassword(!showPassword)
-              }
-            />
-
-            Show Password
-
-          </label>
+          <p>
+            📧
+            <a href="mailto:shrinivas@aetherixcloud.com">
+              shrinivas@aetherixcloud.com
+            </a>
+          </p>
 
         </div>
 
-        <button
-          className="login-btn"
-          onClick={handleLogin}
-        >
-          Login
-        </button>
+      </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="google-btn"
-          disabled={loading}
-        >
-          {loading
-            ? "Signing in..."
-            : "Continue with Google"}
-        </button>
+      {/* RIGHT */}
 
-        <button
-          className="register-btn"
-          onClick={() => navigate("/register")}
-        >
-          Create Account
-        </button>
+      <div className="right-panel">
 
-        <p
-          className="forgot-password"
-          onClick={() =>
-            navigate("/forgot-password")
-          }
-        >
-          Forgot Password?
-        </p>
+        <div className="login-card">
 
-           </div>
+          <h2>
+            Welcome to
+            <span>
+              {" "}
+              Aetherix Cloud
+            </span>
+          </h2>
+
+          <p>
+            Securely sign in to access
+            your cloud dashboard.
+          </p>
+
+          <div className="input-box">
+
+            <FiMail className="input-icon" />
+
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+            />
+
+          </div>
+
+          <div className="input-box">
+
+            <FiLock className="input-icon" />
+
+            <input
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="Password"
+              value={password}
+              onChange={(e) =>
+                setPassword(
+                  e.target.value
+                )
+              }
+            />
+
+            <span
+              className="eye-icon"
+              onClick={() =>
+                setShowPassword(
+                  !showPassword
+                )
+              }
+            >
+              {showPassword ? (
+                <FiEyeOff />
+              ) : (
+                <FiEye />
+              )}
+            </span>
+
+          </div>
+
+          <button
+            className="login-btn"
+            onClick={handleLogin}
+          >
+            Login
+          </button>
+
+          <button
+            className="google-btn"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
+            {loading
+              ? "Signing in..."
+              : "Continue with Google"}
+          </button>
+
+          <button
+            className="register-btn"
+            onClick={() =>
+              navigate("/register")
+            }
+          >
+            Create Account
+          </button>
+
+          <p
+            className="forgot-password"
+            onClick={() =>
+              navigate(
+                "/forgot-password"
+              )
+            }
+          >
+            Forgot Password?
+          </p>
+
+        </div>
+
+      </div>
 
     </div>
-
-  </div>
-
-);
+  );
 }
 
 export default Login;

@@ -1,93 +1,192 @@
-import { useState } from "react";
-import { auth, RecaptchaVerifier } from "./firebase";
-import { signInWithPhoneNumber } from "firebase/auth";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth } from "./firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import "./otp.css";
 
 function PhoneLogin() {
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [confirmation, setConfirmation] = useState(null);
-
   const navigate = useNavigate();
 
-  const sendOTP = async () => {
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
+
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+
+  useEffect(() => {
+    initializeRecaptcha();
+
+    return () => {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {}
+
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
+  const initializeRecaptcha = async () => {
     try {
+      if (window.recaptchaVerifier) return;
+
       window.recaptchaVerifier = new RecaptchaVerifier(
         auth,
         "recaptcha-container",
         {
           size: "normal",
+          callback: () => {
+            console.log("reCAPTCHA verified");
+          },
+          "expired-callback": () => {
+            console.log("reCAPTCHA expired");
+            window.recaptchaVerifier = null;
+          },
         }
       );
 
-      const confirmationResult = await signInWithPhoneNumber(
+      await window.recaptchaVerifier.render();
+
+      console.log("reCAPTCHA Ready");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const sendOTP = async () => {
+    if (!window.recaptchaVerifier) {
+      await initializeRecaptcha();
+    }
+
+    if (!phone.trim()) {
+      alert("Enter phone number");
+      return;
+    }
+
+    if (!phone.startsWith("+")) {
+      alert("Phone number must be like +91XXXXXXXXXX");
+      return;
+    }
+
+    try {
+      setSending(true);
+
+      const confirmation = await signInWithPhoneNumber(
         auth,
-        phone,
+        phone.trim(),
         window.recaptchaVerifier
       );
 
-      setConfirmation(confirmationResult);
+      setConfirmationResult(confirmation);
+
       alert("OTP Sent Successfully");
     } catch (error) {
       console.error(error);
-      alert(error.message);
+
+      if (error.code === "auth/too-many-requests") {
+        alert(
+          "Too many OTP requests.\n\nPlease wait 30-60 minutes before trying again."
+        );
+      } else {
+        alert(
+          "Error Code: " +
+            error.code +
+            "\n\n" +
+            error.message
+        );
+      }
+
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (e) {}
+
+      window.recaptchaVerifier = null;
+
+      await initializeRecaptcha();
+    } finally {
+      setSending(false);
     }
   };
 
   const verifyOTP = async () => {
+    if (!confirmationResult) {
+      alert("Send OTP first");
+      return;
+    }
+
+    if (otp.length !== 6) {
+      alert("Enter 6 digit OTP");
+      return;
+    }
+
     try {
-      await confirmation.confirm(otp);
+      setVerifying(true);
+
+      const result = await confirmationResult.confirm(otp);
+
+      console.log(result);
 
       alert("Phone Login Successful");
 
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error) {
       console.error(error);
-      alert("Invalid OTP");
+
+      alert(
+        "Error Code: " +
+          error.code +
+          "\n\n" +
+          error.message
+      );
+    } finally {
+      setVerifying(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "40px auto" }}>
-      <h2>Phone OTP Login</h2>
+    <div className="otp-container">
+      <div className="otp-card">
+        <h2>Phone OTP Login</h2>
 
-      <input
-        type="tel"
-        placeholder="+91XXXXXXXXXX"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-      />
+        <input
+          type="tel"
+          placeholder="+91XXXXXXXXXX"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
 
-      <button
-        onClick={sendOTP}
-        style={{ width: "100%", padding: "10px" }}
-      >
-        Send OTP
-      </button>
+        <button
+          onClick={sendOTP}
+          disabled={sending}
+        >
+          {sending ? "Sending..." : "Send OTP"}
+        </button>
 
-      <br />
-      <br />
+        <input
+          type="text"
+          placeholder="Enter OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+        />
 
-      <input
-        type="text"
-        placeholder="Enter OTP"
-        value={otp}
-        onChange={(e) => setOtp(e.target.value)}
-        style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-      />
+        <button
+          onClick={verifyOTP}
+          disabled={verifying}
+        >
+          {verifying ? "Verifying..." : "Verify OTP"}
+        </button>
 
-      <button
-        onClick={verifyOTP}
-        style={{ width: "100%", padding: "10px" }}
-      >
-        Verify OTP
-      </button>
-
-      <div
-        id="recaptcha-container"
-        style={{ marginTop: "20px" }}
-      ></div>
+        <div
+          id="recaptcha-container"
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        />
+      </div>
     </div>
   );
 }

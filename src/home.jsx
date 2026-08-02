@@ -3,6 +3,8 @@ import Select from "react-select";
 import { useState } from "react";
 import "./home.css";
 import ceo from "./assets/ceo.jpg";
+import { signOut } from "firebase/auth";
+import { auth } from "./firebase";
 
 function Home() {
 
@@ -22,6 +24,28 @@ const [selectedCity, setSelectedCity] = useState(null);
   const [lon, setLon] = useState("");
 
   const navigate = useNavigate();
+   
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (e) {
+        console.log(e);
+      }
+
+      window.recaptchaVerifier = null;
+    }
+
+    window.confirmationResult = null;
+
+    navigate("/");
+  } catch (error) {
+    console.log(error);
+  }
+};
   const searchCities = async (inputValue) => {
 
   if (inputValue.length < 2) {
@@ -206,13 +230,13 @@ if (!selectedCity) {
   </li>
 
   <li>
-    <button
-      className="logout-btn"
-      onClick={() => navigate("/")}
-    >
-      Logout
-    </button>
-  </li>
+  <button
+    className="logout-btn"
+    onClick={handleLogout}
+  >
+    Logout
+  </button>
+</li>
 </ul>
       </nav>
 

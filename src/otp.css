@@ -1,0 +1,57 @@
+body{
+    margin:0;
+    padding:0;
+    background:#0f172a;
+    font-family:Arial,sans-serif;
+}
+
+.otp-container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.otp-card{
+    width:380px;
+    background:#fff;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
+}
+
+.otp-card h2{
+    text-align:center;
+    color:#2563eb;
+    margin-bottom:20px;
+}
+
+.otp-card input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+.otp-card button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#2563eb;
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
+    margin-bottom:15px;
+}
+
+.otp-card button:hover{
+    background:#1d4ed8;
+}
+
+#recaptcha-container{
+    display:flex;
+    justify-content:center;
+}
