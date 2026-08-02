@@ -50,6 +50,78 @@ setForecast(data.list || []);
     </p>
 
     <div className="forecast-container">
+      <section className="forecast-summary">
+
+  <div className="summary-card">
+
+    <h2>📅 Next 5 Days Forecast</h2>
+
+    <p>
+
+      Weather forecast generated using
+      OpenWeather data for your selected
+      location.
+
+    </p>
+
+    <div className="summary-grid">
+
+      <div>
+
+        <span>🌡 Average Temp</span>
+
+        <strong>
+
+          {Math.round(
+            forecast.reduce(
+              (sum, item) => sum + item.main.temp,
+              0
+            ) / (forecast.length || 1)
+          )}°C
+
+        </strong>
+
+      </div>
+
+      <div>
+
+        <span>💧 Avg Humidity</span>
+
+        <strong>
+
+          {Math.round(
+            forecast.reduce(
+              (sum, item) => sum + item.main.humidity,
+              0
+            ) / (forecast.length || 1)
+          )}%
+
+        </strong>
+
+      </div>
+
+      <div>
+
+        <span>💨 Avg Wind</span>
+
+        <strong>
+
+          {(
+            forecast.reduce(
+              (sum, item) => sum + item.wind.speed,
+              0
+            ) / (forecast.length || 1)
+          ).toFixed(1)} m/s
+
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 
     {forecast
   .filter((item) => item.dt_txt.includes("12:00:00"))
@@ -69,9 +141,69 @@ setForecast(data.list || []);
             width="70"
           />
 
-          <h2>{item.main.temp} °C</h2>
+         <h2>
 
-          <p>{item.weather[0].description}</p>
+  {Math.round(item.main.temp)}°C
+
+</h2>
+
+<p className="forecast-desc">
+
+  {item.weather[0].description}
+
+</p>
+
+<div className="forecast-details">
+
+  <div>
+
+    🌡 Max
+
+    <strong>
+
+      {Math.round(item.main.temp_max)}°C
+
+    </strong>
+
+  </div>
+
+  <div>
+
+    ❄ Min
+
+    <strong>
+
+      {Math.round(item.main.temp_min)}°C
+
+    </strong>
+
+  </div>
+
+  <div>
+
+    💧 Humidity
+
+    <strong>
+
+      {item.main.humidity}%
+
+    </strong>
+
+  </div>
+
+  <div>
+
+    💨 Wind
+
+    <strong>
+
+      {item.wind.speed} m/s
+
+    </strong>
+
+  </div>
+
+</div>
 
         </div>
       ))}

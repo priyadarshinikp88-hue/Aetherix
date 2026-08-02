@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./home.css";
 import ceo from "./assets/ceo.jpg";
 import { signOut } from "firebase/auth";
@@ -8,178 +8,265 @@ import { auth } from "./firebase";
 
 function Home() {
 
-  const [activeSection, setActiveSection] = useState("home");
+  const navigate = useNavigate();
+
+  /* ---------------- STATES ---------------- */
+
   const [city, setCity] = useState("");
+  const [selectedCity, setSelectedCity] = useState(null);
+
   const [weather, setWeather] = useState(null);
 
   const [loading, setLoading] = useState(false);
-  const [locationEnabled, setLocationEnabled] = useState(
-  localStorage.getItem("locationEnabled") !== "false"
-);
 
-  const [cityOptions, setCityOptions] = useState([]);
-  const [showAbout, setShowAbout] = useState(false);
-const [selectedCity, setSelectedCity] = useState(null);
+  const [showAbout, setShowAbout] =
+    useState(false);
+
+  const [cityOptions, setCityOptions] =
+    useState([]);
+
+  const [locationEnabled, setLocationEnabled] =
+    useState(
+      localStorage.getItem("locationEnabled") !==
+        "false"
+    );
+
   const [lat, setLat] = useState("");
+
   const [lon, setLon] = useState("");
 
-  const navigate = useNavigate();
-   
-const handleLogout = async () => {
-  try {
-    await signOut(auth);
-
-    if (window.recaptchaVerifier) {
-      try {
-        window.recaptchaVerifier.clear();
-      } catch (e) {
-        console.log(e);
-      }
-
-      window.recaptchaVerifier = null;
-    }
-
-    window.confirmationResult = null;
-
-    navigate("/");
-  } catch (error) {
-    console.log(error);
-  }
-};
-  const searchCities = async (inputValue) => {
-
-  if (inputValue.length < 2) {
+  const [searchText, setSearchText] = useState("");
+  useEffect(() => {
+  if (searchText.length < 2) {
     setCityOptions([]);
     return;
   }
 
-  try {
+  const timer = setTimeout(() => {
+    searchCities(searchText);
+  }, 300);
 
-    const response = await fetch(
-      `https://aetherix-backend-eoj8.onrender.com/api/cities?q=${inputValue}`
-    );
+  return () => clearTimeout(timer);
+}, [searchText]);
 
-    const data = await response.json();
+  /* ---------------- LOGOUT ---------------- */
 
-    console.log(JSON.stringify(data, null, 2));
+  const handleLogout = async () => {
 
-    setCityOptions(
-  data.map((item) => ({
-    label: `${item.name}${item.state ? ", " + item.state : ""}, ${item.country}`,
-    value: `${item.lat},${item.lon}`,
-    lat: item.lat,
-    lon: item.lon,
-  }))
-);
-    console.log("City Options:", data);
+    try {
 
-  } catch (error) {
-    console.log(error);
-  }
+      await signOut(auth);
 
-};
-const getCurrentLocation = () => {
+      if (window.recaptchaVerifier) {
 
-  if (!locationEnabled) {
-    alert("Location Services are OFF");
-    return;
-  }
+        try {
 
-  if (!navigator.geolocation) {
-    alert("Geolocation is not supported.");
-    return;
-  }
+          window.recaptchaVerifier.clear();
 
-  navigator.geolocation.getCurrentPosition(
+        } catch (e) {
 
-    async (position) => {
+          console.log(e);
 
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-
-      try {
-
-        const response = await fetch(
-          `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${lat}&lon=${lon}`
-        );
-
-        const data = await response.json();
-        console.log(data);
-
-        if (!response.ok) {
-          alert("Unable to fetch weather");
-          return;
         }
 
-        setWeather(data);
-
-        localStorage.setItem("weather", JSON.stringify(data));
-        localStorage.setItem("lat", lat);
-        localStorage.setItem("lon", lon);
-
-        navigate("/dashboard");
-
-      } catch (error) {
-
-        console.error(error);
+        window.recaptchaVerifier = null;
 
       }
 
-    },
+      window.confirmationResult = null;
 
-    () => {
-      alert("Please allow location permission.");
+      navigate("/");
+
+    } catch (error) {
+
+      console.log(error);
+
     }
 
-  );
+  };
 
-};
+  /* ---------------- SEARCH CITY ---------------- */
 
- const getWeather = async () => {
+  const searchCities = async (inputValue) => {
 
- if (locationEnabled) {
-  getCurrentLocation();
-  return;
-}
+    if (inputValue.length < 2) {
 
-if (!selectedCity) {
-  alert("Please select a city first.");
-  return;
-}
+      setCityOptions([]);
 
-  try {
-    setLoading(true);
+      return;
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
 
-    const response = await fetch(
-      `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}`
-    );
+    try {
 
-    const data = await response.json();
-      console.log("API Response:", data);
-    if (!response.ok) {
-      alert(data.message || "Unable to fetch weather");
+      const response = await fetch(
+
+        `https://aetherix-backend-eoj8.onrender.com/api/cities?q=${inputValue}`
+
+      );
+
+      const data = await response.json();
+
+      setCityOptions(
+
+        data.map((item) => ({
+
+          label:
+            `${item.name}` +
+            `${item.state ? ", " + item.state : ""}, ${item.country}`,
+
+          value: `${item.lat},${item.lon}`,
+
+          lat: item.lat,
+
+          lon: item.lon,
+
+        }))
+
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+    /* ---------------- CURRENT LOCATION ---------------- */
+
+  const getCurrentLocation = () => {
+
+    if (!locationEnabled) {
+      alert("Location Services are OFF");
       return;
     }
 
-    setWeather(data);
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported.");
+      return;
+    }
 
-    // Save for Dashboard, Forecast and Alerts
-    localStorage.setItem("weather", JSON.stringify(data));
-    localStorage.setItem("lat", selectedCity.lat);
-    localStorage.setItem("lon", selectedCity.lon);
+    navigator.geolocation.getCurrentPosition(
 
-    // Open Dashboard automatically
-    navigate("/dashboard");
+      async (position) => {
 
-  } catch (error) {
-    console.error(error);
-    alert("Failed to fetch weather.");
-  } finally {
-    setLoading(false);
-  }
-};
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        try {
+
+          const response = await fetch(
+            `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${lat}&lon=${lon}`
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            alert("Unable to fetch weather");
+            return;
+          }
+
+          setWeather(data);
+
+          localStorage.setItem(
+            "weather",
+            JSON.stringify(data)
+          );
+
+          localStorage.setItem("lat", lat);
+          localStorage.setItem("lon", lon);
+
+          navigate("/dashboard");
+
+        } catch (error) {
+
+          console.log(error);
+
+        }
+
+      },
+
+      () => {
+        alert("Please allow location permission.");
+      }
+
+    );
+
+  };
+
+  /* ---------------- GET WEATHER ---------------- */
+
+  const getWeather = async () => {
+
+    if (locationEnabled) {
+
+      getCurrentLocation();
+
+      return;
+
+    }
+
+    if (!selectedCity) {
+
+      alert("Please select a city.");
+
+      return;
+
+    }
+
+    try {
+
+      setLoading(true);
+
+      const response = await fetch(
+        `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+
+        alert(data.message);
+
+        return;
+
+      }
+
+      setWeather(data);
+
+      localStorage.setItem(
+        "weather",
+        JSON.stringify(data)
+      );
+
+      localStorage.setItem(
+        "lat",
+        selectedCity.lat
+      );
+
+      localStorage.setItem(
+        "lon",
+        selectedCity.lon
+      );
+
+      navigate("/dashboard");
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Failed to fetch weather.");
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+  /* ---------------- UI ---------------- */
+
   return (
 
     <div className="home">
@@ -194,244 +281,296 @@ if (!selectedCity) {
             🌤
           </div>
 
-          <div>
+          <div className="logo-text">
 
             <h2>Aetherix Technologies</h2>
 
-            <p>AI Weather Forecast Platform</p>
+            <p>
+              AI Powered Weather Intelligence
+            </p>
 
           </div>
 
         </div>
 
-        
-   <ul>
- <li onClick={() => navigate("/home")} style={{ cursor: "pointer" }}>
-  Home
-</li>
+        <ul className="nav-links">
 
-<li onClick={() => navigate("/forecast")} style={{ cursor: "pointer" }}>
-  Forecast
-</li>
+          <li onClick={() => navigate("/home")}>
+            Home
+          </li>
 
-<li onClick={() => navigate("/dashboard")} style={{ cursor: "pointer" }}>
-  Dashboard
-</li>
+          <li onClick={() => navigate("/forecast")}>
+            Forecast
+          </li>
 
-<li onClick={() => navigate("/alerts")} style={{ cursor: "pointer" }}>
-  Alerts
-</li> 
+          <li onClick={() => navigate("/dashboard")}>
+            Dashboard
+          </li>
 
-  <li
-    onClick={() => setShowAbout(!showAbout)}
-    style={{ cursor: "pointer" }}
-  >
-    About
-  </li>
+          <li onClick={() => navigate("/alerts")}>
+            Alerts
+          </li>
 
-  <li>
-  <button
-    className="logout-btn"
-    onClick={handleLogout}
-  >
-    Logout
-  </button>
-</li>
-</ul>
+          <li
+            onClick={() =>
+              setShowAbout(!showAbout)
+            }
+          >
+            About
+          </li>
+
+          <li>
+
+            <button
+              className="logout-btn"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+
+          </li>
+
+        </ul>
+
       </nav>
+            {/* ================= ABOUT ================= */}
 
-    {/* ABOUT */}
+      {showAbout && (
 
-{showAbout && (
-  
-  <section className="about-section">
+        <section className="about-section">
 
-  {/* CEO */}
+          <img
+            src={ceo}
+            alt="Founder"
+            className="ceo-image"
+          />
 
-  <img src={ceo} alt="CEO" className="ceo-image" />
+          <div className="about-content">
 
+            <h2>
+              About Aetherix Technologies
+            </h2>
 
-  <p className="about-text">
-  Aetherix Technologies is an innovative AI-powered weather forecasting platform dedicated to delivering accurate, reliable, and real-time weather intelligence for individuals, businesses, and organizations. By combining Artificial Intelligence, cloud computing, and the OpenWeather API, our platform provides live weather monitoring, intelligent forecasts, smart weather alerts, advanced weather analytics, and location-based insights to help users make informed decisions. Our mission is to enhance safety, improve travel planning, support agriculture, assist disaster preparedness, and empower industries with data-driven weather solutions that are accessible, efficient, and easy to use. We are committed to continuous innovation, delivering scalable and intelligent weather technologies that transform complex weather data into meaningful information, enabling smarter decisions and a better future through the power of AI.
-</p>
+            <p>
 
+              Aetherix Technologies is an AI-powered
+              Weather Intelligence Platform focused on
+              delivering real-time forecasts, smart
+              weather alerts, analytics and enterprise
+              weather solutions using Artificial
+              Intelligence, Cloud Computing and the
+              OpenWeather API.
 
-  {/* ABOUT */}
+            </p>
 
-</section>
-)}
+            <div className="about-grid">
 
-      {/* HERO */}
+              <div className="about-card">
+                🤖 AI Prediction
+              </div>
+
+              <div className="about-card">
+                📡 Live Weather
+              </div>
+
+              <div className="about-card">
+                🌍 Global Coverage
+              </div>
+
+              <div className="about-card">
+                ⚡ Smart Analytics
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      )}
+
+      {/* ================= HERO ================= */}
 
       <section className="hero">
 
+        {/* LEFT */}
+
         <div className="left">
 
-          <h1
-  style={{
-    fontSize: "40px",
-    lineHeight: "1.2",
-    fontWeight: "700"
-  }}
- >
-  Aetherix Cloud
-  <br />
-  Intelligence Platform
-</h1>
-          
+          <span className="hero-tag">
+
+            AI Powered Weather Platform
+
+          </span>
+
+          <h1>
+
+            Forecasting Tomorrow,
+
+            <br />
+
+            Today.
+
+          </h1>
 
           <p>
-            Forecasting Tomorrow, Today.
+
+            Experience intelligent weather
+            forecasting with Artificial
+            Intelligence, Live Monitoring,
+            Smart Alerts and Data Analytics.
+
           </p>
 
           <div className="feature-box">
 
-            <div className="feature">🤖 AI Powered</div>
+            <div className="feature">
+              🤖 AI Powered
+            </div>
 
-            <div className="feature">📡 Live Weather</div>
+            <div className="feature">
+              📡 Live Weather
+            </div>
 
-            <div className="feature">🌍 Global Coverage</div>
+            <div className="feature">
+              🌎 Global Coverage
+            </div>
 
-            <div className="feature">⚡ Smart Prediction</div>
+            <div className="feature">
+              ⚡ Smart Prediction
+            </div>
 
           </div>
 
         </div>
+
+        {/* RIGHT */}
 
         <div className="right">
 
           <div className="search-card">
 
-  <h2>Search Weather</h2>
+            <h2>
 
-  <p>Options: {cityOptions.length}</p>
+              Search Weather
 
-  <div
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "15px",
-    color: "white",
-  }}
->
+            </h2>
 
-  <h4> Location Services</h4>
+            <p>
 
-  <label
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      cursor: "pointer",
-    }}
-  >
+              Search from thousands of
+              cities worldwide.
 
-   <span style={{ fontWeight: "600" }}>
-  {locationEnabled ? "ON" : "OFF"}
-</span>
+            </p>
 
-<div
-  onClick={() => {
-    const newValue = !locationEnabled;
-    setLocationEnabled(newValue);
-    localStorage.setItem("locationEnabled", newValue);
-  }}
-  style={{
-    width: "52px",
-    height: "28px",
-    borderRadius: "50px",
-    background: locationEnabled ? "#2ecc71" : "#777",
-    position: "relative",
-    cursor: "pointer",
-    transition: "0.3s",
-  }}
->
-  <div
-    style={{
-      width: "22px",
-      height: "22px",
-      borderRadius: "50%",
-      background: "#fff",
-      position: "absolute",
-      top: "3px",
-      left: locationEnabled ? "27px" : "3px",
-      transition: "0.3s",
-    }}
-  />
-</div>
-  </label>
+            <div className="location-header">
 
-</div>
+              <h4>
 
- <Select
+                Location Services
+
+              </h4>
+
+              <div
+                className="toggle-switch"
+                onClick={() => {
+
+                  const value =
+                    !locationEnabled;
+
+                  setLocationEnabled(value);
+
+                  localStorage.setItem(
+                    "locationEnabled",
+                    value
+                  );
+
+                }}
+              >
+
+                <div
+                  className={
+                    locationEnabled
+                      ? "toggle active"
+                      : "toggle"
+                  }
+                />
+
+              </div>
+
+            </div>
+                       <Select
   options={cityOptions}
   value={selectedCity}
-   inputValue={city}
+  inputValue={city}
   getOptionLabel={(option) => option.label}
   getOptionValue={(option) => option.value}
   filterOption={() => true}
-  menuPortalTarget={document.body}
-menuPosition="fixed"
-  placeholder="Search City..."
+  placeholder="Search your city..."
   isSearchable
   isClearable
-  noOptionsMessage={() =>
-  city.length < 2
-    ? "Type at least 2 letters"
-    : "No matching cities"
-}
-  
+  maxMenuHeight={250}
+
   styles={{
-    control: (provided) => ({
-      ...provided,
-      backgroundColor: "#ffffff",
-      border: "2px solid #4aa3ff",
-      borderRadius: "10px",
-      minHeight: "55px",
-      fontSize: "18px",
+    control: (base) => ({
+      ...base,
+      backgroundColor: "#102847",
+      borderColor: "#2d5f99",
+      color: "white",
+      minHeight: "52px",
       boxShadow: "none",
     }),
-    menu: (provided) => ({
-      ...provided,
-      backgroundColor: "#2d4f7c",
-      color: "#fff",
+
+    input: (base) => ({
+      ...base,
+      color: "white",
     }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isFocused ? "#4aa3ff" : "#2d4f7c",
-      color: "#fff",
+
+    singleValue: (base) => ({
+      ...base,
+      color: "white",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: "#b5c7df",
+    }),
+
+    menu: (base) => ({
+      ...base,
+      backgroundColor: "#102847",
+      borderRadius: 12,
+      overflow: "hidden",
+      zIndex: 9999,
+    }),
+
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#1d4f86" : "#102847",
+      color: "white",
       cursor: "pointer",
     }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: "#000",
-    }),
-    input: (provided) => ({
-      ...provided,
-      color: "#000",
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: "#777",
+
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
     }),
   }}
- onInputChange={(value, actionMeta) => {
 
-  if (actionMeta.action === "input-change") {
-
-    setCity(value);
-
-    if (value.length >= 2) {
-      searchCities(value);
-    } else {
-      setCityOptions([]);
-    }
-
+  noOptionsMessage={() =>
+    city.length < 2
+      ? "Type at least 2 letters"
+      : "No matching cities"
   }
 
-}}
-onChange={(selected) => {
+  onInputChange={(value, actionMeta) => {
+    if (actionMeta.action === "input-change") {
+      setCity(value);
+
+     setSearchText(value);
+    }
+  }}
+         onChange={async (selected) => {
 
   setSelectedCity(selected);
 
@@ -442,6 +581,40 @@ onChange={(selected) => {
     setLat(selected.lat);
 
     setLon(selected.lon);
+
+    setLoading(true);
+
+    try {
+
+      const response = await fetch(
+        `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${selected.lat}&lon=${selected.lon}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message);
+        return;
+      }
+
+      setWeather(data);
+
+      localStorage.setItem("weather", JSON.stringify(data));
+      localStorage.setItem("lat", selected.lat);
+      localStorage.setItem("lon", selected.lon);
+
+      navigate("/dashboard");
+
+    } catch (error) {
+
+      console.log(error);
+      alert("Failed to fetch weather.");
+
+    } finally {
+
+      setLoading(false);
+
+    }
 
   } else {
 
@@ -457,83 +630,80 @@ onChange={(selected) => {
 
 }}
 />
- <button onClick={getWeather}>
-  Get Weather
-</button> 
+            <button
+              className="weather-btn"
+              onClick={getWeather}
+            >
+              Get Weather
+            </button>
 
-<button
-className="location-btn"
+            {loading && (
 
-onClick={getCurrentLocation}
+              <div className="loading-container">
 
-disabled={!locationEnabled}
+                <div className="loader"></div>
 
-style={{
-opacity: locationEnabled ? 1 : 0.5,
-cursor: locationEnabled ? "pointer" : "not-allowed"
-}}
+                <p>
 
-></button>
+                  Fetching live weather...
 
-  {loading && (
-  <div className="loading-container">
-    <div className="loader"></div>
-    <p>🌤 Fetching live weather data...</p>
-  </div>
-)}
+                </p>
 
-  {weather && (
-  <div className="city-box">
+              </div>
 
-    <h3>
-      {weather.name}, {weather.sys.country}
-    </h3>
+            )}
 
-    <div style={{ textAlign: "center", marginTop: "15px" }}>
-      <img
-        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-        alt="Weather Icon"
-      />
+            {weather && (
 
-      <h3>
-        {weather.name}, {weather.sys.country}
-      </h3>
+              <div className="city-box">
 
-      <p>{weather.weather[0].description}</p>
-      <p style={{ marginTop: "10px", fontSize: "14px", color: "#ddd" }}>
-  Last Updated: {new Date().toLocaleTimeString()}
-</p>
-    </div>
+                <img
+                  src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                  alt="Weather"
+                />
 
-  </div>
-)}
-</div>   {/* search-card */}
+                <h3>
 
-</div>   {/* right */}
+                  {weather.name},
+                  {" "}
+                  {weather.sys.country}
 
-</section>
-    
-      {/* WEATHER CARDS */}
+                </h3>
 
-      <section className="cards">
+                <h1>
 
-        <div className="card">
-  <h3>🌍 Air Quality</h3>
+                  {Math.round(weather.main.temp)}°C
 
-  <h2>
-    {weather?.air?.main?.aqi ?? "--"}
-  </h2>
+                </h1>
 
-  <p>
-    {weather?.air?.main?.aqi
-  ? ["Good", "Fair", "Moderate", "Poor", "Very Poor"][
-      weather.air.main.aqi - 1
-    ]
-  : "Not Available"}
-  </p>
-</div>
+                <p>
 
-              <div className="card">
+                  {weather.weather[0].description}
+
+                </p>
+
+                <small>
+
+                  Updated:
+                  {" "}
+                  {new Date().toLocaleTimeString()}
+
+                </small>
+
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+      </section>
+                  {/* ================= WEATHER OVERVIEW ================= */}
+
+<section className="cards">
+
+<div className="card">
           <h3>🌡 Temperature</h3>
           <h2>
             {weather ? `${weather.main.temp} °C` : "-- °C"}
@@ -541,9 +711,11 @@ cursor: locationEnabled ? "pointer" : "not-allowed"
         </div>
 
         <div className="card">
-  <h3>🌡 Feels Like</h3>
-  <h2>{weather ? `${weather.main.feels_like} °C` : "-- °C"}</h2>
-</div>
+          <h3>🌡 Feels Like</h3>
+          <h2>
+            {weather ? `${weather.main.feels_like} °C` : "-- °C"}
+          </h2>
+        </div>
 
         <div className="card">
           <h3>💧 Humidity</h3>
@@ -558,57 +730,72 @@ cursor: locationEnabled ? "pointer" : "not-allowed"
             {weather ? `${weather.wind.speed} m/s` : "-- m/s"}
           </h2>
         </div>
+
         <div className="card">
-  <h3>🌅 Sunrise</h3>
-  <h2>
-    {weather?.sys?.sunrise
-      ? new Date(weather.sys.sunrise * 1000).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "--:--"}
-  </h2>
-</div>
+          <h3>🌍 Air Quality</h3>
+          <h2>
+            {weather?.air?.main?.aqi ?? "--"}
+          </h2>
+          <p>
+            {weather?.air?.main?.aqi
+              ? ["Good","Fair","Moderate","Poor","Very Poor"][
+                  weather.air.main.aqi - 1
+                ]
+              : "Not Available"}
+          </p>
+        </div>
 
-<div className="card">
-  <h3>🌇 Sunset</h3>
-  <h2>
-    {weather?.sys?.sunset
-      ? new Date(weather.sys.sunset * 1000).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "--:--"}
-  </h2>
-</div>
         <div className="card">
+          <h3>🌅 Sunrise</h3>
+          <h2>
+            {weather?.sys?.sunrise
+              ? new Date(
+                  weather.sys.sunrise * 1000
+                ).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--"}
+          </h2>
+        </div>
 
-  <h3>☁ Weather</h3>
+        <div className="card">
+          <h3>🌇 Sunset</h3>
+          <h2>
+            {weather?.sys?.sunset
+              ? new Date(
+                  weather.sys.sunset * 1000
+                ).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--"}
+          </h2>
+        </div>
 
-  {weather ? (
+        <div className="card">
+          <h3>☁ Weather</h3>
 
-    <>
-      <img
-        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-        alt="Weather Icon"
-        width="70"
-      />
+          {weather ? (
+            <>
+              <img
+                src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                alt="Weather"
+                width="70"
+              />
 
-      <h2>{weather.weather[0].main}</h2>
-
-    </>
-
-  ) : (
-
-    <h2>---</h2>
-
-  )}
-
-</div>
+              <h2>
+                {weather.weather[0].main}
+              </h2>
+            </>
+          ) : (
+            <h2>--</h2>
+          )}
+        </div>
 
       </section>
 
-      {/* AI DASHBOARD */}
+      {/* ================= AI ================= */}
 
       <section className="ai-dashboard">
 
@@ -617,167 +804,153 @@ cursor: locationEnabled ? "pointer" : "not-allowed"
           <h2>🤖 AI Weather Insights</h2>
 
           {weather ? (
-
             <>
-              <p>📍 City : {weather.name}</p>
-
-              <p>🌍 Country : {weather.sys.country}</p>
-
-              <p>🌡 Feels Like : {weather.main.feels_like} °C</p>
-
-              <p>💧 Humidity : {weather.main.humidity}%</p>
-
-              <p>🌬 Wind Speed : {weather.wind.speed} m/s</p>
-
-              <p>☁ Condition : {weather.weather[0].description}</p>
-
+              <p>📍 {weather.name}</p>
+              <p>🌡 {weather.main.temp} °C</p>
+              <p>💧 {weather.main.humidity}%</p>
+              <p>🌬 {weather.wind.speed} m/s</p>
+              <p>☁ {weather.weather[0].description}</p>
             </>
-
           ) : (
-
             <>
-              <p>✔ AI Rain Prediction</p>
-
-              <p>✔ Temperature Trend</p>
-
-              <p>✔ Smart Weather Alerts</p>
-
+              <p>✔ AI Prediction</p>
               <p>✔ Travel Recommendation</p>
-
+              <p>✔ Rain Forecast</p>
+              <p>✔ Smart Alerts</p>
             </>
-
           )}
 
         </div>
 
         <div className="alert-card">
 
-          <h2>🚨 Weather Alerts</h2>
+          <h2>🚨 System Status</h2>
 
           <div className="alert">
-
-            Live Weather Monitoring Enabled
-
+            Live Monitoring Active
           </div>
 
           <div className="alert safe">
-
             OpenWeather API Connected
-
           </div>
 
         </div>
 
       </section>
 
-      {/* STATISTICS */}
+      {/* ================= STATS ================= */}
 
       <section className="stats">
-              <div className="stat-box">
 
+        <div className="stat-box">
           <h1>100+</h1>
-
           <p>Cities Covered</p>
-
         </div>
 
         <div className="stat-box">
-
           <h1>99%</h1>
-
           <p>Forecast Accuracy</p>
-
         </div>
 
         <div className="stat-box">
-
           <h1>24/7</h1>
-
           <p>Live Updates</p>
-
         </div>
 
         <div className="stat-box">
-
           <h1>AI</h1>
-
           <p>Smart Prediction</p>
+        </div>
+
+      </section>
+
+      {/* ================= SERVICES ================= */}
+
+      <section className="services">
+
+        <h2>Our Services</h2>
+
+        <div className="service-container">
+
+          <div className="service-card">
+            <h3>🌦 Live Weather</h3>
+            <p>Real-time weather monitoring worldwide.</p>
+          </div>
+
+          <div className="service-card">
+            <h3>🤖 AI Forecasting</h3>
+            <p>AI-powered intelligent predictions.</p>
+          </div>
+
+          <div className="service-card">
+            <h3>🚨 Smart Alerts</h3>
+            <p>Instant severe weather notifications.</p>
+          </div>
+
+          <div className="service-card">
+            <h3>📊 Analytics</h3>
+            <p>Weather insights and reporting.</p>
+          </div>
 
         </div>
 
       </section>
 
-{/* SERVICES */}
+      {/* ================= BUSINESS ================= */}
 
-<section className="services">
+      <section className="business-query">
 
-  <h2>Our Services</h2>
+        <h2>Business Enquiries</h2>
 
-  <div className="service-container">
+        <div className="query-card">
 
-    <div className="service-card">
-      <h3>🌦 Live Weather Monitoring</h3>
-      <p>Real-time weather updates for cities worldwide.</p>
-    </div>
+          <p>
 
-    <div className="service-card">
-      <h3>🤖 AI Weather Prediction</h3>
-      <p>AI-powered intelligent weather forecasting.</p>
-    </div>
+            Looking for enterprise weather
+            solutions or API integration?
+            Contact Aetherix Technologies.
 
-    <div className="service-card">
-      <h3>🚨 Weather Alerts</h3>
-      <p>Instant severe weather notifications and alerts.</p>
-    </div>
+          </p>
 
-    <div className="service-card">
-      <h3>📊 Weather Analytics</h3>
-      <p>Weather reports, trends and analytics dashboard.</p>
-    </div>
+          <p>
 
-  </div>
+            <strong>Email:</strong>
+            {" "}
+            hpsthegame@gmail.com
 
-</section>
+          </p>
 
-{/* BUSINESS ENQUIRY */}
+        </div>
 
-<section className="business-query">
+      </section>
 
-  <h2>Business Enquiries</h2>
+      {/* ================= FOOTER ================= */}
 
-  <div className="query-card">
-
-    <p>
-      Looking for AI-powered weather forecasting solutions for your
-      organization? Contact Aetherix Technologies for collaborations,
-      enterprise solutions, API integration, and custom weather analytics.
-    </p>
-
-    <p><strong>📧 Email:</strong> hpsthegame@gmail.com</p>
-
-    </div>
-
-</section>
-    
       <footer>
 
-  <div className="footer-content">
+        <div className="footer-content">
 
-    <h2>🌤 Aetherix Technologies</h2>
+          <h2>🌤 Aetherix Technologies</h2>
 
-    <p>
-      Powered by OpenWeather API | React | Vite
-    </p>
+          <p>
 
-    <hr />
+            Powered by React • Vite •
+            OpenWeather API
 
-    <p>
-      © 2026 Aetherix Technologies. All Rights Reserved.
-    </p>
+          </p>
 
-  </div>
+          <hr />
 
-</footer>
+          <p>
+
+            © 2026 Aetherix Technologies.
+            All Rights Reserved.
+
+          </p>
+
+        </div>
+
+      </footer>
 
     </div>
 

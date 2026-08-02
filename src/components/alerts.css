@@ -1,93 +1,183 @@
+/* ==========================================
+           AETHERIX ALERTS
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+}
+
 .alerts-page{
+
     min-height:100vh;
-    background:linear-gradient(135deg,#07162d,#102c54,#173d73);
+
+    background:
+    radial-gradient(circle at top left,
+    rgba(0,183,255,.18),
+    transparent 35%),
+
+    radial-gradient(circle at bottom right,
+    rgba(0,89,255,.12),
+    transparent 40%),
+
+    linear-gradient(
+        135deg,
+        #041327,
+        #082957,
+        #071426
+    );
+
     color:white;
-    padding:40px;
+
+    padding-bottom:70px;
+
+}
+
+.alerts-heading{
+
     text-align:center;
+
+    padding-top:45px;
+
+    font-size:46px;
+
 }
 
-.alerts-page h1{
-    font-size:40px;
-    margin-bottom:35px;
-    color:#fff;
+.alerts-subtitle{
+
+    text-align:center;
+
+    margin-top:15px;
+
+    color:#c9e1ff;
+
+    font-size:18px;
+
+    margin-bottom:45px;
+
 }
 
-.alerts-container{
+.no-alerts{
+
     display:flex;
+
+    flex-direction:column;
+
     justify-content:center;
+
     align-items:center;
+
+    height:70vh;
+
 }
+/* ================= GRID ================= */
+
+.alerts-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(380px,1fr));
+
+    gap:30px;
+
+    padding:0 60px;
+
+}
+
+/* ================= ALERT CARD ================= */
 
 .alert-card{
-    width:520px;
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(12px);
-    border:1px solid rgba(255,255,255,0.15);
-    border-radius:20px;
-    padding:35px;
-    box-shadow:0 15px 40px rgba(0,0,0,.35);
-    animation:fadeIn .5s ease;
+
+    background:rgba(18,35,63,.92);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:24px;
+
+    padding:30px;
+
+    backdrop-filter:blur(18px);
+
+    transition:.35s;
+
+    box-shadow:
+    0 18px 45px rgba(0,0,0,.28);
+
 }
 
-.weather-icon{
-    font-size:70px;
-    margin-bottom:15px;
+.alert-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:
+    0 20px 45px rgba(0,183,255,.18);
+
 }
 
-.alert-title{
+.alert-icon{
+
+    font-size:60px;
+
+    margin-bottom:20px;
+
+}
+
+.alert-card h2{
+
+    margin:18px 0;
+
     font-size:28px;
-    font-weight:bold;
-    color:#4aa3ff;
-    margin-bottom:15px;
+
 }
 
-.alert-message{
-    font-size:18px;
-    line-height:1.6;
+.alert-card p{
+
+    color:#c8def8;
+
+    line-height:1.7;
+
     margin-bottom:25px;
+
 }
 
-.weather-info{
-    margin-top:20px;
-    text-align:left;
-}
+/* ================= BADGES ================= */
 
-.weather-info p{
-    display:flex;
-    justify-content:space-between;
-    padding:12px 0;
-    border-bottom:1px solid rgba(255,255,255,.12);
-    font-size:17px;
-}
+.alert-badge{
 
-.weather-info span{
+    display:inline-block;
+
+    padding:8px 18px;
+
+    border-radius:40px;
+
     font-weight:600;
-    color:#4aa3ff;
+
+    margin-bottom:20px;
+
 }
 
-.stay-safe{
-    margin-top:25px;
-    background:#1c6dd0;
-    padding:14px;
-    border-radius:10px;
-    font-size:18px;
-    font-weight:600;
+.alert-badge.high{
+
+    background:#d62828;
+
+    color:white;
+
 }
 
-.safe{
-    background:#1b8d4b;
+.alert-badge.medium{
+
+    background:#ff9800;
+
+    color:white;
+
 }
 
-@keyframes fadeIn{
+.alert-badge.safe{
 
-    from{
-        opacity:0;
-        transform:translateY(30px);
-    }
+    background:#1e9b52;
 
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
+    color:white;
 
 }

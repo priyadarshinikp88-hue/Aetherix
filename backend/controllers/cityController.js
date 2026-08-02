@@ -16,7 +16,7 @@ export const searchCities = async (req, res) => {
       {
         params: {
           q,
-          limit: 25,
+          limit: 1000,
           appid: process.env.OPENWEATHER_API_KEY,
         },
       }

@@ -1,97 +1,527 @@
-.dashboard-page {
-  min-height: 100vh;
-  background: #0b1f3a;
-  color: white;
-  padding: 40px;
-  text-align: center;
+/* ==========================================
+            AETHERIX DASHBOARD
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
 }
 
-.dashboard-page h1 {
-  font-size: 34px;
-  margin-bottom: 30px;
-  font-weight: bold;
+body{
+    background:#071426;
+    color:white;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 22px;
-  margin-top: 30px;
+.dashboard-page{
+
+    min-height:100vh;
+
+    background:
+    radial-gradient(circle at top left,
+    rgba(0,183,255,.18),
+    transparent 35%),
+
+    radial-gradient(circle at bottom right,
+    rgba(0,89,255,.12),
+    transparent 40%),
+
+    linear-gradient(
+        135deg,
+        #041327,
+        #082957,
+        #071426
+    );
+
 }
 
-.dashboard-card {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
-  padding: 16px;
-  min-height: 140px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  transition: 0.3s;
+/* ================= EMPTY PAGE ================= */
+
+.empty-dashboard{
+
+    height:70vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
 }
 
-.dashboard-card:hover {
-  transform: translateY(-6px);
+.empty-dashboard h1{
+
+    font-size:46px;
+
+    margin-bottom:20px;
+
 }
 
-.dashboard-card h2 {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 12px;
+.empty-dashboard p{
+
+    color:#bdd8ff;
+
+    font-size:20px;
+
 }
 
-.dashboard-card h1 {
-  font-size: 22px;
-  font-weight: bold;
-  margin: 0;
+/* ================= HERO ================= */
+
+.dashboard-hero{
+
+    display:grid;
+
+    grid-template-columns:1.2fr .8fr;
+
+    gap:50px;
+
+    padding:70px;
+
+    align-items:center;
+
 }
 
-.dashboard-card p {
-  font-size: 15px;
-  line-height: 1.5;
-  margin-top: 10px;
+.hero-left h1{
+
+    font-size:60px;
+
+    margin:20px 0;
+
 }
 
-.ai-card {
-  background: #1f3f68;
+.dashboard-tag{
+
+    display:inline-block;
+
+    padding:10px 22px;
+
+    border-radius:50px;
+
+    background:rgba(0,183,255,.15);
+
+    color:#62c8ff;
+
+    border:1px solid rgba(255,255,255,.08);
+
 }
 
-.ai-card h2 {
-  margin-bottom: 15px;
+.hero-left p{
+
+    color:#c8def8;
+
+    font-size:18px;
+
+    margin-top:10px;
+
 }
 
-.ai-card p {
-  font-size: 15px;
-  line-height: 1.6;
+.hero-right{
+
+    background:rgba(18,35,63,.92);
+
+    border-radius:26px;
+
+    text-align:center;
+
+    padding:40px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    backdrop-filter:blur(18px);
+
 }
 
-.chart-container {
-  width: 70%;
-  height: 240px;
-  margin: 30px auto;
-  background: #17365f;
-  padding: 20px;
-  border-radius: 18px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+.hero-right img{
+
+    width:150px;
+
 }
 
-@media (max-width: 900px) {
-  .chart-container {
-    width: 95%;
-    height: 220px;
-  }
+.hero-right h1{
 
-  .dashboard-card h2 {
-    font-size: 20px;
-  }
+    font-size:64px;
 
-  .dashboard-card h1 {
-    font-size: 26px;
-  }
+}
 
-  .dashboard-page h1 {
-    font-size: 34px;
-  }
+.hero-right p{
+
+    color:#c7def8;
+
+    text-transform:capitalize;
+
+}
+/* ================= WEATHER CARDS ================= */
+
+.dashboard-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+
+    gap:25px;
+
+    padding:0 70px 70px;
+
+}
+
+.dashboard-card{
+
+    background:rgba(18,35,63,.92);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:22px;
+
+    padding:30px;
+
+    text-align:center;
+
+    transition:.35s;
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:0 12px 35px rgba(0,0,0,.25);
+
+}
+
+.dashboard-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:
+    0 20px 45px rgba(0,183,255,.18);
+
+}
+
+.dashboard-card h3{
+
+    color:#6fc9ff;
+
+    margin-bottom:18px;
+
+    font-size:20px;
+
+}
+
+.dashboard-card h1{
+
+    font-size:42px;
+
+    margin-bottom:10px;
+
+}
+
+.dashboard-card p{
+
+    color:#c8ddf8;
+
+    font-size:15px;
+
+}
+
+/* ================= WEATHER SUMMARY ================= */
+
+.weather-card{
+
+    margin:0 70px 50px;
+
+}
+
+/* ================= CHART ================= */
+
+.chart-section{
+
+    padding:0 70px 70px;
+
+}
+
+.chart-card{
+
+    background:rgba(18,35,63,.92);
+
+    border-radius:22px;
+
+    padding:35px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    backdrop-filter:blur(18px);
+
+}
+
+.chart-card h2{
+
+    margin-bottom:25px;
+
+    color:white;
+
+}
+
+.chart-container{
+
+    width:100%;
+
+    height:420px;
+
+}
+
+/* ================= AI ================= */
+
+.ai-section{
+
+    padding:0 70px 70px;
+
+}
+
+.ai-panel{
+
+    background:rgba(18,35,63,.92);
+
+    border-radius:22px;
+
+    padding:35px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+}
+
+.ai-panel h2{
+
+    margin-bottom:25px;
+
+}
+/* ================= QUICK INSIGHTS ================= */
+
+.quick-insights{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+    gap:25px;
+
+    padding:0 70px 70px;
+
+}
+
+.insight-card{
+
+    background:rgba(18,35,63,.92);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:22px;
+
+    padding:30px;
+
+    transition:.35s;
+
+    backdrop-filter:blur(18px);
+
+}
+
+.insight-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 18px 40px rgba(0,183,255,.18);
+
+}
+
+.insight-card h3{
+
+    color:#67c7ff;
+
+    margin-bottom:18px;
+
+    font-size:22px;
+
+}
+
+.insight-card p{
+
+    color:#d9e9ff;
+
+    line-height:1.8;
+
+}
+
+/* ================= FOOTER ================= */
+
+.dashboard-footer{
+
+    margin-top:40px;
+
+    padding:45px;
+
+    text-align:center;
+
+    background:#03101d;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+}
+
+.dashboard-footer h2{
+
+    color:white;
+
+    margin-bottom:10px;
+
+}
+
+.dashboard-footer p{
+
+    color:#9cc8ef;
+
+    margin:10px 0;
+
+}
+
+.dashboard-footer hr{
+
+    width:220px;
+
+    margin:20px auto;
+
+    border:.5px solid rgba(255,255,255,.12);
+
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+
+.dashboard-hero{
+
+grid-template-columns:1fr;
+
+}
+
+.hero-right{
+
+margin-top:30px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.dashboard-hero{
+
+padding:35px;
+
+}
+
+.hero-left h1{
+
+font-size:42px;
+
+}
+
+.dashboard-grid{
+
+padding:25px;
+
+grid-template-columns:1fr;
+
+}
+
+.chart-section{
+
+padding:25px;
+
+}
+
+.ai-section{
+
+padding:25px;
+
+}
+
+.quick-insights{
+
+padding:25px;
+
+grid-template-columns:1fr;
+
+}
+
+.weather-card{
+
+margin:25px;
+
+}
+
+.chart-container{
+
+height:320px;
+
+}
+
+.dashboard-footer{
+
+padding:30px;
+
+}
+
+}
+
+/* ================= SCROLLBAR ================= */
+
+::-webkit-scrollbar{
+
+width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+background:#2d7dff;
+
+border-radius:20px;
+
+}
+
+::-webkit-scrollbar-track{
+
+background:#071426;
+
+}
+
+/* ================= ANIMATION ================= */
+
+.dashboard-card,
+.chart-card,
+.ai-panel,
+.insight-card{
+
+animation:fadeUp .6s ease;
+
+}
+
+@keyframes fadeUp{
+
+from{
+
+opacity:0;
+
+transform:translateY(25px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
 }
