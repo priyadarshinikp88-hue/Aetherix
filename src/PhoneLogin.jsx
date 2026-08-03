@@ -1,6 +1,6 @@
 import axios from "axios";
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+
 
 export const phoneLogin = async (req, res) => {
   try {
