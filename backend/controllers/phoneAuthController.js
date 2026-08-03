@@ -18,17 +18,21 @@ export const phoneLogin = async (req, res) => {
 console.log("Access Token:", accessToken);
     // Verify Access Token with MSG91
     const verifyResponse = await axios.post(
-      "https://control.msg91.com/api/v5/widget/verifyAccessToken",
-      {
-        authkey: process.env.MSG91_AUTH_KEY,
-        "access-token": accessToken,
-      }
-    );
+  "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+  {
+    authkey: process.env.MSG91_AUTH_KEY,
+    "access-token": accessToken,
+  },
+  {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  }
+);
 
-    console.log("MSG91 Response:", verifyResponse.data);
-    console.log("MSG91 Verify API Response:");
-console.log(JSON.stringify(verifyResponse.data, null, 2));
-
+console.log("VERIFY RESPONSE STATUS:", verifyResponse.status);
+console.log("VERIFY RESPONSE DATA:", verifyResponse.data);
     // Get mobile number from MSG91 response
     const phone =
       verifyResponse.data.mobile ||
