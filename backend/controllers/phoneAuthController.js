@@ -14,7 +14,8 @@ export const phoneLogin = async (req, res) => {
         message: "Access Token Missing",
       });
     }
-
+    console.log("MSG91_AUTH_KEY:", process.env.MSG91_AUTH_KEY);
+console.log("Access Token:", accessToken);
     // Verify Access Token with MSG91
     const verifyResponse = await axios.post(
       "https://control.msg91.com/api/v5/widget/verifyAccessToken",
