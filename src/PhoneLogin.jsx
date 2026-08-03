@@ -1,169 +1,94 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  initializeMSG91,
-  sendOTP,
-  verifyOTP,
-  retryOTP,
-} from "./msg91";
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
 
-import "./otp.css";
+export const phoneLogin = async (req, res) => {
+  try {
+    const { accessToken } = req.body;
 
-function PhoneLogin() {
-  const navigate = useNavigate();
-
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-
-  const [sending, setSending] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-
-  useEffect(() => {
-    initializeMSG91()
-      .then(() => {
-        console.log("MSG91 Initialized");
-      })
-      .catch(console.error);
-  }, []);
-
-  const handleSendOTP = async () => {
-    if (!phone.trim()) {
-      alert("Enter mobile number");
-      return;
+    if (!accessToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Access Token Missing",
+      });
     }
 
-    try {
-      setSending(true);
+    console.log("MSG91_AUTH_KEY:", process.env.MSG91_AUTH_KEY);
+    console.log("Access Token:", accessToken);
 
-      const result = await sendOTP(phone);
-
-      console.log(result);
-
-      alert("OTP Sent Successfully");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to send OTP");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    if (!otp.trim()) {
-      alert("Enter OTP");
-      return;
-    }
-
-    try {
-      setVerifying(true);
-
-      // Verify OTP from MSG91
-      const result = await verifyOTP(otp);
-
-      console.log("MSG91 Result:", result);
-
-      if (result.type !== "success") {
-        alert("Invalid OTP");
-        return;
+    const verifyResponse = await axios.post(
+      "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+      {
+        authkey: process.env.MSG91_AUTH_KEY,
+        "access-token": accessToken,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       }
+    );
 
-      // Send Access Token to Backend
-    const API_URL = import.meta.env.VITE_API_URL;
+    console.log("VERIFY RESPONSE:", verifyResponse.data);
 
-const backendResponse = await axios.post(
-  `${API_URL}/phone/verify-phone`,
-  {
-    accessToken: result.message,
-  }
-);
-      console.log("Backend:", backendResponse.data);
-
-      localStorage.setItem( "token",
-        backendResponse.data.token
-      );
-      const token = backendResponse.data.token;
-
-const testResponse = await axios.get(
-  "http://localhost:5000/api/test",
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
-
-console.log("Protected Route:", testResponse.data);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(backendResponse.data.user)
-      );
-
-      alert("Login Successful");
-
-      navigate("/home");
-    } catch (err) {
-      console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-          "OTP Verification Failed"
-      );
-    } finally {
-      setVerifying(false);
+    // If MSG91 itself rejected the request
+    if (verifyResponse.data.type !== "success") {
+      return res.status(401).json({
+        success: false,
+        message: verifyResponse.data.message,
+        code: verifyResponse.data.code,
+      });
     }
-  };
 
-  const handleRetryOTP = async () => {
-    try {
-      await retryOTP();
-      alert("OTP Resent");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to resend OTP");
+    // Try to extract phone number
+    const phone =
+      verifyResponse.data.mobile ||
+      verifyResponse.data.phone ||
+      verifyResponse.data.identifier ||
+      verifyResponse.data.data?.mobile ||
+      verifyResponse.data.data?.phone ||
+      verifyResponse.data.data?.identifier;
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone Number Not Found",
+        response: verifyResponse.data,
+      });
     }
-  };
 
-  return (
-    <div className="otp-container">
-      <div className="otp-card">
-        <h2>Aetherix Phone Login</h2>
+    let user = await User.findOne({ phone });
 
-        <input
-          type="tel"
-          placeholder="Enter Mobile Number"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
+    if (!user) {
+      user = await User.create({
+        phone,
+        name: "Phone User",
+      });
+    }
 
-        <button onClick={handleSendOTP} disabled={sending}>
-          {sending ? "Sending..." : "Send OTP"}
-        </button>
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-        <input
-          type="text"
-          placeholder="Enter OTP"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-        />
+    return res.status(200).json({
+      success: true,
+      token,
+      user,
+    });
 
-        <button
-          onClick={handleVerifyOTP}
-          disabled={verifying}
-        >
-          {verifying ? "Verifying..." : "Verify OTP"}
-        </button>
+  } catch (error) {
+    console.error(
+      "MSG91 ERROR:",
+      error.response?.data || error.message
+    );
 
-        <button
-          onClick={handleRetryOTP}
-          style={{ marginTop: "10px" }}
-        >
-          Resend OTP
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export default PhoneLogin;
+    return res.status(500).json({
+      success: false,
+      message: error.response?.data?.message || "Verification Failed",
+      error: error.response?.data || error.message,
+    });
+  }
+};
