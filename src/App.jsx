@@ -1,4 +1,4 @@
-import PhoneLogin from "./phoneLogin";
+import PhoneLogin from "./PhoneLogin";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./login";
