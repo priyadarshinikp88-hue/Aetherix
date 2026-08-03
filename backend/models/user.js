@@ -13,11 +13,40 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      sparse: true,
     },
-
+     
+    phone: {
+  type: String,
+  unique: true,
+  sparse: true,
+},
     password: {
       type: String,
       required: true,
+    },
+
+    // Phone Login
+    mobile: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: null,
+    },
+
+    otp: {
+      type: String,
+      default: null,
+    },
+
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
+
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
     },
 
     resetToken: {
@@ -34,5 +63,6 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-export default mongoose.model("User", userSchema);
+export default User;

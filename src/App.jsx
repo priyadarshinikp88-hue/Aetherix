@@ -1,4 +1,4 @@
-import PhoneLogin from "./PhoneLogin";
+import PhoneLogin from "./phoneLogin";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./login";
@@ -10,6 +10,7 @@ import Forecast from "./components/forecast";
 import Dashboard from "./components/dashboard";
 import Alerts from "./components/alerts";
 import WeatherMap from "./components/weathermap";
+
 function App() {
   return (
     <BrowserRouter>

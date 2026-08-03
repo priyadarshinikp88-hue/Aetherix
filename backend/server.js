@@ -11,6 +11,8 @@ import authRoutes from "./routes/authRoutes.js";
 import weatherRoutes from "./routes/weather.js";
 import cityRoutes from "./routes/cityRoutes.js";
 import forecastRoutes from "./routes/forecast.js";
+import phoneAuthRoutes from "./routes/phoneAuthRoutes.js";
+import authMiddleware from "./middleware/authMiddleware.js";
 
 dotenv.config();
 
@@ -34,6 +36,18 @@ app.get("/", (req, res) => {
 
 // Auth
 app.use("/api/auth", authRoutes);
+
+app.use("/api/phone", phoneAuthRoutes);
+
+//test routes
+app.get("/api/test", authMiddleware, (req, res) => {
+  res.json({
+    success: true,
+    message: "Protected Route Accessed",
+    user: req.user,
+  });
+});
+
 
 // Weather
 app.use("/api/weather", weatherRoutes);

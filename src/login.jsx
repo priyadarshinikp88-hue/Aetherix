@@ -234,6 +234,13 @@ function Login() {
               ? "Signing in..."
               : "Continue with Google"}
           </button>
+ 
+        <button
+  className="phone-btn"
+  onClick={() => navigate("/phone-login")}
+>
+  📱 Continue with Phone
+</button>
 
           <button
             className="register-btn"

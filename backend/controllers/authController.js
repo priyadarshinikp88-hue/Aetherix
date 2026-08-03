@@ -186,3 +186,114 @@ export const resetPassword = async (req, res) => {
     });
   }
 };
+
+// ================= SEND OTP =================
+export const sendOTP = async (req, res) => {
+  try {
+    const { mobile } = req.body;
+
+    if (!mobile) {
+      return res.status(400).json({
+        message: "Mobile number is required",
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // OTP expires in 5 minutes
+    const expiry = new Date(Date.now() + 5 * 60 * 1000);
+
+    let user = await User.findOne({ mobile });
+
+    if (!user) {
+      user = new User({
+        name: "Phone User",
+        email: `${mobile}@phone.aetherix`,
+        password: "phone-login",
+        mobile,
+      });
+    }
+
+    user.otp = otp;
+    user.otpExpiry = expiry;
+
+    await user.save();
+
+    console.log("OTP:", otp);
+
+    return res.status(200).json({
+      message: "OTP generated successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+// ================= VERIFY OTP =================
+export const verifyOTP = async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+
+    const user = await User.findOne({ mobile });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (!user.otp || !user.otpExpiry) {
+      return res.status(400).json({
+        message: "OTP not generated",
+      });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    if (user.otpExpiry < Date.now()) {
+      return res.status(400).json({
+        message: "OTP Expired",
+      });
+    }
+
+    user.isPhoneVerified = true;
+    user.otp = null;
+    user.otpExpiry = null;
+
+    await user.save();
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    return res.status(200).json({
+      message: "Phone Login Successful",
+      token,
+      user,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+};
