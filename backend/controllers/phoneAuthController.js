@@ -28,10 +28,6 @@ export const phoneLogin = async (req, res) => {
     console.log("MSG91 Verify API Response:");
 console.log(JSON.stringify(verifyResponse.data, null, 2));
 
-return res.json({
-  success: true,
-  msg91: verifyResponse.data,
-});
     // Get mobile number from MSG91 response
     const phone =
       verifyResponse.data.mobile ||
