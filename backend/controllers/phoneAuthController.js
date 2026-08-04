@@ -36,17 +36,15 @@ console.log("STATUS:", verifyResponse.status);
 console.log("DATA:", JSON.stringify(verifyResponse.data, null, 2));
 
  // Extract phone number from every possible location
-    const phone =
-      verifyResponse.data.mobile ||
-      verifyResponse.data.phone ||
-      verifyResponse.data.identifier ||
-      verifyResponse.data.data?.mobile ||
-      verifyResponse.data.data?.phone ||
-      verifyResponse.data.data?.identifier ||
-      verifyResponse.data.result?.mobile ||
-      verifyResponse.data.result?.phone ||
-      verifyResponse.data.result?.identifier;
+    
+ if (verifyResponse.data.type !== "success") {
+  return res.status(400).json({
+    success: false,
+    message: verifyResponse.data.message,
+  });
+}
 
+const phone = verifyResponse.data.message;
     if (!phone) {
       return res.status(400).json({
         success: false,
