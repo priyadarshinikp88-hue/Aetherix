@@ -53,68 +53,79 @@ function PhoneLogin() {
       setSending(false);
     }
   };
+    const handleVerifyOTP = async () => {
+  if (!otp.trim()) {
+    alert("Enter OTP");
+    return;
+  }
 
-  const handleVerifyOTP = async () => {
-    if (!otp.trim()) {
-      alert("Enter OTP");
+  try {
+    setVerifying(true);
+
+    const result = await verifyOTP(otp);
+
+    console.log("========== VERIFY OTP RESULT ==========");
+    console.log(result);
+    console.log("Type:", result.type);
+    console.log("Message:", result.message);
+    console.log("Keys:", Object.keys(result));
+
+    if (result.type !== "success") {
+      alert("Invalid OTP");
       return;
     }
 
-    try {
-      setVerifying(true);
+    const API_URL = import.meta.env.VITE_API_URL;
 
-      const result = await verifyOTP(otp);
-
-      console.log("MSG91 Result:", result);
-
-      if (result.type !== "success") {
-        alert("Invalid OTP");
-        return;
+    const backendResponse = await axios.post(
+      `${API_URL}/phone/verify-phone`,
+      {
+        accessToken: result.message,
       }
+    );
 
-      const API_URL = import.meta.env.VITE_API_URL;
+    console.log("========== BACKEND RESPONSE ==========");
+    console.log(backendResponse.data);
 
-      const backendResponse = await axios.post(
-        `${API_URL}/phone/verify-phone`,
-        {
-          accessToken: result.message,
-        }
-      );
+    // Temporarily show the complete backend response
+    alert(JSON.stringify(backendResponse.data, null, 2));
 
-      console.log("Backend Response:", backendResponse.data);
+    if (!backendResponse.data.success) {
+      return;
+    }
 
-      if (!backendResponse.data.success) {
-        alert(
-          backendResponse.data.message ||
-            "Verification Failed"
-        );
-        return;
-      }
+    localStorage.setItem(
+      "token",
+      backendResponse.data.token
+    );
 
-      localStorage.setItem(
-        "token",
-        backendResponse.data.token
-      );
+    localStorage.setItem(
+      "user",
+      JSON.stringify(backendResponse.data.user)
+    );
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(backendResponse.data.user)
-      );
+    alert("Login Successful");
 
-      alert("Login Successful");
+    navigate("/home");
 
-      navigate("/home");
-    } catch (err) {
-      console.error(err);
+  } catch (err) {
+    console.error("========== AXIOS ERROR ==========");
+    console.error(err);
+
+    if (err.response) {
+      console.log("Status:", err.response.status);
+      console.log("Response:", err.response.data);
 
       alert(
-        err.response?.data?.message ||
-          "OTP Verification Failed"
+        JSON.stringify(err.response.data, null, 2)
       );
-    } finally {
-      setVerifying(false);
+    } else {
+      alert("OTP Verification Failed");
     }
-  };
+  } finally {
+    setVerifying(false);
+  }
+};
 
   const handleRetryOTP = async () => {
     try {
