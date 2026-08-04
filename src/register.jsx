@@ -12,56 +12,53 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRegister = async () => {
+ const handleRegister = async () => {
+  if (
+    name.trim() === "" ||
+    email.trim() === "" ||
+    password.trim() === "" ||
+    confirmPassword.trim() === ""
+  ) {
+    alert("Please fill all fields.");
+    return;
+  }
 
-    if (
-      name.trim() === "" ||
-      email.trim() === "" ||
-      password.trim() === "" ||
-      confirmPassword.trim() === ""
-    ) {
-      alert("Please fill all fields.");
-      return;
-    }
+  if (password !== confirmPassword) {
+    alert("Passwords do not match.");
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
+  const API_URL = import.meta.env.VITE_API_URL;
 
-    try {
-          const API_URL = import.meta.env.VITE_API_URL;
-
-const response = await fetch(
-  `${API_URL}/auth/register`,
-
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            password,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert(data.message);
-        navigate("/login");
-      } else {
-        alert(data.message);
+  try {
+    const response = await fetch(
+      `${API_URL}/auth/register`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
       }
+    );
 
-    } catch (error) {
-      console.error(error);
-      alert("Server Error");
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(data.message);
+      navigate("/");
+    } else {
+      alert(data.message);
     }
-
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Server Error");
+  }
+};
 
   return (
 
