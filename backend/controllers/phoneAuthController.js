@@ -18,34 +18,29 @@ export const phoneLogin = async (req, res) => {
     console.log("Access Token:", accessToken);
     console.log("======================================");
 
-    const verifyResponse = await axios.post(
-      "https://control.msg91.com/api/v5/widget/verifyAccessToken",
-      {
-        authkey: process.env.MSG91_AUTH_KEY,
-        "access-token": accessToken,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      }
-    );
+  const verifyResponse = await axios.post(
+  "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+  {
+    authkey: process.env.MSG91_AUTH_KEY,
+    "access-token": accessToken,
+  },
+  {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    validateStatus: () => true,
+  }
+);
 
-    console.log("=========== MSG91 FULL RESPONSE ===========");
-    console.log(JSON.stringify(verifyResponse.data, null, 2));
+console.log("STATUS:", verifyResponse.status);
+console.log("HEADERS:", verifyResponse.headers);
+console.log("DATA:", JSON.stringify(verifyResponse.data, null, 2));
 
-    // If MSG91 authentication itself failed
-    if (
-      verifyResponse.data.type === "error" ||
-      verifyResponse.data.message === "AuthenticationFailure"
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "MSG91 Authentication Failed",
-        msg91: verifyResponse.data,
-      });
-    }
+return res.json({
+  status: verifyResponse.status,
+  data: verifyResponse.data,
+});  
 
     // Extract phone number from every possible location
     const phone =
