@@ -6,7 +6,7 @@ import Home from "./home";
 import ForgotPassword from "./forgotpassword";
 import ResetPassword from "./ResetPassword";
 import PhoneLogin from "./PhoneLogin";
-
+import { Navigate } from "react-router-dom";
 import Forecast from "./components/forecast";
 import Dashboard from "./components/dashboard";
 import Alerts from "./components/alerts";
@@ -18,6 +18,8 @@ function App() {
       <Routes>
         
   <Route path="/" element={<Home />} />
+
+  <Route path="/home" element={<Navigate to="/" replace />} />
 
   <Route path="/login" element={<Login />} />
 
