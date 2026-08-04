@@ -128,7 +128,7 @@ function Register() {
 
           <button
             className="back-button"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/")}
           >
             Back to Login
           </button>
