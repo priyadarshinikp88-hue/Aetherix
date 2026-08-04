@@ -14,7 +14,8 @@ export const phoneLogin = async (req, res) => {
     }
 
     console.log("======================================");
-    console.log("MSG91_AUTH_KEY:", process.env.MSG91_AUTH_KEY);
+    console.log("AUTH KEY FROM ENV:");
+console.log(process.env.MSG91_AUTH_KEY);
     console.log("Access Token:", accessToken);
     console.log("======================================");
 
