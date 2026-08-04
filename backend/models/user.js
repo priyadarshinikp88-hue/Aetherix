@@ -27,12 +27,6 @@ const userSchema = new mongoose.Schema(
 },
 
     // Phone Login
-    mobile: {
-      type: String,
-      unique: true,
-      sparse: true,
-      default: null,
-    },
 
     otp: {
       type: String,

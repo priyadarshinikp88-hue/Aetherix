@@ -53,15 +53,20 @@ const phone = verifyResponse.data.message;
       });
     }
 
-    let user = await User.findOne({ phone });
+     let user = await User.findOne({ phone });
 
-    if (!user) {
-      user = await User.create({
-        phone,
-        name: "Phone User",
-      });
-    }
+console.log("Existing User:", user);
 
+if (!user) {
+  user = await User.create({
+    phone: phone,
+    name: "Phone User",
+    email: null,
+    password: null,
+  });
+
+  console.log("Created User:", user);
+}
     const token = jwt.sign(
       {
         id: user._id,
@@ -95,7 +100,7 @@ const phone = verifyResponse.data.message;
       });
     }
 
-    console.error(error.message);
+    console.error(error);
 
     return res.status(500).json({
       success: false,
