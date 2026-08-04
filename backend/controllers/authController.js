@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
@@ -70,6 +70,10 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
     });
+
+    console.log("========== REGISTER ==========");
+console.log("Database:", user.db.name);
+console.log("Email:", email);
 
     await user.save();
 
