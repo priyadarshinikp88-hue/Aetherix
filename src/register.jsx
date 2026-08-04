@@ -30,10 +30,11 @@ function Register() {
     }
 
     try {
+          const API_URL = import.meta.env.VITE_API_URL;
 
-      const response = await fetch(
-        "https://aetherix-backend-eoj8.onrender.com/api/auth/register",
-        {
+const response = await fetch(
+  `${API_URL}/auth/register`,
+
           method: "POST",
           headers: {
             "Content-Type": "application/json",
