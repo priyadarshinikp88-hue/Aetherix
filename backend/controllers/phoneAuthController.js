@@ -19,26 +19,23 @@ console.log(process.env.MSG91_AUTH_KEY);
     console.log("Access Token:", accessToken);
     console.log("======================================");
 
-  const verifyResponse = await axios.post(
-  "https://control.msg91.com/api/v5/widget/verifyAccessToken",
-  {
+ const verifyResponse = await axios({
+  method: "POST",
+  url: "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  },
+  data: {
     authkey: process.env.MSG91_AUTH_KEY,
     "access-token": accessToken,
   },
-  {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    validateStatus: () => true,
-  }
-);
+});
 
 console.log("STATUS:", verifyResponse.status);
-console.log("HEADERS:", verifyResponse.headers);
 console.log("DATA:", JSON.stringify(verifyResponse.data, null, 2));
 
-    // Extract phone number from every possible location
+ // Extract phone number from every possible location
     const phone =
       verifyResponse.data.mobile ||
       verifyResponse.data.phone ||
