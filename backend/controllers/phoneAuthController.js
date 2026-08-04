@@ -37,11 +37,6 @@ console.log("STATUS:", verifyResponse.status);
 console.log("HEADERS:", verifyResponse.headers);
 console.log("DATA:", JSON.stringify(verifyResponse.data, null, 2));
 
-return res.json({
-  status: verifyResponse.status,
-  data: verifyResponse.data,
-});  
-
     // Extract phone number from every possible location
     const phone =
       verifyResponse.data.mobile ||
