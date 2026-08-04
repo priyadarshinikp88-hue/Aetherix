@@ -8,23 +8,23 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      sparse: true,
-    },
+   email: {
+  type: String,
+  unique: true,
+  lowercase: true,
+  sparse: true,
+  default: null,
+},
      
     phone: {
   type: String,
   unique: true,
   sparse: true,
 },
-    password: {
-      type: String,
-      required: true,
-    },
+  ]password: {
+  type: String,
+  default: null,
+},
 
     // Phone Login
     mobile: {
