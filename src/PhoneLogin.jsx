@@ -87,26 +87,32 @@ function PhoneLogin() {
     console.log("========== BACKEND RESPONSE ==========");
     console.log(backendResponse.data);
 
-    // Temporarily show the complete backend response
-    alert(JSON.stringify(backendResponse.data, null, 2));
-
     if (!backendResponse.data.success) {
       return;
     }
+    console.log("STEP 1");
 
-    localStorage.setItem(
-      "token",
-      backendResponse.data.token
-    );
+localStorage.setItem(
+  "token",
+  backendResponse.data.token
+);
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(backendResponse.data.user)
-    );
+console.log("STEP 2");
 
-    alert("Login Successful");
+localStorage.setItem(
+  "user",
+  JSON.stringify(backendResponse.data.user)
+);
 
-    navigate("/home");
+console.log("STEP 3");
+
+alert("Login Successful");
+
+console.log("STEP 4");
+
+navigate("/home");
+
+console.log("STEP 5");
 
   } catch (err) {
     console.error("========== AXIOS ERROR ==========");
