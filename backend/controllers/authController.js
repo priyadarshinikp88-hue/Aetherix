@@ -71,10 +71,6 @@ export const register = async (req, res) => {
       password: hashedPassword,
     });
 
-    console.log("========== REGISTER ==========");
-console.log("Database:", user.db.name);
-console.log("Email:", email);
-
     await user.save();
 
     return res.status(201).json({
