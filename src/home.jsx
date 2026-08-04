@@ -75,7 +75,7 @@ function Home() {
 
       window.confirmationResult = null;
 
-      navigate("/");
+      navigate("/login");
 
     } catch (error) {
 

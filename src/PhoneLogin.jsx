@@ -110,7 +110,7 @@ alert("Login Successful");
 
 console.log("STEP 4");
 
-navigate("/home");
+navigate("/dashboard");
 
 console.log("STEP 5");
 
@@ -197,7 +197,7 @@ console.log("STEP 5");
         </button>
 
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/login")}
           style={{
             background: "#6b7280",
             marginTop: "10px",

@@ -50,7 +50,7 @@ function Register() {
 
       if (response.ok) {
         alert(data.message);
-        navigate("/");
+        navigate("/login");
       } else {
         alert(data.message);
       }
@@ -130,7 +130,7 @@ function Register() {
 
           <button
             className="back-button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/login")}
           >
             Back to Login
           </button>

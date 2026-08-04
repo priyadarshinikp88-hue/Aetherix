@@ -16,19 +16,30 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/phone-login" element={<PhoneLogin />} />
-        <Route
-          path="/reset-password/:token"
-          element={<ResetPassword />}
-        />
-        <Route path="/forecast" element={<Forecast />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/alerts" element={<Alerts />} />
-        <Route path="/map" element={<WeatherMap />} />
+        
+  <Route path="/" element={<Home />} />
+
+  <Route path="/login" element={<Login />} />
+
+  <Route path="/register" element={<Register />} />
+
+  <Route path="/forgot-password" element={<ForgotPassword />} />
+
+  <Route path="/phone-login" element={<PhoneLogin />} />
+
+  <Route
+    path="/reset-password/:token"
+    element={<ResetPassword />}
+  />
+
+  <Route path="/dashboard" element={<Dashboard />} />
+
+  <Route path="/forecast" element={<Forecast />} />
+
+  <Route path="/alerts" element={<Alerts />} />
+
+  <Route path="/map" element={<WeatherMap />} />
+
       </Routes>
     </BrowserRouter>
   );

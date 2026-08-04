@@ -58,7 +58,7 @@ function Login() {
           JSON.stringify(data.user)
         );
 
-        navigate("/home");
+        navigate("/dashboard");
       } else {
         alert(data.message);
       }
@@ -82,7 +82,7 @@ function Login() {
         JSON.stringify(result.user)
       );
 
-      navigate("/home");
+      navigate("/dashboard");
     } catch (error) {
       console.log(error);
       alert(error.message);

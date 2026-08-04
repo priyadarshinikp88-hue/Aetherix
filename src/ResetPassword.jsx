@@ -39,7 +39,7 @@ function ResetPassword() {
       if (response.ok) {
         alert("Password updated successfully!");
 
-        navigate("/");
+        navigate("/login");
       } else {
         alert(data.message);
       }
@@ -72,7 +72,7 @@ function ResetPassword() {
           Update Password
         </button>
 
-        <button onClick={() => navigate("/")}>
+        <button onClick={() => navigate("/login")}>
           Back to Login
         </button>
       </div>

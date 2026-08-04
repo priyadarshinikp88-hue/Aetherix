@@ -61,7 +61,7 @@ function ForgotPassword() {
       </button>
 
       <button
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/login")}
         style={{
           width: "100%",
           padding: "10px",
@@ -74,3 +74,4 @@ function ForgotPassword() {
 }
 
 export default ForgotPassword;
+
