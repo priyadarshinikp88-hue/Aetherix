@@ -181,8 +181,6 @@ function Dashboard() {
 
     <Navbar />
 
-    <Sidebar />
-
       {/* ================= HERO ================= */}
 
       <section className="dashboard-hero">

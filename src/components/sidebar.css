@@ -87,16 +87,15 @@
 }
 
 /* Mobile */
+@media (max-width:768px){
 
-@media (max-width: 992px) {
+.sidebar{
 
-  .sidebar {
+display:none;
 
-    width: 90px;
+}
 
-    padding: 20px 10px;
-
-  }
+}
 
   .sidebar-logo p,
   .menu-item span:last-child,
@@ -118,4 +117,4 @@
 
   }
 
-}
+
