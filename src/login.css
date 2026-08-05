@@ -62,7 +62,6 @@ color:#fff;
 font-weight:800;
 z-index:2;
 }
-
 .brand-tagline{
 margin-top:20px;
 font-size:24px;
@@ -73,13 +72,7 @@ color:#d7ebff;
 z-index:2;
 }
 
-.divider{
-width:220px;
-height:1px;
-background:rgba(255,255,255,.2);
-margin:30px 0;
-z-index:2;
-}
+
   
 .word-slider{
 display:flex;
@@ -359,13 +352,41 @@ box-shadow:0 0 12px rgba(0,191,255,.25);
 }
 
 }
-/* MOBILE */
+ @media(max-width:576px){
 
-@media(max-width:992px){
+.logo-image{
 
-.login-container{
+width:120px;
 
-flex-direction:column;
+}
+
+.brand-title{
+
+font-size:38px;
+
+letter-spacing:3px;
+
+}
+
+.brand-tagline{
+
+font-size:18px;
+
+}
+
+.animated-word{
+
+font-size:28px;
+
+padding:10px 22px;
+
+}
+
+.brand-message{
+
+font-size:18px;
+
+}
 
 }
 
@@ -405,4 +426,3 @@ padding:30px;
 
 }
 
-}

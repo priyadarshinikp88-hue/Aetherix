@@ -178,8 +178,6 @@ function Login() {
           Endless Possibilities
         </h2>
 
-        <div className="divider"></div>
-
         <div className="word-slider">
            
            <h2 className="animated-word">
