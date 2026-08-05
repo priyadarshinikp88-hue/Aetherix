@@ -3,6 +3,7 @@ import Navbar from "./navbar";
 import WeatherCard from "./weathercard";
 import AIInsight from "./aiinsight";
 import { getMoonPhase } from "../utils/moonPhase";
+import Sidebar from "./sidebar";
 
 import {
   Chart as ChartJS,
@@ -174,16 +175,17 @@ function Dashboard() {
 
   };
 
-  return (
+    return (
 
-    <div className="dashboard-page">
+<div className="dashboard-page">
 
-      <Navbar />
+    <Navbar />
+
+    <Sidebar />
 
       {/* ================= HERO ================= */}
 
       <section className="dashboard-hero">
-
         <div className="hero-left">
 
           <span className="dashboard-tag">
@@ -579,9 +581,12 @@ function Dashboard() {
 
       </footer>
 
-    </div>
+</div>
 
-  );
+);
+    
+
+
 
 }
 

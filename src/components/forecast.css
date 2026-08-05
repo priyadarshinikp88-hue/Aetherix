@@ -344,3 +344,15 @@ padding:20px;
 }
 
 }
+/* ================= APP LAYOUT ================= */
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 80px);
+}
+
+.dashboard-main {
+    padding: 30px;
+    overflow-x: hidden;
+}

@@ -1,5 +1,5 @@
 import logo from "./assets/logo.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 
@@ -14,6 +14,7 @@ import {
 } from "react-icons/fi";
 
 function Login() {
+
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -22,21 +23,57 @@ function Login() {
   const [showPassword, setShowPassword] =
     useState(false);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
+
+  // Animated Words
+
+  const words = [
+    "Explore",
+    "Innovate",
+    "Evolve",
+  ];
+
+  const [currentWord, setCurrentWord] =
+    useState(0);
+
+  useEffect(() => {
+
+    const timer = setInterval(() => {
+
+      setCurrentWord(
+        (prev) =>
+          (prev + 1) % words.length
+      );
+
+    }, 2500);
+
+    return () =>
+      clearInterval(timer);
+
+  }, []);
 
   const handleLogin = async () => {
+
     if (!email.trim() || !password.trim()) {
-      alert("Please enter Email and Password");
+
+      alert(
+        "Please enter Email and Password"
+      );
+
       return;
+
     }
 
     try {
+
       const response = await fetch(
         "https://aetherix-backend-eoj8.onrender.com/api/auth/login",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             email,
@@ -45,9 +82,11 @@ function Login() {
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (response.ok) {
+
         localStorage.setItem(
           "token",
           data.token
@@ -59,113 +98,134 @@ function Login() {
         );
 
         navigate("/dashboard");
+
       } else {
+
         alert(data.message);
+
       }
+
     } catch (err) {
+
       console.log(err);
+
       alert("Server Error");
+
     }
+
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
+  const handleGoogleLogin =
+    async () => {
 
-      const result = await signInWithPopup(
-        auth,
-        provider
-      );
+      try {
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(result.user)
-      );
+        setLoading(true);
 
-      navigate("/dashboard");
-    } catch (error) {
-      console.log(error);
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const result =
+          await signInWithPopup(
+            auth,
+            provider
+          );
 
-  return (
+        localStorage.setItem(
+          "user",
+          JSON.stringify(result.user)
+        );
+
+        navigate("/dashboard");
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert(error.message);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+      return (
+
     <div className="login-container">
 
-      {/* LEFT */}
+      {/* LEFT PANEL */}
 
       <div className="left-panel">
 
+        <div className="background-glow"></div>
+
         <div className="logo-box">
+
           <img
             src={logo}
-            alt="logo"
+            alt="Aetherix Logo"
             className="logo-image"
           />
+
         </div>
 
-        <h1>Aetherix Technologies</h1>
+        <h1 className="brand-title">
+          AETHERIX
+        </h1>
 
-        <h2>
-          AI-Powered Digital Innovation Platform
+        <h2 className="brand-tagline">
+          One Platform
+          <br />
+          Endless Possibilities
         </h2>
 
-        <p>
-          Building intelligent digital
-          solutions for businesses,
-          education, climate intelligence,
-          cloud computing, cybersecurity,
-          artificial intelligence and
-          digital transformation.
-        </p>
+        <div className="divider"></div>
 
-        <br />
-
-        <p>
-          Empowering organizations with
-          secure, scalable and innovative
-          technology platforms that drive
-          growth, intelligence and
-          sustainability.
-        </p>
-
-        <div className="contact-info">
-
-          <p>
-            🌐 www.aetherixcloud.com
-          </p>
-
-          <p>
-            📧
-            <a href="mailto:shrinivas@aetherixcloud.com">
-              shrinivas@aetherixcloud.com
-            </a>
-          </p>
+        <div className="word-slider">
+           
+           <h2 className="animated-word">
+  ✨ {words[currentWord]}
+</h2>
 
         </div>
+
+        <div className="divider"></div>
+    <p className="brand-message">
+
+Building Intelligent Platforms
+<br />
+for Tomorrow
+
+</p>
+          <div className="trust-badges">
+
+  <span>🛡 Secure</span>
+
+  <span>⚡ Intelligent</span>
+
+  <span>☁ Reliable</span>
+
+</div>
 
       </div>
 
-      {/* RIGHT */}
+      {/* RIGHT PANEL */}
 
       <div className="right-panel">
 
         <div className="login-card">
 
-          <h2>
-            Welcome to
-            <span>
-              {" "}
-              Aetherix Cloud
-            </span>
-          </h2>
+          <div className="login-header">
 
-          <p>
-            Securely sign in to access
-            your cloud dashboard.
-          </p>
+            <h2>Welcome Back</h2>
+
+            <p>
+
+              Sign in to continue your journey with
+              <strong> Aetherix</strong>
+
+            </p>
+
+          </div>
 
           <div className="input-box">
 
@@ -195,9 +255,7 @@ function Login() {
               placeholder="Password"
               value={password}
               onChange={(e) =>
-                setPassword(
-                  e.target.value
-                )
+                setPassword(e.target.value)
               }
             />
 
@@ -209,11 +267,13 @@ function Login() {
                 )
               }
             >
+
               {showPassword ? (
                 <FiEyeOff />
               ) : (
                 <FiEye />
               )}
+
             </span>
 
           </div>
@@ -222,7 +282,7 @@ function Login() {
             className="login-btn"
             onClick={handleLogin}
           >
-            Login
+            Sign In
           </button>
 
           <button
@@ -230,17 +290,21 @@ function Login() {
             onClick={handleGoogleLogin}
             disabled={loading}
           >
+
             {loading
-              ? "Signing in..."
+              ? "Signing In..."
               : "Continue with Google"}
+
           </button>
- 
-        <button
-  className="phone-btn"
-  onClick={() => navigate("/phone-login")}
->
-  📱 Continue with Phone
-</button>
+
+          <button
+            className="phone-btn"
+            onClick={() =>
+              navigate("/phone-login")
+            }
+          >
+            📱 Continue with Phone
+          </button>
 
           <button
             className="register-btn"
@@ -254,9 +318,7 @@ function Login() {
           <p
             className="forgot-password"
             onClick={() =>
-              navigate(
-                "/forgot-password"
-              )
+              navigate("/forgot-password")
             }
           >
             Forgot Password?
@@ -267,7 +329,9 @@ function Login() {
       </div>
 
     </div>
+
   );
+
 }
 
 export default Login;
