@@ -352,77 +352,61 @@ box-shadow:0 0 12px rgba(0,191,255,.25);
 }
 
 }
- @media(max-width:576px){
+@media (max-width: 768px) {
 
-.logo-image{
-
-width:120px;
-
+.login-container{
+    flex-direction:column;
+    min-height:100vh;
 }
 
-.brand-title{
-
-font-size:38px;
-
-letter-spacing:3px;
-
-}
-
-.brand-tagline{
-
-font-size:18px;
-
-}
-
-.animated-word{
-
-font-size:28px;
-
-padding:10px 22px;
-
-}
-
-.brand-message{
-
-font-size:18px;
-
-}
-
-}
-
-.left-panel,
-.right-panel{
-
-width:100%;
-
-}
+/* Hero Section */
 
 .left-panel{
-
-padding:40px 25px;
-
-}
-.brand-title{
-
-font-size:72px;
-letter-spacing:8px;
+    width:100%;
+    min-height:100vh;
+    padding:40px 20px;
+    justify-content:center;
+    align-items:center;
 }
 
-.brand-tagline{
+/* Login Section */
 
-font-size:20px;
-
-}
-
-.animated-word{
-
-font-size:34px;
-
+.right-panel{
+    width:100%;
+    min-height:100vh;
+    padding:30px 20px;
+    justify-content:center;
+    align-items:center;
 }
 
 .login-card{
+    width:100%;
+    max-width:420px;
+    margin:auto;
+}
 
-padding:30px;
+/* Hero Text */
+
+.brand-title{
+    font-size:48px;
+    letter-spacing:4px;
+}
+
+.brand-tagline{
+    font-size:20px;
+}
+
+.brand-message{
+    font-size:18px;
+}
+
+.logo-image{
+    width:140px;
+}
+
+.trust-badges{
+    justify-content:center;
+}
 
 }
 
