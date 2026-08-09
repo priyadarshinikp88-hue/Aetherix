@@ -246,8 +246,8 @@ useEffect(() => {
           </h1>
 
           <p>
-            Search a city from the Home page
-            to access the AI Weather Dashboard.
+            Search a city 
+            to access the AI Weather Dashboard
           </p>
 
         </div>

@@ -47,11 +47,29 @@ function Navbar({ weather, setWeather }) {
       if (setWeather) {
         setWeather(data);
       }
+   // Save weather
+localStorage.setItem(
+  "weather",
+  JSON.stringify(data)
+);
 
-      localStorage.setItem(
-        "weather",
-        JSON.stringify(data)
-      );
+// Save coordinates for Forecast
+if (data?.coord?.lat != null) {
+  localStorage.setItem(
+    "lat",
+    String(data.coord.lat)
+  );
+}
+
+if (data?.coord?.lon != null) {
+  localStorage.setItem(
+    "lon",
+    String(data.coord.lon)
+  );
+}
+
+// Go to dashboard
+navigate("/dashboard");
 
       navigate("/dashboard");
     } catch (error) {

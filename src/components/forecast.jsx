@@ -5,6 +5,7 @@ import Navbar from "./navbar";
 function Forecast() {
   const [forecast, setForecast] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // =====================================================
   // GET FORECAST
@@ -15,30 +16,112 @@ function Forecast() {
   }, []);
 
   const getForecast = async () => {
-    const lat = localStorage.getItem("lat");
-    const lon = localStorage.getItem("lon");
-
-    if (!lat || !lon) {
-      alert("Please search a city from Home page first.");
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
+      setErrorMessage("");
+
+      // =================================================
+      // GET SAVED WEATHER
+      // =================================================
+
+      let savedWeather = null;
+
+      try {
+        const saved = localStorage.getItem("weather");
+
+        if (saved) {
+          savedWeather = JSON.parse(saved);
+        }
+      } catch (error) {
+        console.error("Failed to read saved weather:", error);
+      }
+
+      // =================================================
+      // GET COORDINATES
+      // =================================================
+
+      let lat = localStorage.getItem("lat");
+      let lon = localStorage.getItem("lon");
+
+      // If coordinates are not saved separately,
+      // get them from saved weather.
+      if ((!lat || !lon) && savedWeather?.coord) {
+        lat = savedWeather.coord.lat;
+        lon = savedWeather.coord.lon;
+
+        localStorage.setItem("lat", String(lat));
+        localStorage.setItem("lon", String(lon));
+      }
+
+      // =================================================
+      // NO LOCATION
+      // =================================================
+
+      if (!lat || !lon) {
+        setErrorMessage(
+          "Please search for a city from the Home page first."
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      console.log("Forecast coordinates:", lat, lon);
+
+      // =================================================
+      // CALL BACKEND
+      // =================================================
 
       const response = await fetch(
-        `https://aetherix-backend-eoj8.onrender.com/api/forecast?lat=${lat}&lon=${lon}`
+        `https://aetherix-backend-eoj8.onrender.com/api/forecast?lat=${encodeURIComponent(
+          lat
+        )}&lon=${encodeURIComponent(lon)}`
       );
 
       const data = await response.json();
 
+      console.log("Forecast API response:", data);
+
+      // =================================================
+      // API ERROR
+      // =================================================
+
       if (!response.ok) {
-        alert(data.message || "Unable to fetch forecast");
+        console.error("Forecast API failed:", data);
+
+        if (
+          data?.message?.toLowerCase()?.includes("invalid api key")
+        ) {
+          setErrorMessage(
+            "Weather service API key is invalid. Please try again later."
+          );
+        } else {
+          setErrorMessage(
+            data?.message ||
+              "Unable to fetch weather forecast."
+          );
+        }
+
+        setLoading(false);
         return;
       }
 
-      const list = data.list || [];
+      // =================================================
+      // GET FORECAST LIST
+      // =================================================
+
+      const list = Array.isArray(data.list)
+        ? data.list
+        : [];
+
+      if (!list.length) {
+        setErrorMessage(
+          "No forecast data is available for this location."
+        );
+
+        setLoading(false);
+        return;
+      }
 
       // =================================================
       // GROUP 3-HOUR FORECAST INTO DAYS
@@ -49,8 +132,9 @@ function Forecast() {
       list.forEach((item) => {
         const date = new Date(item.dt * 1000);
 
-        // Local date key
-        const dateKey = date.toLocaleDateString("en-CA");
+        const dateKey = date.toLocaleDateString(
+          "en-CA"
+        );
 
         if (!groupedDays[dateKey]) {
           groupedDays[dateKey] = [];
@@ -63,7 +147,9 @@ function Forecast() {
       // CREATE DAILY FORECAST
       // =================================================
 
-      const dailyForecast = Object.entries(groupedDays)
+      const dailyForecast = Object.entries(
+        groupedDays
+      )
         .slice(0, 5)
         .map(([dateKey, items]) => {
           const temperatures = items.map(
@@ -78,24 +164,35 @@ function Forecast() {
             (item) => item.wind?.speed ?? 0
           );
 
-          const minTemp = Math.min(...temperatures);
-          const maxTemp = Math.max(...temperatures);
+          const minTemp = Math.min(
+            ...temperatures
+          );
+
+          const maxTemp = Math.max(
+            ...temperatures
+          );
 
           const averageTemp =
-            temperatures.reduce((sum, value) => sum + value, 0) /
-            temperatures.length;
+            temperatures.reduce(
+              (sum, value) => sum + value,
+              0
+            ) / temperatures.length;
 
           const averageHumidity =
-            humidityValues.reduce((sum, value) => sum + value, 0) /
-            humidityValues.length;
+            humidityValues.reduce(
+              (sum, value) => sum + value,
+              0
+            ) / humidityValues.length;
 
           const averageWind =
-            windValues.reduce((sum, value) => sum + value, 0) /
-            windValues.length;
+            windValues.reduce(
+              (sum, value) => sum + value,
+              0
+            ) / windValues.length;
 
-          // Find the forecast closest to noon
-          const representativeItem = items.reduce(
-            (closest, current) => {
+          // Find forecast closest to noon
+          const representativeItem =
+            items.reduce((closest, current) => {
               const currentHour = new Date(
                 current.dt * 1000
               ).getHours();
@@ -108,8 +205,7 @@ function Forecast() {
                 Math.abs(closestHour - 12)
                 ? current
                 : closest;
-            }
-          );
+            });
 
           return {
             date: dateKey,
@@ -120,22 +216,32 @@ function Forecast() {
             min: minTemp,
             max: maxTemp,
 
-            humidity: Math.round(averageHumidity),
+            humidity: Math.round(
+              averageHumidity
+            ),
 
             wind: averageWind,
 
             weather:
-              representativeItem.weather?.[0] || {},
+              representativeItem.weather?.[0] ||
+              {},
 
             icon:
-              representativeItem.weather?.[0]?.icon || "01d",
+              representativeItem.weather?.[0]
+                ?.icon || "01d",
           };
         });
 
       setForecast(dailyForecast);
-
     } catch (error) {
-      console.error("Forecast error:", error);
+      console.error(
+        "Forecast error:",
+        error
+      );
+
+      setErrorMessage(
+        "Unable to connect to the weather server."
+      );
     } finally {
       setLoading(false);
     }
@@ -151,9 +257,13 @@ function Forecast() {
         <Navbar />
 
         <div className="forecast-loading">
-          <h2>🌦 Loading Weather Forecast...</h2>
+          <h2>
+            🌦 Loading Weather Forecast...
+          </h2>
+
           <p>
-            Fetching the latest weather predictions.
+            Fetching the latest weather
+            predictions.
           </p>
         </div>
       </div>
@@ -161,19 +271,19 @@ function Forecast() {
   }
 
   // =====================================================
-  // EMPTY
+  // ERROR
   // =====================================================
 
-  if (!forecast.length) {
+  if (errorMessage) {
     return (
       <div className="forecast-page">
         <Navbar />
 
         <div className="forecast-loading">
-          <h2>⚠️ No Forecast Data</h2>
+          <h2>⚠️ Forecast Unavailable</h2>
 
           <p>
-            Please search for a city from the Home page first.
+            {errorMessage}
           </p>
         </div>
       </div>
@@ -211,29 +321,24 @@ function Forecast() {
 
   return (
     <div className="forecast-page">
-
       <Navbar />
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+      {/* HEADER */}
 
       <h1>
         🌦 5-Day Weather Forecast
       </h1>
 
       <p>
-        Get detailed weather predictions for the next
-        five days using Aetherix Weather Intelligence
-        and OpenWeather data.
+        Get detailed weather predictions for
+        the next five days using Aetherix
+        Weather Intelligence and OpenWeather
+        data.
       </p>
 
-      {/* =================================================
-          SUMMARY
-      ================================================= */}
+      {/* SUMMARY */}
 
       <div className="forecast-summary">
-
         <div className="summary-card">
 
           <h2>
@@ -241,13 +346,12 @@ function Forecast() {
           </h2>
 
           <p>
-            Weather forecast generated for your selected
-            location using real-time weather data.
+            Weather forecast generated for
+            your selected location using
+            real-time weather data.
           </p>
 
           <div className="summary-grid">
-
-            {/* TEMPERATURE */}
 
             <div>
               <span>
@@ -259,8 +363,6 @@ function Forecast() {
               </strong>
             </div>
 
-            {/* HUMIDITY */}
-
             <div>
               <span>
                 💧 Average Humidity
@@ -270,8 +372,6 @@ function Forecast() {
                 {averageHumidity}%
               </strong>
             </div>
-
-            {/* WIND */}
 
             <div>
               <span>
@@ -284,14 +384,10 @@ function Forecast() {
             </div>
 
           </div>
-
         </div>
-
       </div>
 
-      {/* =================================================
-          DAILY FORECAST CARDS
-      ================================================= */}
+      {/* DAILY FORECAST */}
 
       <div className="forecast-container">
 
@@ -322,13 +418,10 @@ function Forecast() {
             );
 
           return (
-
             <div
               className="forecast-card"
               key={item.date}
             >
-
-              {/* DAY */}
 
               <h3>
                 {dayName}
@@ -338,8 +431,6 @@ function Forecast() {
                 {fullDate}
               </p>
 
-              {/* WEATHER ICON */}
-
               <img
                 src={`https://openweathermap.org/img/wn/${item.icon}@2x.png`}
                 alt={
@@ -348,24 +439,16 @@ function Forecast() {
                 }
               />
 
-              {/* AVERAGE TEMPERATURE */}
-
               <h2>
                 {Math.round(item.temp)}°C
               </h2>
-
-              {/* CONDITION */}
 
               <p className="forecast-desc">
                 {item.weather?.description ||
                   "Weather information unavailable"}
               </p>
 
-              {/* DETAILS */}
-
               <div className="forecast-details">
-
-                {/* MAX */}
 
                 <div>
                   <span>
@@ -377,8 +460,6 @@ function Forecast() {
                   </strong>
                 </div>
 
-                {/* MIN */}
-
                 <div>
                   <span>
                     ❄ Min
@@ -389,8 +470,6 @@ function Forecast() {
                   </strong>
                 </div>
 
-                {/* HUMIDITY */}
-
                 <div>
                   <span>
                     💧 Humidity
@@ -400,8 +479,6 @@ function Forecast() {
                     {item.humidity}%
                   </strong>
                 </div>
-
-                {/* WIND */}
 
                 <div>
                   <span>
@@ -416,12 +493,10 @@ function Forecast() {
               </div>
 
             </div>
-
           );
         })}
 
       </div>
-
     </div>
   );
 }

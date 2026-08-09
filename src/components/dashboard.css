@@ -736,81 +736,326 @@
 /* =========================================================
    RESPONSIVE
 ========================================================= */
+  /* =========================================================
+   AETHERIX MOBILE FIX
+   ========================================================= */
 
-@media (max-width: 1250px) {
-
-  .weather-cards {
-    grid-template-columns:
-      repeat(4, minmax(0, 1fr));
-  }
-
-  .dashboard-forecast-grid {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
-  }
-
+.dashboard-page {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
+.dashboard-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
 
 @media (max-width: 1000px) {
 
   .dashboard-container {
-    padding: 30px;
+    width: 100%;
+    padding: 25px 20px 60px;
+    box-sizing: border-box;
   }
 
   .dashboard-top {
     grid-template-columns: 1fr;
+    width: 100%;
   }
 
   .weather-cards {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
-  }
-
-}
-
-
-@media (max-width: 700px) {
-
-  .dashboard-container {
-    padding: 20px 15px 50px;
-  }
-
-  .dashboard-intro h1 {
-    font-size: 36px;
-  }
-
-  .weather-cards {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .dashboard-forecast-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .forecast-header {
-    flex-direction: column;
-
-    align-items: flex-start;
-  }
-
-}
-
-
-@media (max-width: 480px) {
-
-  .weather-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-forecast-grid {
-    grid-template-columns: 1fr;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
   }
 
   .weather-card {
-    min-height: 190px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
+  .dashboard-forecast {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .dashboard-forecast-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-forecast-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .dashboard-page {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .dashboard-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px 12px 50px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  /* TOP */
+
+  .dashboard-top {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .dashboard-intro {
+    width: 100%;
+    padding: 10px 5px;
+    box-sizing: border-box;
+  }
+
+  .dashboard-intro h1 {
+    font-size: 32px;
+    line-height: 1.15;
+    word-break: break-word;
+  }
+
+  /* WEATHER VISUAL */
+
+  .weather-visual-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  /* CURRENT WEATHER CARDS */
+
+  .weather-cards {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    box-sizing: border-box;
+  }
+
+  .weather-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 180px;
+    padding: 24px 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .card-title {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    font-size: 18px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .card-title span {
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .card-value {
+    max-width: 100%;
+    font-size: 34px;
+    text-align: center;
+    word-break: break-word;
+  }
+
+  .small-value {
+    font-size: 28px;
+  }
+
+  .condition-value {
+    font-size: 25px;
+  }
+
+  .card-description {
+    max-width: 100%;
+    text-align: center;
+    word-break: break-word;
+  }
+
+  /* DASHBOARD FORECAST */
+
+  .dashboard-forecast {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 35px;
+    padding: 20px 14px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .forecast-header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    box-sizing: border-box;
+  }
+
+  .forecast-header h2 {
+    font-size: 24px;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .forecast-header p {
+    font-size: 14px;
+  }
+
+  .forecast-button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .dashboard-forecast-grid {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    box-sizing: border-box;
+  }
+
+  .dashboard-forecast-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 20px 14px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .dashboard-forecast-card h3 {
+    font-size: 16px;
+  }
+
+  .dashboard-forecast-card h2 {
+    font-size: 30px;
+  }
+
+  .dashboard-forecast-card p {
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .forecast-mini-details {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* UPDATE TEXT */
+
+  .weather-update-status {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+    text-align: center;
+    word-break: break-word;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .dashboard-container {
+    padding: 16px 10px 45px;
+  }
+
+  .dashboard-intro h1 {
+    font-size: 29px;
+  }
+
+  .weather-card {
+    min-height: 170px;
+    padding: 22px 14px;
+  }
+
+  .card-title {
+    font-size: 17px;
+  }
+
+  .card-value {
+    font-size: 32px;
+  }
+
+  .dashboard-forecast {
+    padding: 18px 12px;
+  }
+
+  .forecast-header h2 {
+    font-size: 22px;
+  }
+}
+
+
+/* =========================================================
+   EXTRA SAFETY AGAINST HORIZONTAL OVERFLOW
+   ========================================================= */
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
