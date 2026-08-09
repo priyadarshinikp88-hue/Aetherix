@@ -83,11 +83,10 @@ function Dashboard() {
       localStorage.setItem("lat", lat);
       localStorage.setItem("lon", lon);
 
-
-      const response = await fetch(
-        `https://aetherix-backend-eoj8.onrender.com/api/forecast?lat=${lat}&lon=${lon}`
-      );
-
+const response = await fetch(
+  `https://aetherix-backend-eoj8.onrender.com/api/forecast?lat=${lat}&lon=${lon}`
+);
+     
 
       const data = await response.json();
 

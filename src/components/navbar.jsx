@@ -19,63 +19,147 @@ function Navbar({ weather, setWeather }) {
   const navigate = useNavigate();
 
   const [city, setCity] = useState("");
+  const [cityOptions, setCityOptions] = useState([]);
+  const [searchingCities, setSearchingCities] = useState(false);
 
   // =====================================================
-  // SEARCH CITY
+  // CITY SUGGESTIONS
   // =====================================================
 
-  const searchCity = async () => {
-    if (!city.trim()) {
-      alert("Please enter a city.");
+  const searchCities = async (inputValue) => {
+    const value = inputValue.trim();
+
+    setCity(inputValue);
+
+    if (value.length < 2) {
+      setCityOptions([]);
       return;
     }
 
     try {
+      setSearchingCities(true);
+
       const response = await fetch(
-        `https://aetherix-backend-eoj8.onrender.com/api/weather?city=${encodeURIComponent(
-          city.trim()
+        `https://aetherix-backend-eoj8.onrender.com/api/cities?q=${encodeURIComponent(
+          value
         )}`
       );
 
       const data = await response.json();
 
+      console.log("🔎 City search:", value);
+      console.log("🏙 City suggestions:", data);
+
       if (!response.ok) {
-        alert(data.message || "City not found.");
+        setCityOptions([]);
         return;
       }
 
+      const options = Array.isArray(data)
+        ? data
+            .filter(
+              (item) =>
+                item?.name &&
+                item?.lat != null &&
+                item?.lon != null
+            )
+            .map((item) => ({
+              name: item.name,
+              state: item.state || "",
+              country: item.country || "",
+              lat: item.lat,
+              lon: item.lon,
+            }))
+        : [];
+
+      setCityOptions(options);
+    } catch (error) {
+      console.error("❌ City search error:", error);
+      setCityOptions([]);
+    } finally {
+      setSearchingCities(false);
+    }
+  };
+
+  // =====================================================
+  // SELECT CITY FROM SUGGESTIONS
+  // =====================================================
+
+  const selectCity = async (selectedCity) => {
+    if (!selectedCity) return;
+
+    console.log("📍 Selected city:", selectedCity);
+
+    try {
+      const response = await fetch(
+        `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${encodeURIComponent(
+          selectedCity.lat
+        )}&lon=${encodeURIComponent(selectedCity.lon)}`
+      );
+
+      const data = await response.json();
+
+      console.log("🌤 Weather response:", data);
+
+      if (!response.ok) {
+        alert(data.message || "Unable to fetch weather.");
+        return;
+      }
+
+      // Update weather state
       if (setWeather) {
         setWeather(data);
       }
-   // Save weather
-localStorage.setItem(
-  "weather",
-  JSON.stringify(data)
-);
 
-// Save coordinates for Forecast
-if (data?.coord?.lat != null) {
-  localStorage.setItem(
-    "lat",
-    String(data.coord.lat)
-  );
-}
+      // Save weather
+      localStorage.setItem(
+        "weather",
+        JSON.stringify(data)
+      );
 
-if (data?.coord?.lon != null) {
-  localStorage.setItem(
-    "lon",
-    String(data.coord.lon)
-  );
-}
+      // Save coordinates for forecast
+      localStorage.setItem(
+        "lat",
+        String(selectedCity.lat)
+      );
 
-// Go to dashboard
-navigate("/dashboard");
+      localStorage.setItem(
+        "lon",
+        String(selectedCity.lon)
+      );
 
+      // Clear search
+      setCity("");
+      setCityOptions([]);
+
+      // Dashboard
       navigate("/dashboard");
     } catch (error) {
-      console.error("Weather search error:", error);
-      alert("Unable to fetch weather.");
+      console.error("❌ Weather fetch error:", error);
+
+      alert(
+        "Unable to fetch weather. Please try again."
+      );
     }
+  };
+
+  // =====================================================
+  // SEARCH BUTTON / ENTER
+  // =====================================================
+
+  const searchCity = () => {
+    if (!city.trim()) {
+      alert("Please enter a city.");
+      return;
+    }
+
+    // If suggestions exist, select the first one
+    if (cityOptions.length > 0) {
+      selectCity(cityOptions[0]);
+      return;
+    }
+
+    alert("Please select a city from the suggestions.");
   };
 
   // =====================================================
@@ -101,23 +185,15 @@ navigate("/dashboard");
         console.log("📍 Longitude:", lon);
 
         try {
-          const url =
-            `https://aetherix-backend-eoj8.onrender.com/api/weather` +
-            `?lat=${encodeURIComponent(lat)}` +
-            `&lon=${encodeURIComponent(lon)}`;
-
-          console.log("🌐 Weather API:", url);
-
-          const response = await fetch(url);
-
-          console.log(
-            "🌐 Status:",
-            response.status
+          const response = await fetch(
+            `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${encodeURIComponent(
+              lat
+            )}&lon=${encodeURIComponent(lon)}`
           );
 
           const data = await response.json();
 
-          console.log("🌤 Weather:", data);
+          console.log("🌤 Live weather:", data);
 
           if (!response.ok) {
             alert(
@@ -159,10 +235,6 @@ navigate("/dashboard");
         }
       },
 
-      // =================================================
-      // LOCATION ERROR
-      // =================================================
-
       (error) => {
         console.error(
           "❌ Geolocation error:",
@@ -171,15 +243,15 @@ navigate("/dashboard");
 
         if (error.code === 1) {
           alert(
-            "Location permission was denied. Please allow location access for localhost."
+            "Location permission was denied."
           );
         } else if (error.code === 2) {
           alert(
-            "Your location could not be determined. Please try again."
+            "Your location could not be determined."
           );
         } else if (error.code === 3) {
           alert(
-            "Location request timed out. Please try again."
+            "Location request timed out."
           );
         } else {
           alert(
@@ -187,10 +259,6 @@ navigate("/dashboard");
           );
         }
       },
-
-      // =================================================
-      // LOCATION OPTIONS
-      // =================================================
 
       {
         enableHighAccuracy: true,
@@ -201,31 +269,23 @@ navigate("/dashboard");
   };
 
   // =====================================================
-  // NOTIFICATION
+  // NAVIGATION
   // =====================================================
 
   const openAlerts = () => {
     navigate("/alerts");
   };
 
-  // =====================================================
-  // BACK
-  // =====================================================
-
   const goBack = () => {
     navigate(-1);
   };
-
-  // =====================================================
-  // HOME
-  // =====================================================
 
   const goHome = () => {
     navigate("/");
   };
 
   // =====================================================
-  // NAVBAR
+  // JSX
   // =====================================================
 
   return (
@@ -246,20 +306,13 @@ navigate("/dashboard");
         />
       </div>
 
-
       {/* =================================================
-          SEARCH CONTAINER
+          SEARCH
       ================================================= */}
 
       <div className="search-container">
 
-        {/* =================================================
-            SEARCH BOX
-        ================================================= */}
-
         <div className="search-box">
-
-          {/* SEARCH ICON */}
 
           <FiSearch
             className="search-icon"
@@ -267,27 +320,23 @@ navigate("/dashboard");
             title="Search City"
           />
 
-
-          {/* SEARCH INPUT */}
-
           <input
             type="text"
             placeholder="Search city..."
             value={city}
             onChange={(e) =>
-              setCity(e.target.value)
+              searchCities(e.target.value)
             }
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 searchCity();
               }
+
+              if (e.key === "Escape") {
+                setCityOptions([]);
+              }
             }}
           />
-
-
-          {/* =================================================
-              LIVE LOCATION
-          ================================================= */}
 
           <motion.button
             type="button"
@@ -298,24 +347,62 @@ navigate("/dashboard");
             title="Use my current location"
           >
             <MdMyLocation className="live-icon" />
-
             <span>Live</span>
           </motion.button>
 
         </div>
 
-      </div>
+        {/* =================================================
+            CITY SUGGESTIONS
+        ================================================= */}
 
+        {cityOptions.length > 0 && (
+          <div className="city-suggestions">
+
+            {cityOptions.map((item, index) => (
+              <button
+                key={`${item.name}-${item.lat}-${item.lon}-${index}`}
+                type="button"
+                className="city-suggestion"
+                onClick={() => selectCity(item)}
+              >
+                <FiSearch />
+
+                <span>
+                  <strong>
+                    {item.name}
+                  </strong>
+
+                  {item.state && (
+                    <small>
+                      {item.state}
+                    </small>
+                  )}
+
+                  <small>
+                    {item.country}
+                  </small>
+                </span>
+              </button>
+            ))}
+
+          </div>
+        )}
+
+        {searchingCities &&
+          city.trim().length >= 2 && (
+            <div className="city-search-loading">
+              Searching cities...
+            </div>
+          )}
+
+      </div>
 
       {/* =================================================
           RIGHT SIDE
       ================================================= */}
 
       <div className="nav-right">
-
-        {/* =================================================
-            NOTIFICATION
-        ================================================= */}
 
         <button
           type="button"
@@ -328,11 +415,6 @@ navigate("/dashboard");
           <span className="notification-dot"></span>
         </button>
 
-
-        {/* =================================================
-            BACK
-        ================================================= */}
-
         <button
           type="button"
           className="nav-icon-btn back-btn"
@@ -341,11 +423,6 @@ navigate("/dashboard");
         >
           <FiArrowLeft />
         </button>
-
-
-        {/* =================================================
-            HOME
-        ================================================= */}
 
         <button
           type="button"
