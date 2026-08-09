@@ -887,127 +887,41 @@ useEffect(() => {
 
         </section>
 
+   {/* ===================================================
+    FORECAST PAGE LINK
+=================================================== */}
 
-        {/* ===================================================
-            5 DAY FORECAST
-        =================================================== */}
+<section className="dashboard-forecast">
 
-        <section className="dashboard-forecast">
+  <div className="forecast-header">
 
-          <div className="forecast-header">
+    <div>
+      <span className="dashboard-badge">
+        Weather Prediction
+      </span>
 
-            <div>
+      <h2>
+        🌦 5-Day Weather Forecast
+      </h2>
 
-              <span className="dashboard-badge">
-                Weather Prediction
-              </span>
+      <p>
+        Forecast for {city}
+      </p>
+    </div>
 
-              <h2>
-                🌦 5-Day Weather Forecast
-              </h2>
+    <button
+      type="button"
+      className="forecast-button"
+      onClick={() => {
+        window.location.href = "/forecast";
+      }}
+    >
+      View Full Forecast →
+    </button>
 
-              <p>
-                Forecast for {city}
-              </p>
+  </div>
 
-            </div>
-
-
-            <button
-              className="forecast-button"
-              onClick={() =>
-                window.location.href = "/forecast"
-              }
-            >
-              View Full Forecast →
-            </button>
-
-          </div>
-
-
-          <div className="dashboard-forecast-grid">
-
-            {displayForecast.length === 0 ? (
-
-              <div className="forecast-loading">
-                Loading forecast...
-              </div>
-
-            ) : (
-
-              displayForecast.map(
-                (item, index) => {
-
-                  const date =
-                    new Date(item.dt_txt);
-
-
-                  return (
-
-                    <div
-                      className="dashboard-forecast-card"
-                      key={index}
-                    >
-
-                      <h3>
-
-                        {date.toLocaleDateString(
-                          "en-IN",
-                          {
-                            weekday: "short",
-                            day: "numeric",
-                            month: "short",
-                          }
-                        )}
-
-                      </h3>
-
-
-                      <img
-                        src={`https://openweathermap.org/img/wn/${item.weather?.[0]?.icon}@2x.png`}
-                        alt="Weather"
-                      />
-
-
-                      <h2>
-                        {Math.round(
-                          item.main.temp
-                        )}°C
-                      </h2>
-
-
-                      <p>
-                        {item.weather?.[0]?.description}
-                      </p>
-
-
-                      <div className="forecast-mini-details">
-
-                        <span>
-                          💧 {item.main.humidity}%
-                        </span>
-
-                        <span>
-                          💨 {item.wind.speed} m/s
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  );
-
-                }
-
-              )
-
-            )}
-
-          </div>
-
-        </section>
-
-
+</section>
         {/* ===================================================
             AUTO UPDATE
         =================================================== */}
