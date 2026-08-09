@@ -54,14 +54,11 @@ function Navbar({ weather, setWeather }) {
       );
 
       navigate("/dashboard");
-
     } catch (error) {
       console.error("Weather search error:", error);
-
       alert("Unable to fetch weather.");
     }
   };
-
 
   // =====================================================
   // LIVE LOCATION
@@ -107,24 +104,20 @@ function Navbar({ weather, setWeather }) {
           if (!response.ok) {
             alert(
               data.message ||
-              "Unable to fetch weather."
+                "Unable to fetch weather."
             );
-
             return;
           }
 
-          // Update React state
           if (setWeather) {
             setWeather(data);
           }
 
-          // Save weather
           localStorage.setItem(
             "weather",
             JSON.stringify(data)
           );
 
-          // Save coordinates
           localStorage.setItem(
             "lat",
             String(lat)
@@ -135,9 +128,7 @@ function Navbar({ weather, setWeather }) {
             String(lon)
           );
 
-          // Go to dashboard
           navigate("/dashboard");
-
         } catch (error) {
           console.error(
             "❌ Live weather error:",
@@ -164,17 +155,14 @@ function Navbar({ weather, setWeather }) {
           alert(
             "Location permission was denied. Please allow location access for localhost."
           );
-
         } else if (error.code === 2) {
           alert(
             "Your location could not be determined. Please try again."
           );
-
         } else if (error.code === 3) {
           alert(
             "Location request timed out. Please try again."
           );
-
         } else {
           alert(
             "Unable to get your current location."
@@ -194,7 +182,6 @@ function Navbar({ weather, setWeather }) {
     );
   };
 
-
   // =====================================================
   // NOTIFICATION
   // =====================================================
@@ -202,7 +189,6 @@ function Navbar({ weather, setWeather }) {
   const openAlerts = () => {
     navigate("/alerts");
   };
-
 
   // =====================================================
   // BACK
@@ -212,7 +198,6 @@ function Navbar({ weather, setWeather }) {
     navigate(-1);
   };
 
-
   // =====================================================
   // HOME
   // =====================================================
@@ -220,6 +205,10 @@ function Navbar({ weather, setWeather }) {
   const goHome = () => {
     navigate("/");
   };
+
+  // =====================================================
+  // NAVBAR
+  // =====================================================
 
   return (
     <nav className="navbar">
@@ -241,44 +230,64 @@ function Navbar({ weather, setWeather }) {
 
 
       {/* =================================================
-          SEARCH + LIVE
+          SEARCH CONTAINER
       ================================================= */}
-<div className="search-container">
 
-  <div className="search-box">
+      <div className="search-container">
 
-    <FiSearch
-      className="search-icon"
-      onClick={searchCity}
-    />
+        {/* =================================================
+            SEARCH BOX
+        ================================================= */}
 
-    <input
-      type="text"
-      placeholder="Search city..."
-      value={city}
-      onChange={(e) => setCity(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          searchCity();
-        }
-      }}
-    />
+        <div className="search-box">
 
-    {/* LIVE INSIDE SEARCH BAR */}
-    <motion.button
-      type="button"
-      className="location-btn"
-      onClick={getLiveLocation}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <MdMyLocation className="live-icon" />
-      <span>Live</span>
-    </motion.button>
+          {/* SEARCH ICON */}
 
-  </div>
+          <FiSearch
+            className="search-icon"
+            onClick={searchCity}
+            title="Search City"
+          />
 
-</div>
+
+          {/* SEARCH INPUT */}
+
+          <input
+            type="text"
+            placeholder="Search city..."
+            value={city}
+            onChange={(e) =>
+              setCity(e.target.value)
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                searchCity();
+              }
+            }}
+          />
+
+
+          {/* =================================================
+              LIVE LOCATION
+          ================================================= */}
+
+          <motion.button
+            type="button"
+            className="location-btn"
+            onClick={getLiveLocation}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Use my current location"
+          >
+            <MdMyLocation className="live-icon" />
+
+            <span>Live</span>
+          </motion.button>
+
+        </div>
+
+      </div>
+
 
       {/* =================================================
           RIGHT SIDE
@@ -286,7 +295,9 @@ function Navbar({ weather, setWeather }) {
 
       <div className="nav-right">
 
-        {/* ================= NOTIFICATION ================= */}
+        {/* =================================================
+            NOTIFICATION
+        ================================================= */}
 
         <button
           type="button"
@@ -294,13 +305,15 @@ function Navbar({ weather, setWeather }) {
           onClick={openAlerts}
           title="Weather Alerts"
         >
-
           <FiBell />
 
+          <span className="notification-dot"></span>
         </button>
 
 
-        {/* ================= BACK ================= */}
+        {/* =================================================
+            BACK
+        ================================================= */}
 
         <button
           type="button"
@@ -308,13 +321,13 @@ function Navbar({ weather, setWeather }) {
           onClick={goBack}
           title="Go Back"
         >
-
           <FiArrowLeft />
-
         </button>
 
 
-        {/* ================= HOME ================= */}
+        {/* =================================================
+            HOME
+        ================================================= */}
 
         <button
           type="button"
@@ -322,13 +335,9 @@ function Navbar({ weather, setWeather }) {
           onClick={goHome}
           title="Home"
         >
-
           <FiHome />
 
-          <span>
-            Home
-          </span>
-
+          <span>Home</span>
         </button>
 
       </div>
