@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   register,
   login,
@@ -6,7 +7,9 @@ import {
   resetPassword,
   sendOTP,
   verifyOTP,
+  getProfile,
 } from "../controllers/authController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -24,6 +27,8 @@ router.post("/register", register);
 
 // Login
 router.post("/login", login);
+
+router.get("/profile", authMiddleware, getProfile);
 
 // Phone OTP
 router.post("/send-otp", sendOTP);

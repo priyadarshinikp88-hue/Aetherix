@@ -34,12 +34,16 @@ export const login = async (req, res) => {
     return res.status(200).json({
       message: "Login Successful",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-    });
+
+     user: {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    membership: user.membership,
+    profileImage: user.profileImage,
+     }
+    }); 
 
   } catch (error) {
     console.error(error);
@@ -66,10 +70,12 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
-      name,
-      email,
-      password: hashedPassword,
-    });
+    name,
+    email,
+    password: hashedPassword,
+    membership: "User",
+    profileImage: "",
+});
 
     await user.save();
 
@@ -295,5 +301,32 @@ export const verifyOTP = async (req, res) => {
       message: "Server Error",
     });
 
+  }
+};
+
+// ================= GET PROFILE =================
+
+export const getProfile = async (req, res) => {
+  try {
+
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Server Error",
+    });
   }
 };

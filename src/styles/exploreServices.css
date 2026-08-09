@@ -1,0 +1,233 @@
+/* ==========================================
+        EXPLORE SERVICES
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+}
+
+.explore-page{
+
+    min-height:100vh;
+
+    padding:70px;
+
+    background:
+    radial-gradient(circle at top left,
+    rgba(0,183,255,.15),
+    transparent 35%),
+
+    radial-gradient(circle at bottom right,
+    rgba(0,119,255,.12),
+    transparent 40%),
+
+    linear-gradient(
+    135deg,
+    #041326,
+    #082957,
+    #071426);
+
+}
+
+.explore-hero{
+
+    text-align:center;
+
+    margin-bottom:70px;
+
+}
+
+.explore-badge{
+
+    display:inline-block;
+
+    padding:10px 20px;
+
+    border-radius:40px;
+
+    background:rgba(0,183,255,.12);
+
+    color:#78d3ff;
+
+}
+
+.explore-hero h1{
+
+    margin-top:25px;
+
+    font-size:60px;
+
+}
+
+.explore-hero p{
+
+    margin-top:18px;
+
+    color:#cfe7ff;
+
+    font-size:20px;
+
+}
+
+/* ================= GRID ================= */
+
+.services-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+    gap:30px;
+
+}
+
+/* ================= CARD ================= */
+
+.service-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    background:rgba(15,35,60,.82);
+
+    border-radius:26px;
+
+    padding:35px;
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    cursor:pointer;
+
+    transition:.4s;
+
+}
+
+.service-card:hover{
+
+    transform:translateY(-10px);
+
+    border-color:#2ab8ff;
+
+    box-shadow:0 20px 45px rgba(0,183,255,.25);
+
+}
+
+.service-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+    radial-gradient(circle at top right,
+
+    rgba(0,183,255,.22),
+
+    transparent 55%);
+
+    opacity:0;
+
+    transition:.4s;
+
+}
+
+.service-card:hover::before{
+
+    opacity:1;
+
+}
+
+/* ================= ICON ================= */
+
+.service-icon{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:70px;
+
+    color:#4cc7ff;
+
+    margin-bottom:20px;
+
+    transition:.35s;
+
+}
+
+.service-card:hover .service-icon{
+
+    transform:scale(1.15);
+
+    color:white;
+
+}
+
+/* ================= TEXT ================= */
+
+.service-card h3{
+
+    text-align:center;
+
+    color:#7ed7ff;
+
+    margin-bottom:18px;
+
+    font-size:26px;
+
+}
+
+.service-card p{
+
+    text-align:center;
+
+    color:#dbefff;
+
+    line-height:1.8;
+
+    min-height:60px;
+
+}
+
+/* ================= BUTTON ================= */
+
+.service-card button{
+
+    width:100%;
+
+    margin-top:25px;
+
+    border:none;
+
+    padding:15px;
+
+    border-radius:14px;
+
+    background:#1787ff;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    transition:.35s;
+
+}
+
+.service-card button:hover{
+
+    background:#0f6fe6;
+
+}

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import ExploreServices from "./pages/ExploreServices";
 import Login from "./login";
 import Register from "./register";
 import Home from "./home";
@@ -11,11 +11,16 @@ import Forecast from "./components/forecast";
 import Dashboard from "./components/dashboard";
 import Alerts from "./components/alerts";
 import WeatherMap from "./components/weathermap";
+import About from "./pages/About";
+import Profile from "./pages/Profile";
+import WeatherSearch from "./pages/WeatherSearch";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        <Route path="/weather-search" element={<WeatherSearch />} />
         
   <Route path="/" element={<Home />} />
 
@@ -29,10 +34,21 @@ function App() {
 
   <Route path="/phone-login" element={<PhoneLogin />} />
 
+  <Route path="/profile" element={<Profile />} />
+  
+   <Route
+    path="/about"
+    element={<About />}
+/>
+
   <Route
     path="/reset-password/:token"
     element={<ResetPassword />}
   />
+   <Route
+    path="/explore-services"
+    element={<ExploreServices />}
+/>
 
   <Route path="/dashboard" element={<Dashboard />} />
 

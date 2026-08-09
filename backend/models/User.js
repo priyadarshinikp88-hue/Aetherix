@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
   unique: true,
   lowercase: true,
   sparse: true,
-  default: null,
+  
 },
      
     phone: {
@@ -24,6 +24,16 @@ const userSchema = new mongoose.Schema(
   password: {
   type: String,
   default: null,
+},
+ 
+  membership: {
+  type: String,
+  default: "User",
+},
+
+profileImage: {
+  type: String,
+  default: "",
 },
 
     // Phone Login

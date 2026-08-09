@@ -1,0 +1,157 @@
+.header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:18px 50px;
+
+    background:rgba(10,18,35,.75);
+
+    backdrop-filter:blur(18px);
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.header-logo h2{
+
+    color:white;
+
+    font-size:30px;
+
+    letter-spacing:2px;
+
+    margin:0;
+
+    font-weight:700;
+
+}
+
+.header-logo span{
+
+    color:#63c9ff;
+
+    font-size:13px;
+
+    letter-spacing:1px;
+
+}
+
+.header-nav{
+
+    display:flex;
+
+    gap:18px;
+
+}
+
+.header-nav button{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    background:none;
+
+    border:none;
+
+    color:white;
+
+    font-size:15px;
+
+    cursor:pointer;
+
+    padding:10px 18px;
+
+    border-radius:12px;
+
+    transition:.35s;
+
+}
+
+.header-nav button:hover{
+
+    background:rgba(99,201,255,.15);
+
+    color:#63c9ff;
+
+}
+
+.header-actions{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.icon-btn{
+
+    width:46px;
+
+    height:46px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.08);
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:20px;
+
+    transition:.35s;
+
+}
+
+.icon-btn:hover{
+
+    background:#63c9ff;
+
+    color:#081320;
+
+}
+
+.profile-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    border:none;
+
+    padding:11px 20px;
+
+    border-radius:30px;
+
+    background:#1c6cff;
+
+    color:white;
+
+    cursor:pointer;
+
+    transition:.35s;
+
+    font-weight:600;
+
+}
+
+.profile-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 0 18px rgba(99,201,255,.4);
+
+}

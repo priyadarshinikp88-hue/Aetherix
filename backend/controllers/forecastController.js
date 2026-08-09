@@ -14,11 +14,12 @@ export const getForecast = async (req, res) => {
     }
 
     const response = await axios.get(
-      "https://api.openweathermap.org/data/2.5/forecast",
+      "https://api.openweathermap.org/data/2.5/forecast/daily",
       {
         params: {
           lat,
           lon,
+          cnt: 15,
           units: "metric",
           appid: process.env.OPENWEATHER_API_KEY,
         },
@@ -28,10 +29,15 @@ export const getForecast = async (req, res) => {
     res.json(response.data);
 
   } catch (error) {
-    console.error(error.message);
+    console.error(
+      "FORECAST ERROR:",
+      error.response?.data || error.message
+    );
 
     res.status(500).json({
-      message: "Unable to fetch forecast",
+      message:
+        error.response?.data?.message ||
+        "Unable to fetch 15-day forecast",
     });
   }
 };

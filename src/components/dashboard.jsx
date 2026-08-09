@@ -1,105 +1,232 @@
-import "./dashboard.css";
+import { useEffect, useState } from "react";
 import Navbar from "./navbar";
-import WeatherCard from "./weathercard";
-import AIInsight from "./aiinsight";
+import "./dashboard.css";
+
 import { getMoonPhase } from "../utils/moonPhase";
-import Sidebar from "./sidebar";
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-import { Line } from "react-chartjs-2";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+  FiThermometer,
+  FiDroplet,
+  FiWind,
+  FiCalendar,
+  FiClock,
+  FiBell,
+  FiEye,
+} from "react-icons/fi";
 
 function Dashboard() {
 
-  const weather = JSON.parse(
-    localStorage.getItem("weather")
+  // =========================================================
+  // WEATHER
+  // =========================================================
+
+  const [weather, setWeather] = useState(() => {
+    try {
+      const saved = localStorage.getItem("weather");
+      return saved ? JSON.parse(saved) : null;
+    } catch (error) {
+      console.error("Failed to load weather:", error);
+      return null;
+    }
+  });
+
+
+  // =========================================================
+  // FORECAST
+  // =========================================================
+
+  const [forecast, setForecast] = useState([]);
+
+
+  // =========================================================
+  // CLOCK
+  // =========================================================
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+
+  useEffect(() => {
+
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+
+  }, []);
+
+
+  // =========================================================
+  // GET FORECAST
+  // =========================================================
+
+  const getForecast = async (weatherData) => {
+
+    try {
+
+      const lat =
+        weatherData?.coord?.lat ||
+        localStorage.getItem("lat");
+
+      const lon =
+        weatherData?.coord?.lon ||
+        localStorage.getItem("lon");
+
+
+      if (!lat || !lon) {
+        console.warn("Latitude/Longitude not available.");
+        return;
+      }
+
+
+      // Save coordinates for Forecast page too
+      localStorage.setItem("lat", lat);
+      localStorage.setItem("lon", lon);
+
+
+      const response = await fetch(
+        `https://aetherix-backend-eoj8.onrender.com/api/forecast?lat=${lat}&lon=${lon}`
+      );
+
+
+      const data = await response.json();
+
+
+      if (!response.ok) {
+
+        console.error(
+          "Forecast fetch failed:",
+          data
+        );
+
+        return;
+      }
+
+
+      setForecast(data.list || []);
+
+    } catch (error) {
+
+      console.error(
+        "Forecast error:",
+        error
+      );
+
+    }
+
+  };
+
+
+  // =========================================================
+  // INITIAL FORECAST
+  // =========================================================
+
+  useEffect(() => {
+
+    if (weather) {
+      getForecast(weather);
+    }
+
+  }, []);
+ 
+  // =========================================================
+// AUTOMATIC WEATHER UPDATE EVERY 1 MINUTE
+// =========================================================
+
+useEffect(() => {
+  if (!weather) {
+    return;
+  }
+
+  const updateWeather = async () => {
+    try {
+      // Prefer coordinates from current weather data
+      // This is important for Live Location.
+      const lat =
+        weather?.coord?.lat ||
+        localStorage.getItem("lat");
+
+      const lon =
+        weather?.coord?.lon ||
+        localStorage.getItem("lon");
+
+      if (!lat || !lon) {
+        console.warn("Latitude/Longitude not available.");
+        return;
+      }
+
+      console.log(
+        `Updating weather for coordinates: ${lat}, ${lon}...`
+      );
+
+      const response = await fetch(
+        `https://aetherix-backend-eoj8.onrender.com/api/weather?lat=${lat}&lon=${lon}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(
+          "Weather update failed:",
+          data
+        );
+        return;
+      }
+
+      // Update screen
+      setWeather(data);
+
+      // Save latest weather
+      localStorage.setItem(
+        "weather",
+        JSON.stringify(data)
+      );
+
+      // Keep coordinates saved
+      if (data?.coord?.lat) {
+        localStorage.setItem(
+          "lat",
+          String(data.coord.lat)
+        );
+      }
+
+      if (data?.coord?.lon) {
+        localStorage.setItem(
+          "lon",
+          String(data.coord.lon)
+        );
+      }
+
+      // Update forecast too
+      getForecast(data);
+
+      console.log(
+        "Weather updated successfully"
+      );
+
+    } catch (error) {
+      console.error(
+        "Automatic weather update failed:",
+        error
+      );
+    }
+  };
+
+  // Update every 1 minute
+  const interval = setInterval(
+    updateWeather,
+    60000
   );
 
-  const currentDate = new Date();
+  return () => {
+    clearInterval(interval);
+  };
 
-  const formattedDate =
-    currentDate.toLocaleDateString("en-IN", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+}, [weather?.coord?.lat, weather?.coord?.lon]);
 
-  const formattedTime =
-    currentDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    const moonPhase = getMoonPhase();
-    const getAQIStatus = (aqi) => {
-
-  switch (aqi) {
-
-    case 1:
-      return "🟢 Good";
-
-    case 2:
-      return "🟡 Fair";
-
-    case 3:
-      return "🟠 Moderate";
-
-    case 4:
-      return "🔴 Poor";
-
-    case 5:
-      return "🟣 Very Poor";
-
-    default:
-      return "Not Available";
-
-  }
-
-};
-  const getAQIAdvice = (aqi) => {
-
-  switch (aqi) {
-
-    case 1:
-      return "Air quality is excellent for outdoor activities.";
-
-    case 2:
-      return "Air quality is acceptable for most people.";
-
-    case 3:
-      return "Sensitive people should reduce prolonged outdoor activity.";
-
-    case 4:
-      return "Avoid outdoor exercise if possible.";
-
-    case 5:
-      return "Stay indoors and wear a mask if going outside.";
-
-    default:
-      return "No air quality data available.";
-
-  }
-
-};
+  // =========================================================
+  // NO WEATHER
+  // =========================================================
 
   if (!weather) {
 
@@ -107,17 +234,20 @@ function Dashboard() {
 
       <div className="dashboard-page">
 
-        <Navbar />
+        <Navbar
+          weather={weather}
+          setWeather={setWeather}
+        />
 
-        <div className="empty-dashboard">
+        <div className="no-weather">
 
-          <h1>No Weather Data</h1>
+          <h1>
+            No Weather Data
+          </h1>
 
           <p>
-
             Search a city from the Home page
             to access the AI Weather Dashboard.
-
           </p>
 
         </div>
@@ -128,464 +258,773 @@ function Dashboard() {
 
   }
 
-  const data = {
 
-    labels: [
+  // =========================================================
+  // WEATHER DATA
+  // =========================================================
 
-      "Morning",
+  const city =
+    weather.city ||
+    weather.location?.city ||
+    weather.location?.name ||
+    weather.name ||
+    "Unknown";
 
-      "Afternoon",
 
-      "Evening",
+  const temperature =
+    weather.main?.temp ?? "--";
 
-      "Night",
 
-    ],
+  const feelsLike =
+    weather.main?.feels_like ?? "--";
 
-    datasets: [
 
-      {
+  const humidity =
+    weather.main?.humidity ?? "--";
 
-        label: "Temperature (°C)",
 
-        data: [
+  const windSpeed =
+    weather.wind?.speed ?? "--";
 
-          weather.main.temp - 2,
 
-          weather.main.temp + 1,
+  const condition =
+    weather.weather?.[0]?.main ||
+    "Unknown";
 
-          weather.main.temp,
 
-          weather.main.temp - 3,
+  const description =
+    weather.weather?.[0]?.description ||
+    "";
 
-        ],
 
-        borderColor: "#4aa3ff",
+  const visibility =
+    weather.visibility != null
+      ? (weather.visibility / 1000).toFixed(1)
+      : "--";
 
-        backgroundColor:
-          "rgba(74,163,255,0.2)",
 
-        tension: 0.4,
+  const pressure =
+    weather.main?.pressure ?? "--";
 
-        fill: true,
 
-      },
+  // =========================================================
+  // SUNRISE / SUNSET
+  // IMPORTANT: OpenWeather stores these in weather.sys
+  // =========================================================
 
-    ],
+  const formatTime = (timestamp) => {
+
+    if (!timestamp) {
+      return "--:--";
+    }
+
+    return new Date(
+      timestamp * 1000
+    ).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   };
 
-    return (
 
-<div className="dashboard-page">
+  const sunrise =
+    formatTime(
+      weather.sys?.sunrise
+    );
 
-    <Navbar />
 
-      {/* ================= HERO ================= */}
+  const sunset =
+    formatTime(
+      weather.sys?.sunset
+    );
 
-      <section className="dashboard-hero">
-        <div className="hero-left">
 
-          <span className="dashboard-tag">
+  // =========================================================
+  // MOON PHASE
+  // =========================================================
 
-            AI Powered Weather Dashboard
+  let moonPhase = "--";
 
-          </span>
+  try {
 
-          <h1>
+    moonPhase = getMoonPhase();
 
-            {weather.name},
+  } catch (error) {
 
-            {" "}
+    console.warn(
+      "Moon phase unavailable"
+    );
 
-            {weather.sys.country}
+  }
 
-          </h1>
 
-          <p>
+  // =========================================================
+  // WEATHER VISUAL
+  // =========================================================
 
-            {formattedDate}
+  const conditionLower =
+    String(condition).toLowerCase();
 
-          </p>
 
-          <p>
+  let weatherVisual = "☁️";
 
-            {formattedTime}
 
-          </p>
+  if (
+    conditionLower.includes("rain") ||
+    conditionLower.includes("drizzle")
+  ) {
 
-        </div>
+    weatherVisual = "🌧️";
 
-        <div className="hero-right">
+  } else if (
+    conditionLower.includes("clear")
+  ) {
 
-          <img
-            src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`}
-            alt="Weather Icon"
-          />
+    weatherVisual = "☀️";
 
-          <h1>
+  } else if (
+    conditionLower.includes("snow")
+  ) {
 
-            {Math.round(weather.main.temp)}°C
+    weatherVisual = "❄️";
 
-          </h1>
+  } else if (
+    conditionLower.includes("storm") ||
+    conditionLower.includes("thunder")
+  ) {
 
-          <p>
+    weatherVisual = "⛈️";
 
-            {weather.weather[0].description}
+  } else if (
+    conditionLower.includes("cloud")
+  ) {
 
-          </p>
+    weatherVisual = "☁️";
 
-        </div>
+  } else if (
+    conditionLower.includes("mist") ||
+    conditionLower.includes("fog") ||
+    conditionLower.includes("haze")
+  ) {
 
-      </section>
+    weatherVisual = "🌫️";
 
-            {/* ================= WEATHER OVERVIEW ================= */}
+  }
 
-      <section className="dashboard-grid">
 
-        <div className="dashboard-card">
+  // =========================================================
+  // DATE / TIME
+  // =========================================================
 
-          <h3>🌡 Temperature</h3>
+  const formattedDate =
+    currentTime.toLocaleDateString(
+      "en-IN",
+      {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }
+    );
 
-          <h1>{weather.main.temp}°C</h1>
 
-          <p>Current Temperature</p>
+  const formattedTime =
+    currentTime.toLocaleTimeString(
+      "en-IN",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }
+    );
 
-        </div>
 
-        <div className="dashboard-card">
+  // =========================================================
+  // FORECAST DAYS
+  // =========================================================
 
-          <h3>🤗 Feels Like</h3>
+  const forecastDays = forecast
+    .filter((item) =>
+      item.dt_txt?.includes("12:00:00")
+    )
+    .slice(0, 5);
 
-          <h1>{weather.main.feels_like}°C</h1>
 
-          <p>Perceived Temperature</p>
+  // If 12 PM entries are unavailable,
+  // use first 5 forecast entries.
 
-        </div>
+  const displayForecast =
+    forecastDays.length > 0
+      ? forecastDays
+      : forecast.slice(0, 5);
 
-        <div className="dashboard-card">
 
-          <h3>💧 Humidity</h3>
+  // =========================================================
+  // RETURN
+  // =========================================================
 
-          <h1>{weather.main.humidity}%</h1>
+  return (
 
-          <p>Moisture Level</p>
+    <div className="dashboard-page">
 
-        </div>
+      {/* =====================================================
+          NAVBAR
+      ===================================================== */}
 
-        <div className="dashboard-card">
+      <Navbar
+        weather={weather}
+        setWeather={setWeather}
+      />
 
-          <h3>🌬 Wind Speed</h3>
 
-          <h1>{weather.wind.speed} m/s</h1>
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
 
-          <p>Current Wind</p>
+      <main className="dashboard-container">
 
-        </div>
 
-        <div className="dashboard-card">
+        {/* ===================================================
+            TOP SECTION
+        =================================================== */}
 
-          <h3>☁ Condition</h3>
+        <section className="dashboard-top">
 
-          <h1>{weather.weather[0].main}</h1>
 
-          <p>{weather.weather[0].description}</p>
+          {/* LEFT */}
 
-        </div>
+          <div className="dashboard-intro">
 
-        <div className="dashboard-card">
+            <div className="dashboard-badge">
+              AI Powered Weather Dashboard
+            </div>
 
-          <h3>🌅 Sunrise</h3>
 
-          <h1>
+            <h1>
+              {city}, IN
+            </h1>
 
-            {new Date(
-              weather.sys.sunrise * 1000
-            ).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
 
-          </h1>
+            <div className="date-time">
 
-        </div>
+              <div className="date-row">
 
-        <div className="dashboard-card">
+                <FiCalendar />
 
-          <h3>🌇 Sunset</h3>
+                <span>
+                  {formattedDate}
+                </span>
 
-          <h1>
+              </div>
 
-            {new Date(
-              weather.sys.sunset * 1000
-            ).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
 
-          </h1>
+              <div className="date-row">
 
-        </div>
-        
-       <div className="dashboard-card">
+                <FiClock />
 
-  <h3>🌙 Moon Phase</h3>
+                <span>
+                  {formattedTime}
+                </span>
 
-  <h1>{moonPhase}</h1>
+              </div>
 
-  <p>Current Lunar Phase</p>
-
-</div>
-
-        <div className="dashboard-card">
-
-          <h3>📊 Pressure</h3>
-
-          <h1>{weather.main.pressure} hPa</h1>
-
-          <p>Atmospheric Pressure</p>
-
-        </div>
-
-        <div className="dashboard-card">
-
-  <h3>👁 Visibility</h3>
-
-  <h1>
-
-    {(weather.visibility / 1000).toFixed(1)} km
-
-  </h1>
-
-  <p>
-  {weather.visibility >= 10000
-    ? "Excellent Visibility"
-    : weather.visibility >= 5000
-    ? "Good Visibility"
-    : weather.visibility >= 2000
-    ? "Moderate Visibility"
-    : "Poor Visibility"}
-</p>
-</div>
-
-        <div className="dashboard-card">
-
-  <h3>☁ Cloud Cover</h3>
-
-  <h1>
-
-    {weather.clouds.all}%
-
-  </h1>
-
-  <p>
-
-    {weather.clouds.all < 20
-      ? "Clear Sky"
-      : weather.clouds.all < 50
-      ? "Partly Cloudy"
-      : weather.clouds.all < 80
-      ? "Mostly Cloudy"
-      : "Overcast"}
-
-  </p>
-
-</div>  
-
-      <div className="dashboard-card">
-
-  <h3>🌍 Air Quality</h3>
-
-  <h1>
-
-    {weather.air?.main?.aqi || "--"}
-
-  </h1>
-
-  <p>
-
-  {weather.air?.main?.aqi
-    ? getAQIStatus(weather.air.main.aqi)
-    : "Not Available"}
-
-</p>
-
-<small>
-
-  {weather.air?.main?.aqi
-    ? getAQIAdvice(weather.air.main.aqi)
-    : ""}
-
-</small>
-
-</div>
-
-      </section>
-
-      {/* ================= WEATHER SUMMARY ================= */}
-
-      <WeatherCard weather={weather} />
-
-      {/* ================= TEMPERATURE CHART ================= */}
-
-      <section className="chart-section">
-
-        <div className="chart-card">
-
-          <h2>
-
-            📈 Temperature Trend
-
-          </h2>
-
-          <div className="chart-container">
-
-            <Line
-
-              data={data}
-
-              options={{
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                  legend: {
-
-                    labels: {
-
-                      color: "#ffffff",
-
-                    },
-
-                  },
-
-                },
-
-                scales: {
-
-                  x: {
-
-                    ticks: {
-
-                      color: "#ffffff",
-
-                    },
-
-                  },
-
-                  y: {
-
-                    ticks: {
-
-                      color: "#ffffff",
-
-                    },
-
-                  },
-
-                },
-
-              }}
-
-            />
+            </div>
 
           </div>
 
+
+          {/* WEATHER VISUAL */}
+
+          <div className="weather-visual-card">
+
+            <div className="weather-visual">
+
+              <div className="weather-icon-large">
+                {weatherVisual}
+              </div>
+
+
+              <div className="weather-condition">
+
+                <h2>
+                  {description || condition}
+                </h2>
+
+              </div>
+
+
+              <div className="weather-intelligence">
+
+                <span>
+                  AI Powered
+                </span>
+
+                <span>
+                  Weather
+                </span>
+
+                <span>
+                  Intelligence
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* ===================================================
+            CURRENT WEATHER CARDS
+        =================================================== */}
+
+        <section className="weather-cards">
+
+
+          {/* TEMPERATURE */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <FiThermometer />
+
+              <span>
+                Temperature
+              </span>
+
+            </div>
+
+
+            <div className="card-value">
+
+              {Number(temperature).toFixed(2)}°C
+
+            </div>
+
+
+            <div className="card-description">
+              Current Temperature
+            </div>
+
+          </div>
+
+
+          {/* FEELS LIKE */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <span>🤗</span>
+
+              <span>
+                Feels Like
+              </span>
+
+            </div>
+
+
+            <div className="card-value">
+
+              {Number(feelsLike).toFixed(2)}°C
+
+            </div>
+
+
+            <div className="card-description">
+              Perceived Temperature
+            </div>
+
+          </div>
+
+
+          {/* HUMIDITY */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <FiDroplet />
+
+              <span>
+                Humidity
+              </span>
+
+            </div>
+
+
+            <div className="card-value">
+
+              {humidity}%
+
+            </div>
+
+
+            <div className="card-description">
+              Moisture Level
+            </div>
+
+          </div>
+
+
+          {/* WIND */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <FiWind />
+
+              <span>
+                Wind Speed
+              </span>
+
+            </div>
+
+
+            <div className="card-value">
+
+              {windSpeed} m/s
+
+            </div>
+
+
+            <div className="card-description">
+              Current Wind
+            </div>
+
+          </div>
+
+
+          {/* CONDITION */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <span>☁️</span>
+
+              <span>
+                Condition
+              </span>
+
+            </div>
+
+
+            <div className="card-value condition-value">
+
+              {condition}
+
+            </div>
+
+
+            <div className="card-description">
+              {description}
+            </div>
+
+          </div>
+
+
+          {/* =================================================
+              SUNRISE
+          ================================================= */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <span>🌅</span>
+
+              <span>
+                Sunrise
+              </span>
+
+            </div>
+
+
+            <div className="card-value small-value">
+
+              {sunrise}
+
+            </div>
+
+
+            <div className="card-description">
+              Sunrise Time
+            </div>
+
+          </div>
+
+
+          {/* =================================================
+              SUNSET
+          ================================================= */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <span>🌇</span>
+
+              <span>
+                Sunset
+              </span>
+
+            </div>
+
+
+            <div className="card-value small-value">
+
+              {sunset}
+
+            </div>
+
+
+            <div className="card-description">
+              Sunset Time
+            </div>
+
+          </div>
+
+
+          {/* =================================================
+              MOON PHASE
+          ================================================= */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <span>🌙</span>
+
+              <span>
+                Moon Phase
+              </span>
+
+            </div>
+
+
+            <div className="card-value small-value">
+
+              {moonPhase}
+
+            </div>
+
+
+            <div className="card-description">
+              Current Moon
+            </div>
+
+          </div>
+
+
+          {/* PRESSURE */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <span>💨</span>
+
+              <span>
+                Pressure
+              </span>
+
+            </div>
+
+
+            <div className="card-value">
+
+              {pressure}
+
+            </div>
+
+
+            <div className="card-description">
+              Atmospheric Pressure
+            </div>
+
+          </div>
+
+
+          {/* VISIBILITY */}
+
+          <div className="weather-card">
+
+            <div className="card-title">
+
+              <FiEye />
+
+              <span>
+                Visibility
+              </span>
+
+            </div>
+
+
+            <div className="card-value">
+
+              {visibility} km
+
+            </div>
+
+
+            <div className="card-description">
+
+              {weather.visibility >= 10000
+                ? "Excellent Visibility"
+                : weather.visibility >= 5000
+                ? "Good Visibility"
+                : "Moderate Visibility"}
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* ===================================================
+            5 DAY FORECAST
+        =================================================== */}
+
+        <section className="dashboard-forecast">
+
+          <div className="forecast-header">
+
+            <div>
+
+              <span className="dashboard-badge">
+                Weather Prediction
+              </span>
+
+              <h2>
+                🌦 5-Day Weather Forecast
+              </h2>
+
+              <p>
+                Forecast for {city}
+              </p>
+
+            </div>
+
+
+            <button
+              className="forecast-button"
+              onClick={() =>
+                window.location.href = "/forecast"
+              }
+            >
+              View Full Forecast →
+            </button>
+
+          </div>
+
+
+          <div className="dashboard-forecast-grid">
+
+            {displayForecast.length === 0 ? (
+
+              <div className="forecast-loading">
+                Loading forecast...
+              </div>
+
+            ) : (
+
+              displayForecast.map(
+                (item, index) => {
+
+                  const date =
+                    new Date(item.dt_txt);
+
+
+                  return (
+
+                    <div
+                      className="dashboard-forecast-card"
+                      key={index}
+                    >
+
+                      <h3>
+
+                        {date.toLocaleDateString(
+                          "en-IN",
+                          {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                          }
+                        )}
+
+                      </h3>
+
+
+                      <img
+                        src={`https://openweathermap.org/img/wn/${item.weather?.[0]?.icon}@2x.png`}
+                        alt="Weather"
+                      />
+
+
+                      <h2>
+                        {Math.round(
+                          item.main.temp
+                        )}°C
+                      </h2>
+
+
+                      <p>
+                        {item.weather?.[0]?.description}
+                      </p>
+
+
+                      <div className="forecast-mini-details">
+
+                        <span>
+                          💧 {item.main.humidity}%
+                        </span>
+
+                        <span>
+                          💨 {item.wind.speed} m/s
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  );
+
+                }
+
+              )
+
+            )}
+
+          </div>
+
+        </section>
+
+
+        {/* ===================================================
+            AUTO UPDATE
+        =================================================== */}
+
+        <div className="weather-update-status">
+
+          Weather updates automatically every minute
+
         </div>
 
-      </section>
-            {/* ================= AI INSIGHTS ================= */}
+      </main>
 
-      <section className="ai-section">
+    </div>
 
-        <div className="ai-panel">
-
-          <h2>🤖 AI Weather Intelligence</h2>
-
-          <AIInsight weather={weather} />
-
-        </div>
-
-      </section>
-
-      {/* ================= QUICK INSIGHTS ================= */}
-
-      <section className="quick-insights">
-
-        <div className="insight-card">
-
-          <h3>☀ UV Recommendation</h3>
-
-          <p>
-            {weather.main.temp > 35
-              ? "High temperature detected. Stay hydrated and avoid prolonged exposure."
-              : "Weather is comfortable for outdoor activities."}
-          </p>
-
-        </div>
-
-        <div className="insight-card">
-
-          <h3>🌧 Rain Possibility</h3>
-
-          <p>
-
-            {weather.weather[0].main.toLowerCase().includes("rain")
-              ? "Carry an umbrella today."
-              : "No significant rainfall expected."}
-
-          </p>
-
-        </div>
-
-        <div className="insight-card">
-
-          <h3>💨 Wind Advisory</h3>
-
-          <p>
-
-            {weather.wind.speed > 8
-              ? "Strong winds detected. Be cautious while travelling."
-              : "Wind conditions are normal."}
-
-          </p>
-
-        </div>
-
-      </section>
-
-      {/* ================= FOOTER ================= */}
-
-      <footer className="dashboard-footer">
-
-        <h2>Aetherix Technologies</h2>
-
-        <p>
-
-          AI Powered Weather Intelligence Platform
-
-        </p>
-
-        <hr />
-
-        <p>
-
-          Powered by React • OpenWeather API • AI
-
-        </p>
-
-      </footer>
-
-</div>
-
-);
-    
-
-
+  );
 
 }
+
 
 export default Dashboard;

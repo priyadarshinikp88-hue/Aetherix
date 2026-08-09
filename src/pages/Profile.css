@@ -1,0 +1,298 @@
+/* ===============================
+        PROFILE PAGE
+================================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+}
+
+.profile-page{
+
+    min-height:100vh;
+
+    background:
+    linear-gradient(
+    135deg,
+    #04111f,
+    #071d34,
+    #061320);
+
+    color:white;
+
+}
+
+/* ===============================
+        HOME BUTTON
+================================= */
+
+.profile-back{
+
+    padding:30px 80px 10px;
+
+}
+
+.home-btn{
+
+    display:inline-block;
+
+    text-decoration:none;
+
+    background:#2388ff;
+
+    color:white;
+
+    padding:12px 28px;
+
+    border-radius:12px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.home-btn:hover{
+
+    background:#3aa0ff;
+
+    transform:translateY(-2px);
+
+}
+
+/* ===============================
+        PROFILE CARD
+================================= */
+
+.profile-container{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:40px 20px 80px;
+
+}
+
+.profile-card{
+
+    width:450px;
+
+    background:rgba(15,35,60,.82);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:25px;
+
+    padding:45px;
+
+    text-align:center;
+
+    transition:.35s;
+
+}
+
+.profile-card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 20px 45px rgba(0,183,255,.20);
+
+}
+
+/* ===============================
+        PROFILE IMAGE
+================================= */
+ 
+ .profile-image{
+    transition:.3s;
+}
+
+.profile-image:hover{
+    transform:scale(1.05);
+}
+ .profile-image{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #2d8cff;
+    margin-bottom:20px;
+}
+ .change-photo-btn{
+    display:inline-block;
+    padding:12px 26px;
+    background:#2d8cff;
+    color:#fff;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.3s;
+    margin-bottom:30px;
+}
+
+.change-photo-btn:hover{
+    background:#43a1ff;
+}
+
+/* ===============================
+        PROFILE DETAILS
+================================= */
+
+.profile-card h1{
+
+    font-size:36px;
+
+    margin-bottom:20px;
+
+}
+
+.profile-card h2{
+
+    font-size:28px;
+
+    margin-bottom:12px;
+
+}
+
+.profile-email,
+.profile-phone{
+
+    color:#cfe8ff;
+
+    font-size:18px;
+
+    margin-bottom:10px;
+
+}
+     .profile-birthday{
+    color:#c8d9ef;
+    font-size:18px;
+    margin-top:10px;
+    margin-bottom:25px;
+}
+/* ===============================
+        MEMBERSHIP
+================================= */
+ .membership-card{
+    margin-top:35px;
+    padding:25px;
+    border-radius:18px;
+    background:rgba(255,255,255,.05);
+}
+
+.membership-card h3{
+
+    color:#7fd8ff;
+
+    margin-bottom:15px;
+
+}
+  .membership{
+    display:inline-block;
+    padding:10px 22px;
+    border-radius:30px;
+    background:#1f6dff;
+    color:#fff;
+    font-weight:600;
+}
+
+/* ===============================
+        LOGOUT BUTTON
+================================= */
+
+.logout-btn{
+
+    margin-top:35px;
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#ff4b5c;
+
+    color:white;
+
+    font-size:17px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+ .logout-btn:hover{
+    background:#ff3045;
+    transform:translateY(-2px);
+}
+
+/* ===============================
+        RESPONSIVE
+================================= */
+
+@media(max-width:768px){
+
+.profile-back{
+
+    padding:20px;
+
+}
+
+.profile-card{
+
+    width:100%;
+
+    padding:30px;
+
+}
+
+.profile-image{
+
+    width:110px;
+
+    height:110px;
+
+}
+ 
+}
+ .profile-image-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.upload-btn{
+
+    display:inline-block;
+
+    margin-top:15px;
+
+    padding:10px 22px;
+
+    background:#1f6dff;
+
+    color:white;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.upload-btn:hover{
+
+    background:#3aa0ff;
+
+}

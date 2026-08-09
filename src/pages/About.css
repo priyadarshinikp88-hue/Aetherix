@@ -1,0 +1,524 @@
+/* ===================================
+        ABOUT PAGE
+=================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+}
+
+.about-page{
+
+    min-height:100vh;
+
+    background:
+    linear-gradient(
+    135deg,
+    #04111f,
+    #071d34,
+    #061320);
+
+    color:white;
+
+    overflow-x:hidden;
+
+}
+
+/* ===================================
+        HERO SECTION
+=================================== */
+  .about-hero{
+    text-align:center;
+    padding:80px 80px 70px;
+}
+
+.about-tag{
+
+    display:inline-block;
+
+    padding:10px 24px;
+
+    border-radius:40px;
+
+    background:rgba(0,183,255,.12);
+
+    color:#7fd8ff;
+
+    font-size:15px;
+
+    letter-spacing:1px;
+
+}
+
+.about-hero h1{
+
+    font-size:64px;
+
+    margin:30px 0;
+
+    line-height:1.15;
+
+}
+
+.about-hero p{
+
+    max-width:950px;
+
+    margin:auto;
+
+    font-size:20px;
+
+    color:#d6ebff;
+
+    line-height:1.9;
+
+}
+
+/* ===================================
+        FOUNDER
+=================================== */
+   .founder-section{
+    display:grid;
+    grid-template-columns:360px 850px;
+    justify-content:center;
+    gap:70px;
+    align-items:center;
+    padding:40px 80px 80px;
+}
+  .founder-image img{
+    width:320px;
+    border-radius:24px;
+    border:2px solid rgba(41,185,255,.35);
+    box-shadow:
+        0 0 25px rgba(41,185,255,.15),
+        0 20px 45px rgba(0,0,0,.35);
+    transition:.35s;
+}
+
+.founder-image img:hover{
+    transform:translateY(-6px);
+}
+  .founder-content{
+    background:#132845;
+    backdrop-filter:blur(18px);
+    border:1px solid rgba(41,185,255,.12);
+    border-radius:24px;
+    padding:50px;
+    transition:.35s;
+}
+
+.founder-content:hover{
+    transform:translateY(-6px);
+    box-shadow:0 20px 45px rgba(0,183,255,.15);
+}
+
+.founder-tag{
+
+    display:inline-block;
+
+    padding:10px 20px;
+
+    border-radius:40px;
+
+    background:rgba(0,183,255,.12);
+
+    color:#7fd8ff;
+
+    margin-bottom:20px;
+
+}
+
+.founder-content h2{
+
+    font-size:46px;
+
+    margin-bottom:10px;
+
+}
+.founder-content h4{
+
+    color:#66cfff;
+
+    font-size:24px;
+
+    font-weight:600;
+
+    margin-top:-5px;
+
+    margin-bottom:30px;
+
+}
+  .founder-content p{
+    color:#d7ecff;
+    line-height:2;
+    font-size:19px;
+    margin-bottom:22px;
+}
+/* ===================================
+        MISSION & VISION
+=================================== */
+
+.mission-section{
+
+    padding:30px 80px 90px;
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:35px;
+
+}
+  .mission-card{
+    background:rgba(15,35,60,.80);
+    backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:25px;
+    padding:40px;
+    min-height:250px;
+    transition:.35s;
+}
+
+.mission-card:hover{
+
+    transform:translateY(-10px);
+
+    border-color:#2bbcff;
+
+    box-shadow:0 20px 45px rgba(0,183,255,.22);
+
+}
+
+.mission-card h2{
+
+    color:#76d8ff;
+
+    margin-bottom:20px;
+
+    font-size:34px;
+
+}
+
+.mission-card p{
+
+    color:#d7ebff;
+
+    line-height:1.9;
+
+    font-size:18px;
+
+}
+
+/* ===================================
+        WHY CHOOSE AETHERIX
+=================================== */
+
+.why-aetherix{
+
+    padding:30px 80px 90px;
+
+}
+
+.why-aetherix h2{
+
+    text-align:center;
+
+    font-size:52px;
+
+    margin-bottom:60px;
+
+}
+
+.why-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:30px;
+
+}
+
+.why-card{
+
+    background:rgba(15,35,60,.82);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:24px;
+
+    padding:35px;
+
+    text-align:center;
+
+    transition:.35s;
+
+      min-height:250px;
+
+}
+
+.why-card:hover{
+
+    transform:translateY(-10px);
+
+    border-color:#25b7ff;
+
+    box-shadow:0 20px 45px rgba(0,183,255,.22);
+
+}
+
+.why-card h3{
+
+    color:#7fd8ff;
+
+    margin:20px 0;
+
+    font-size:24px;
+
+}
+
+.why-card p{
+
+    color:#d7ebff;
+
+    line-height:1.8;
+
+}
+
+ /* ===================================
+        CONTACT
+=================================== */
+
+.contact-section{
+
+    padding:30px 80px 90px;
+
+    text-align:center;
+
+}
+
+.contact-section h2{
+
+    font-size:52px;
+
+    margin-bottom:20px;
+
+}
+
+.contact-section>p{
+
+    color:#d7ebff;
+
+    font-size:20px;
+
+    max-width:700px;
+
+    margin:0 auto 50px;
+
+    line-height:1.8;
+
+}
+
+.contact-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:30px;
+
+}
+
+.contact-card{
+
+    background:rgba(15,35,60,.82);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:24px;
+
+    padding:35px;
+
+    transition:.35s;
+
+     min-height:180px;
+}
+
+.contact-card:hover{
+
+    transform:translateY(-10px);
+
+    border-color:#25b7ff;
+
+    box-shadow:0 20px 45px rgba(0,183,255,.22);
+
+}
+
+.contact-card h3{
+
+    color:#7fd8ff;
+
+    margin-bottom:15px;
+
+    font-size:24px;
+
+}
+
+.contact-card p{
+
+    color:#d7ebff;
+
+}
+  /* ===================================
+        FOOTER
+=================================== */
+
+.about-footer{
+
+    text-align:center;
+
+    padding:50px 20px;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+}
+
+.about-footer h2{
+
+    font-size:34px;
+
+    margin-bottom:10px;
+
+}
+
+.about-footer p{
+
+    color:#7fd8ff;
+
+    margin-bottom:15px;
+
+}
+
+.about-footer span{
+
+    color:#9fcdf5;
+
+    font-size:14px;
+
+}
+
+/* ===================================
+        RESPONSIVE
+=================================== */
+
+@media(max-width:1100px){
+
+.founder-section{
+
+    grid-template-columns:1fr;
+
+    text-align:center;
+
+}
+
+.mission-section{
+
+    grid-template-columns:1fr;
+
+}
+
+.why-grid{
+
+    grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+@media(max-width:768px){
+
+.about-hero{
+
+    padding:70px 25px;
+
+}
+
+.about-hero h1{
+
+    font-size:42px;
+
+}
+
+.founder-section{
+
+    grid-template-columns:1fr;
+
+    padding:40px 25px;
+
+    text-align:center;
+
+}
+
+.mission-section{
+
+    grid-template-columns:1fr;
+
+    padding:30px 25px;
+
+}
+
+.why-aetherix{
+
+    padding:30px 25px;
+
+}
+
+.why-grid{
+
+    grid-template-columns:1fr;
+
+}
+
+.contact-section{
+
+    padding:30px 25px;
+
+}
+
+.contact-grid{
+
+    grid-template-columns:1fr;
+
+}
+
+}
+
+/* ==========================
+        HEADER
+========================== */
+
+.about-back{
+    padding:30px 80px 10px;
+}
+ .home-btn{
+    display:inline-block;
+    text-decoration:none;
+    background:linear-gradient(135deg,#2388ff,#4aa8ff);
+    color:#fff;
+    padding:12px 30px;
+    border-radius:12px;
+    font-size:17px;
+    font-weight:600;
+    transition:.35s;
+    box-shadow:0 10px 25px rgba(35,136,255,.25);
+}
+
+.home-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 15px 35px rgba(35,136,255,.35);
+}

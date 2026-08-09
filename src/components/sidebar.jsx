@@ -17,28 +17,38 @@ import "./sidebar.css";
 function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   const menuItems = [
-    { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
-    { name: "Environment", icon: <FaCloudSun />, path: "/dashboard" },
-    { name: "Agriculture", icon: <FaLeaf />, path: "/coming-soon" },
-    { name: "Travel", icon: <FaPlane />, path: "/coming-soon" },
-    { name: "Smart City", icon: <FaCity />, path: "/coming-soon" },
-    { name: "Maps", icon: <FaMapMarkedAlt />, path: "/map" },
-    { name: "Reports", icon: <FaChartBar />, path: "/coming-soon" },
-    { name: "Alerts", icon: <FaBell />, path: "/alerts" },
-    { name: "Profile", icon: <FaUser />, path: "/coming-soon" },
-    { name: "Settings", icon: <FaCog />, path: "/coming-soon" },
-  ];
+  { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
+  { name: "Weather", icon: <FaCloudSun />, path: "/dashboard" },
+  { name: "Forecast", icon: <FaChartBar />, path: "/forecast" },
+  { name: "Maps", icon: <FaMapMarkedAlt />, path: "/map" },
+  { name: "Alerts", icon: <FaBell />, path: "/alerts" },
+  { name: "Agriculture", icon: <FaLeaf />, path: "/coming-soon" },
+  { name: "Travel", icon: <FaPlane />, path: "/coming-soon" },
+  { name: "Smart City", icon: <FaCity />, path: "/coming-soon" },
+  { name: "Profile", icon: <FaUser />, path: "/profile" },
+  { name: "Settings", icon: <FaCog />, path: "/settings" },
+];
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <h2>AETHERIX</h2>
-        <p>Daily Decisions</p>
-      </div>
+      <div
+  className="sidebar-logo"
+  onClick={() => navigate("/dashboard")}
+>
+  <div className="sidebar-logo-icon">🌤</div>
+
+  <h2>AETHERIX</h2>
+
+  <p>Trusted Intelligence</p>
+</div>
 
       <div className="sidebar-menu">
+
+  <p className="menu-heading">
+    MAIN MENU
+  </p>
         {menuItems.map((item) => (
           <div
             key={item.name}
@@ -52,10 +62,30 @@ function Sidebar() {
           </div>
         ))}
       </div>
+     
+     <div className="sidebar-footer">
 
-      <div className="sidebar-footer">
-        Version 1.0
-      </div>
+  <div className="sidebar-user">
+
+    <div className="user-avatar">
+      👩
+    </div>
+
+    <div className="user-info">
+      <h4>Priyadarshini</h4>
+      <p>Administrator</p>
+    </div>
+
+  </div>
+
+  <button
+    className="logout-sidebar-btn"
+    onClick={() => navigate("/")}
+  >
+    🚪 Logout
+  </button>
+
+</div>
     </aside>
   );
 }

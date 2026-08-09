@@ -15,36 +15,40 @@ export const phoneLogin = async (req, res) => {
 
     console.log("======================================");
     console.log("AUTH KEY FROM ENV:");
-console.log(process.env.MSG91_AUTH_KEY);
+    console.log(process.env.MSG91_AUTH_KEY);
     console.log("Access Token:", accessToken);
     console.log("======================================");
 
- const verifyResponse = await axios({
-  method: "POST",
-  url: "https://control.msg91.com/api/v5/widget/verifyAccessToken",
-  headers: {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-  },
-  data: {
-    authkey: process.env.MSG91_AUTH_KEY,
-    "access-token": accessToken,
-  },
-});
+    const verifyResponse = await axios({
+      method: "POST",
+      url: "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      data: {
+        authkey: process.env.MSG91_AUTH_KEY,
+        "access-token": accessToken,
+      },
+    });
 
-console.log("STATUS:", verifyResponse.status);
-console.log("DATA:", JSON.stringify(verifyResponse.data, null, 2));
+    console.log("STATUS:", verifyResponse.status);
+    console.log(
+      "DATA:",
+      JSON.stringify(verifyResponse.data, null, 2)
+    );
 
- // Extract phone number from every possible location
-    
- if (verifyResponse.data.type !== "success") {
-  return res.status(400).json({
-    success: false,
-    message: verifyResponse.data.message,
-  });
-}
+    // Check MSG91 verification
+    if (verifyResponse.data.type !== "success") {
+      return res.status(400).json({
+        success: false,
+        message: verifyResponse.data.message,
+      });
+    }
 
-const phone = verifyResponse.data.message;
+    // Get phone number
+    const phone = verifyResponse.data.message;
+
     if (!phone) {
       return res.status(400).json({
         success: false,
@@ -53,20 +57,24 @@ const phone = verifyResponse.data.message;
       });
     }
 
-     let user = await User.findOne({ phone });
+    console.log("Verified Phone:", phone);
 
-console.log("Existing User:", user);
+    // Find existing user
+    let user = await User.findOne({ phone });
 
-if (!user) {
-  user = await User.create({
-    phone: phone,
-    name: "Phone User",
-    email: null,
-    password: null,
-  });
+    console.log("Existing User:", user);
 
-  console.log("Created User:", user);
-}
+    // Create user if not found
+    if (!user) {
+      user = await User.create({
+        phone: phone,
+        name: "Phone User",
+      });
+
+      console.log("Created User:", user);
+    }
+
+    // Generate JWT
     const token = jwt.sign(
       {
         id: user._id,
@@ -84,11 +92,11 @@ if (!user) {
     });
 
   } catch (error) {
-
     console.error("=========== MSG91 ERROR ===========");
 
     if (error.response) {
       console.error("Status:", error.response.status);
+
       console.error(
         JSON.stringify(error.response.data, null, 2)
       );

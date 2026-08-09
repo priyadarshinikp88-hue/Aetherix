@@ -1,0 +1,309 @@
+.weather-animation{
+    width:100%;
+    height:260px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    overflow:hidden;
+}
+
+/* =========================
+        RAIN SCENE
+========================= */
+
+.rain-scene{
+    position:relative;
+    width:240px;
+    height:220px;
+}
+
+/* =========================
+        CLOUD
+========================= */
+
+.cloud{
+    position:absolute;
+    left:50%;
+    top:15px;
+    transform:translateX(-50%);
+    width:180px;
+    height:90px;
+    animation:cloudFloat 4s ease-in-out infinite;
+}
+
+.cloud-part{
+    position:absolute;
+    background:#ffffff;
+    border-radius:50%;
+    box-shadow:  0 0 30px rgba(255,255,255,.35),
+        0 0 70px rgba(255,255,255,.08);
+}
+
+.cloud-part.one{
+    width:70px;
+    height:70px;
+    left:0;
+    top:18px;
+}
+
+.cloud-part.two{
+    width:95px;
+    height:95px;
+    left:42px;
+    top:0;
+}
+
+.cloud-part.three{
+    width:70px;
+    height:70px;
+    right:0;
+    top:22px;
+}
+
+.cloud-base{
+    position:absolute;
+    bottom:5px;
+    left:18px;
+    width:145px;
+    height:45px;
+    background:#fff;
+    border-radius:30px;
+}
+
+/* =========================
+          RAIN
+========================= */
+  .rain{
+    position:absolute;
+    top:82px;
+    left:50%;
+    transform:translateX(-50%);
+    width:160px;
+    height:120px;
+}
+
+  .rain span{
+    width:4px;
+    height:12px;
+    transform:rotate(12deg);
+    border-radius:50px;
+
+    background:linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.95),
+        #8fd8ff,
+        #3db8ff
+    );
+
+    box-shadow:0 0 6px rgba(90,190,255,.5);
+
+    opacity:.95;
+
+    animation:rainDrop linear infinite;
+}
+  @keyframes rainDrop{
+
+0%{
+    transform:translateY(-15px);
+    opacity:0;
+}
+
+10%{
+    opacity:1;
+}
+
+90%{
+    opacity:1;
+}
+
+100%{
+    transform:translateY(120px);
+    opacity:0;
+}
+
+}
+/* =========================
+        CLOUD SCENE
+========================= */
+
+.cloud-scene{
+    position:relative;
+    width:220px;
+    height:180px;
+}
+
+.floating-cloud{
+    position:absolute;
+    background:#fff;
+    border-radius:40px;
+    box-shadow:0 0 30px rgba(255,255,255,.18);
+}
+
+.floating-cloud::before{
+    content:"";
+    position:absolute;
+    width:45px;
+    height:45px;
+    background:white;
+    border-radius:50%;
+    left:18px;
+    top:-18px;
+}
+
+.floating-cloud::after{
+    content:"";
+    position:absolute;
+    width:55px;
+    height:55px;
+    background:white;
+    border-radius:50%;
+    right:18px;
+    top:-24px;
+}
+
+.cloud1{
+    width:120px;
+    height:42px;
+    top:40px;
+    left:20px;
+    animation:floatCloud1 5s ease-in-out infinite;
+}
+
+.cloud2{
+    width:95px;
+    height:35px;
+    bottom:40px;
+    right:15px;
+    animation:floatCloud2 4s ease-in-out infinite;
+}
+
+/* =========================
+        SUN
+========================= */
+
+.sun-scene{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    width:220px;
+    height:220px;
+}
+
+.sun{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#FFD54A;
+
+    box-shadow:
+        0 0 20px #FFD54A,
+        0 0 45px rgba(255,213,74,.6);
+
+    animation:sunRotate 12s linear infinite;
+}
+
+/* =========================
+      ANIMATIONS
+========================= */
+  @keyframes rainDrop{
+
+0%{
+    transform:translateY(-20px);
+    opacity:0;
+}
+
+15%{
+    opacity:1;
+}
+
+100%{
+    transform:translateY(130px);   /* was 90-100px */
+    opacity:0;
+}
+
+}
+ @keyframes cloudFloat{
+    0%,100%{
+        transform:translateX(-50%) translateY(0);
+    }
+
+    50%{
+        transform:translateX(-50%) translateY(-6px);
+    }
+}
+
+.cloud{
+    animation:cloudFloat 4s ease-in-out infinite;
+}
+
+
+@keyframes floatCloud1{
+
+    0%,100%{
+        transform:translateX(0);
+    }
+
+    50%{
+        transform:translateX(15px);
+    }
+
+}
+
+@keyframes floatCloud2{
+
+    0%,100%{
+        transform:translateX(0);
+    }
+
+    50%{
+        transform:translateX(-12px);
+    }
+
+}
+
+@keyframes sunRotate{
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+.rain-floor{
+    position:absolute;
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+    width:150px;
+}
+
+.rain-floor span{
+    position:absolute;
+    width:10px;
+    height:2px;
+    border-radius:50%;
+    background:#78d8ff;
+    animation:splash 1s infinite;
+}
+
+@keyframes splash{
+
+0%{
+    transform:scaleX(.3);
+    opacity:0;
+}
+
+40%{
+    opacity:1;
+}
+
+100%{
+    transform:scaleX(2);
+    opacity:0;
+}
+
+}

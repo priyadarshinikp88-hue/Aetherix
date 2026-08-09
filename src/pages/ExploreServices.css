@@ -1,0 +1,782 @@
+/* =========================================================
+   AETHERIX - EXPLORE SERVICES PAGE
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+.explore-page {
+  min-height: 100vh;
+  width: 100%;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(0, 174, 255, 0.12),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #041b2d 0%,
+      #07294b 48%,
+      #0b3262 100%
+    );
+
+  color: #ffffff;
+
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER / NAVBAR
+========================================================= */
+
+.explore-navbar {
+  width: 100%;
+  height: 105px;
+
+  background: #06142d;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 50px;
+
+  gap: 22px;
+
+  border-bottom: 1px solid rgba(98, 208, 255, 0.12);
+
+  position: relative;
+  z-index: 1000;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.explore-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.explore-logo img {
+  width: 95px;
+  height: 78px;
+
+  object-fit: contain;
+
+  display: block;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.explore-back-btn {
+  width: 54px;
+  height: 54px;
+
+  padding: 0;
+
+  border: 1px solid rgba(98, 208, 255, 0.12);
+  border-radius: 14px;
+
+  background: #142846;
+
+  color: #62d0ff;
+
+  font-size: 30px;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.explore-back-btn:hover {
+  background: #1b3558;
+
+  border-color: rgba(98, 208, 255, 0.35);
+
+  transform: translateX(-2px);
+}
+
+
+/* =========================================================
+   RIGHT NAVIGATION
+========================================================= */
+
+.explore-nav-right {
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 14px;
+}
+
+/* =====================================================
+   SERVICE SEARCH
+===================================================== */
+
+.explore-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+
+/* SEARCH ICON BUTTON */
+
+.explore-search-btn {
+  width: 58px;
+  height: 58px;
+
+  border: 1px solid rgba(98, 208, 255, 0.18);
+  border-radius: 15px;
+
+  background: #142b4a;
+  color: #62d0ff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.explore-search-btn svg {
+  width: 25px;
+  height: 25px;
+  stroke-width: 2.2;
+}
+
+.explore-search-btn:hover {
+  background: #1b3a60;
+  border-color: rgba(98, 208, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   EXPANDED SERVICE SEARCH
+===================================================== */
+
+.service-search-box {
+  width: 300px;
+  height: 58px;
+
+  background: #193555;
+
+  border: 1px solid rgba(98, 208, 255, 0.2);
+
+  border-radius: 15px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 14px;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+
+  animation: serviceSearchOpen 0.2s ease;
+}
+
+.service-search-box > svg {
+  width: 23px;
+  height: 23px;
+
+  color: #62d0ff;
+
+  flex-shrink: 0;
+}
+
+
+.service-search-box input {
+  flex: 1;
+
+  min-width: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: white;
+
+  font-size: 17px;
+
+  margin-left: 12px;
+}
+
+.service-search-box input::placeholder {
+  color: #9db2ca;
+}
+
+
+/* CLOSE SEARCH */
+
+.service-search-close {
+  width: 32px;
+  height: 32px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #9db2ca;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  border-radius: 8px;
+}
+
+.service-search-close svg {
+  width: 19px;
+  height: 19px;
+}
+
+.service-search-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+
+@keyframes serviceSearchOpen {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* =========================================================
+   HOME BUTTON
+========================================================= */
+
+.explore-home-btn {
+  height: 54px;
+
+  min-width: 125px;
+
+  padding: 0 22px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: #168cf5;
+
+  color: #ffffff;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.explore-home-btn:hover {
+  background: #2498ff;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 20px rgba(22, 140, 245, 0.25);
+}
+
+
+/* =========================================================
+   HERO SECTION
+========================================================= */
+
+.explore-hero {
+  width: 100%;
+
+  text-align: center;
+
+  padding: 55px 20px 45px;
+}
+
+.explore-hero h1 {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: clamp(42px, 4vw, 66px);
+
+  font-weight: 800;
+
+  letter-spacing: -1px;
+}
+
+.explore-hero p {
+  margin: 20px 0 0;
+
+  color: #c6ddf5;
+
+  font-size: 20px;
+
+  line-height: 1.6;
+}
+
+
+/* Small glowing line under hero */
+
+.explore-hero::after {
+  content: "";
+
+  display: block;
+
+  width: 160px;
+  height: 2px;
+
+  margin: 28px auto 0;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #38c7ff,
+    transparent
+  );
+
+  border-radius: 50px;
+}
+
+
+/* =========================================================
+   SERVICES GRID
+========================================================= */
+
+.services-grid {
+  width: min(1500px, calc(100% - 70px));
+
+  margin: 15px auto 0;
+
+  padding-bottom: 70px;
+
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 28px;
+}
+
+
+/* =========================================================
+   SERVICE CARD
+========================================================= */
+
+.service-card {
+  min-height: 440px;
+
+  padding: 38px 28px 28px;
+
+  background: rgba(17, 43, 75, 0.95);
+
+  border: 1px solid rgba(98, 208, 255, 0.14);
+
+  border-radius: 25px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  position: relative;
+
+  overflow: hidden;
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+
+/* subtle card glow */
+
+.service-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: -80px;
+  left: 50%;
+
+  width: 180px;
+  height: 180px;
+
+  transform: translateX(-50%);
+
+  background: rgba(64, 196, 255, 0.07);
+
+  filter: blur(45px);
+
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+
+  border-color: rgba(98, 208, 255, 0.5);
+
+  background: rgba(19, 49, 84, 0.98);
+
+  box-shadow:
+    0 18px 35px rgba(0, 0, 0, 0.18),
+    0 0 25px rgba(47, 177, 255, 0.08);
+}
+
+
+/* =========================================================
+   SERVICE ICON
+========================================================= */
+
+.service-icon {
+  width: 110px;
+  height: 110px;
+
+  margin-bottom: 25px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #58caff;
+
+  font-size: 70px;
+
+  background: rgba(5, 28, 55, 0.45);
+
+  border: 1px solid rgba(88, 202, 255, 0.12);
+
+  position: relative;
+  z-index: 1;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.service-card:hover .service-icon {
+  transform: scale(1.06);
+
+  box-shadow: 0 0 28px rgba(88, 202, 255, 0.12);
+}
+
+
+/* =========================================================
+   SERVICE TITLE
+========================================================= */
+
+.service-card h3 {
+  margin: 0;
+
+  color: #62d0ff;
+
+  font-size: 28px;
+
+  font-weight: 750;
+
+  line-height: 1.25;
+
+  position: relative;
+  z-index: 1;
+}
+
+
+/* =========================================================
+   SERVICE DESCRIPTION
+========================================================= */
+
+.service-card p {
+  margin: 25px 0 30px;
+
+  color: #d2e2f2;
+
+  font-size: 17px;
+
+  line-height: 1.6;
+
+  position: relative;
+  z-index: 1;
+}
+
+
+/* =========================================================
+   OPEN SERVICE BUTTON
+========================================================= */
+
+.service-card button {
+  width: 100%;
+  height: 58px;
+
+  margin-top: auto;
+
+  border: none;
+  border-radius: 14px;
+
+  background: #168cf5;
+
+  color: #ffffff;
+
+  font-size: 17px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  position: relative;
+  z-index: 1;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.service-card button:hover {
+  background: #2498ff;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 20px rgba(22, 140, 245, 0.2);
+}
+
+
+/* =========================================================
+   LARGE LAPTOP / SMALL DESKTOP
+========================================================= */
+
+@media (max-width: 1250px) {
+
+  .explore-navbar {
+    padding: 0 30px;
+  }
+
+  .services-grid {
+    width: min(1100px, calc(100% - 50px));
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 950px) {
+
+  .explore-navbar {
+    height: 95px;
+
+    padding: 0 25px;
+
+    gap: 15px;
+  }
+
+  .explore-logo img {
+    width: 82px;
+    height: 70px;
+  }
+
+  .explore-hero {
+    padding-top: 45px;
+  }
+
+  .explore-hero h1 {
+    font-size: 44px;
+  }
+
+  .explore-hero p {
+    font-size: 18px;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 22px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+  .explore-navbar {
+    height: 82px;
+
+    padding: 0 16px;
+
+    gap: 10px;
+  }
+
+  .explore-logo img {
+    width: 62px;
+    height: 55px;
+  }
+
+  .explore-back-btn,
+  .explore-search-btn {
+    width: 44px;
+    height: 44px;
+
+    border-radius: 12px;
+  }
+
+  .explore-back-btn {
+    font-size: 25px;
+  }
+
+  .explore-search-btn {
+    font-size: 19px;
+  }
+
+  .explore-nav-right {
+    gap: 8px;
+  }
+
+  .explore-home-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+
+    padding: 0;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+  }
+
+  .explore-home-btn span {
+    display: none;
+  }
+
+  .explore-hero {
+    padding: 40px 18px 35px;
+  }
+
+  .explore-hero h1 {
+    font-size: 36px;
+
+    line-height: 1.15;
+  }
+
+  .explore-hero p {
+    margin-top: 15px;
+
+    font-size: 16px;
+  }
+
+  .services-grid {
+    width: calc(100% - 30px);
+
+    grid-template-columns: 1fr;
+
+    gap: 20px;
+
+    padding-bottom: 45px;
+  }
+
+  .service-card {
+    min-height: 390px;
+
+    padding: 30px 22px 24px;
+  }
+
+  .service-icon {
+    width: 95px;
+    height: 95px;
+
+    font-size: 60px;
+  }
+
+  .service-card h3 {
+    font-size: 25px;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 430px) {
+
+  .explore-navbar {
+    padding: 0 10px;
+
+    gap: 7px;
+  }
+
+  .explore-logo img {
+    width: 55px;
+  }
+
+  .explore-back-btn,
+  .explore-search-btn,
+  .explore-home-btn {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .explore-hero h1 {
+    font-size: 31px;
+  }
+
+}
