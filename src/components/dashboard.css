@@ -1060,149 +1060,98 @@ body,
   box-sizing: border-box;
 }
 /* =========================================================
-   FINAL PHONE CARD SIZE + CONTENT POSITION FIX
+   FINAL MOBILE WEATHER CARD ALIGNMENT
+   Small cards + centered content
    ========================================================= */
 
 @media (max-width: 900px) {
 
-  /* Prevent the page from becoming wider than the phone */
-  html,
-  body,
-  #root,
-  .dashboard-page {
-    width: 100% !important;
-    max-width: 100vw !important;
-    min-width: 0 !important;
-    overflow-x: hidden !important;
-  }
-
-  /* Main dashboard */
-  .dashboard-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-
-    margin: 0 !important;
-
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-  }
-
-  /* =====================================================
-     CURRENT WEATHER CARDS
-     ===================================================== */
-
   .weather-cards {
     width: 100% !important;
     max-width: 100% !important;
-    min-width: 0 !important;
-
     display: flex !important;
     flex-direction: column !important;
-
     align-items: center !important;
-
     gap: 18px !important;
-
-    box-sizing: border-box !important;
-
-    overflow: hidden !important;
   }
 
   .weather-card {
-    /* IMPORTANT */
     width: calc(100% - 30px) !important;
     max-width: 620px !important;
     min-width: 0 !important;
 
     margin: 0 auto !important;
+    padding: 24px 20px !important;
 
     min-height: 170px !important;
-
-    padding: 22px 24px !important;
 
     box-sizing: border-box !important;
 
     display: flex !important;
     flex-direction: column !important;
 
-    align-items: flex-start !important;
+    /* CENTER CONTENT */
+    align-items: center !important;
     justify-content: center !important;
 
-    text-align: left !important;
+    text-align: center !important;
 
     overflow: hidden !important;
   }
 
-  /* Card title */
+  /* Title */
   .weather-card .card-title {
     width: 100% !important;
-    max-width: 100% !important;
 
     display: flex !important;
-
     align-items: center !important;
-    justify-content: flex-start !important;
-
-    text-align: left !important;
+    justify-content: center !important;
 
     gap: 8px !important;
 
     margin-bottom: 12px !important;
 
+    text-align: center !important;
+
     font-size: 18px !important;
 
     white-space: normal !important;
-    overflow-wrap: anywhere !important;
   }
 
-  /* Card title icon */
+  /* Icon */
   .weather-card .card-title svg {
     flex-shrink: 0 !important;
     font-size: 22px !important;
   }
 
-  /* Card value */
+  /* Main value */
   .weather-card .card-value {
     width: 100% !important;
-    max-width: 100% !important;
 
-    text-align: left !important;
+    text-align: center !important;
 
     font-size: 30px !important;
+    line-height: 1.2 !important;
 
-    line-height: 1.15 !important;
-
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
+    word-break: normal !important;
   }
 
   /* Description */
   .weather-card .card-description {
     width: 100% !important;
-    max-width: 100% !important;
 
     margin-top: 8px !important;
 
-    text-align: left !important;
+    text-align: center !important;
 
     font-size: 14px !important;
-
     line-height: 1.4 !important;
-
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
   }
 
-  /* Small values such as sunrise/sunset */
   .weather-card .small-value {
     font-size: 28px !important;
   }
 
-  /* Condition text */
   .weather-card .condition-value {
     font-size: 26px !important;
   }
@@ -1210,22 +1159,17 @@ body,
 
 
 /* =========================================================
-   SMALL PHONE
+   SMALL PHONES
    ========================================================= */
 
 @media (max-width: 480px) {
 
-  .dashboard-container {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-
   .weather-card {
-    width: calc(100% - 20px) !important;
+    width: calc(100% - 28px) !important;
 
     min-height: 155px !important;
 
-    padding: 20px 20px !important;
+    padding: 20px 16px !important;
   }
 
   .weather-card .card-title {
