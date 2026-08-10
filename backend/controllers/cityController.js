@@ -5,7 +5,7 @@ dotenv.config();
 
 export const searchCities = async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, limit = 50 } = req.query;
 
     if (!q || q.length < 2) {
       return res.json([]);
@@ -16,7 +16,7 @@ export const searchCities = async (req, res) => {
       {
         params: {
           q,
-          limit: 1000,
+          limit: Math.min(Number(limit) || 50, 100),
           appid: process.env.OPENWEATHER_API_KEY,
         },
       }
