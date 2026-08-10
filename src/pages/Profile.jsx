@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./profile.css";
+import "./Profile.css";
 
 const API_URL = "https://aetherix-backend-eoj8.onrender.com";
 
@@ -181,12 +181,12 @@ function Profile() {
             Authorization: `Bearer ${token}`,
           },
 
-          body: JSON.stringify({
-            name: profile.name.trim(),
-            email: profile.email.trim() || null,
-            phone: profile.phone.trim() || null,
-            profileImage: profile.profileImage || "",
-          }),
+         body: JSON.stringify({
+  name: profile.name.trim(),
+  email: profile.email.trim(),
+  phone: profile.phone.trim(),
+  profileImage: profile.profileImage || "",
+}),
         }
       );
 
