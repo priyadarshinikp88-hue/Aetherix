@@ -330,3 +330,106 @@ export const getProfile = async (req, res) => {
     });
   }
 };
+// ================= UPDATE PROFILE =================
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, profileImage } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // ================= NAME =================
+
+    if (name !== undefined) {
+      if (!name.trim()) {
+        return res.status(400).json({
+          message: "Name cannot be empty",
+        });
+      }
+
+      user.name = name.trim();
+    }
+
+    // ================= EMAIL =================
+
+    if (email !== undefined) {
+      const cleanEmail = email.trim().toLowerCase();
+
+      if (!cleanEmail) {
+        return res.status(400).json({
+          message: "Email cannot be empty",
+        });
+      }
+
+      const emailExists = await User.findOne({
+        email: cleanEmail,
+        _id: { $ne: user._id },
+      });
+
+      if (emailExists) {
+        return res.status(400).json({
+          message: "Email is already registered",
+        });
+      }
+
+      user.email = cleanEmail;
+    }
+
+    // ================= PHONE =================
+
+    if (phone !== undefined) {
+      const cleanPhone = phone.trim();
+
+      if (cleanPhone) {
+        const phoneExists = await User.findOne({
+          phone: cleanPhone,
+          _id: { $ne: user._id },
+        });
+
+        if (phoneExists) {
+          return res.status(400).json({
+            message: "Phone number is already registered",
+          });
+        }
+
+        user.phone = cleanPhone;
+      } else {
+        user.phone = null;
+      }
+    }
+
+    // ================= PROFILE IMAGE =================
+
+    if (profileImage !== undefined) {
+      user.profileImage = profileImage;
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        membership: user.membership,
+        profileImage: user.profileImage,
+      },
+    });
+
+  } catch (error) {
+    console.error("UPDATE PROFILE ERROR:", error);
+
+    return res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
