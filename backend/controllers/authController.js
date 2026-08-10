@@ -303,12 +303,10 @@ export const verifyOTP = async (req, res) => {
 
   }
 };
-
 // ================= GET PROFILE =================
 
 export const getProfile = async (req, res) => {
   try {
-
     const user = await User.findById(req.user.id).select("-password");
 
     if (!user) {
@@ -330,106 +328,155 @@ export const getProfile = async (req, res) => {
     });
   }
 };
+
+
 // ================= UPDATE PROFILE =================
 
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email, phone, profileImage } = req.body;
+    console.log("================================");
+    console.log("UPDATE PROFILE REQUEST");
+    console.log("REQ.USER:", req.user);
+    console.log("REQ.BODY:", req.body);
+    console.log("================================");
 
-    const user = await User.findById(req.user.id);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid user authentication.",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    console.log("USER FOUND:", user);
 
     if (!user) {
       return res.status(404).json({
+        success: false,
         message: "User not found",
       });
     }
 
+    const {
+      name,
+      email,
+      phone,
+      profileImage,
+    } = req.body;
+
+
     // ================= NAME =================
 
-    if (name !== undefined) {
-      if (!name.trim()) {
-        return res.status(400).json({
-          message: "Name cannot be empty",
-        });
-      }
-
+    if (name !== undefined && name.trim()) {
       user.name = name.trim();
     }
 
+
     // ================= EMAIL =================
 
-    if (email !== undefined) {
-      const cleanEmail = email.trim().toLowerCase();
+    if (email !== undefined && email.trim()) {
 
-      if (!cleanEmail) {
-        return res.status(400).json({
-          message: "Email cannot be empty",
+      const cleanEmail =
+        email.trim().toLowerCase();
+
+      const existingEmail =
+        await User.findOne({
+          email: cleanEmail,
+          _id: { $ne: user._id },
         });
-      }
 
-      const emailExists = await User.findOne({
-        email: cleanEmail,
-        _id: { $ne: user._id },
-      });
-
-      if (emailExists) {
+      if (existingEmail) {
         return res.status(400).json({
-          message: "Email is already registered",
+          success: false,
+          message: "Email is already registered.",
         });
       }
 
       user.email = cleanEmail;
     }
 
+
     // ================= PHONE =================
 
-    if (phone !== undefined) {
-      const cleanPhone = phone.trim();
+    if (phone !== undefined && phone.trim()) {
 
-      if (cleanPhone) {
-        const phoneExists = await User.findOne({
+      const cleanPhone =
+        phone.trim();
+
+      const existingPhone =
+        await User.findOne({
           phone: cleanPhone,
           _id: { $ne: user._id },
         });
 
-        if (phoneExists) {
-          return res.status(400).json({
-            message: "Phone number is already registered",
-          });
-        }
-
-        user.phone = cleanPhone;
-      } else {
-        user.phone = null;
+      if (existingPhone) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Phone number is already registered.",
+        });
       }
+
+      user.phone = cleanPhone;
     }
 
-    // ================= PROFILE IMAGE =================
+
+    // ================= PROFILE PHOTO =================
 
     if (profileImage !== undefined) {
       user.profileImage = profileImage;
     }
 
+
+    // ================= SAVE =================
+
     await user.save();
+
+    console.log(
+      "PROFILE SAVED:",
+      user._id
+    );
+
 
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
+
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
-        membership: user.membership,
-        profileImage: user.profileImage,
+        membership:
+          user.membership || "User",
+        profileImage:
+          user.profileImage || "",
       },
     });
 
   } catch (error) {
-    console.error("UPDATE PROFILE ERROR:", error);
+
+    console.error(
+      "UPDATE PROFILE ERROR:",
+      error
+    );
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Email or phone number is already registered.",
+      });
+    }
 
     return res.status(500).json({
-      message: "Server Error",
+      success: false,
+      message:
+        "Failed to update profile.",
+      error: error.message,
     });
   }
 };

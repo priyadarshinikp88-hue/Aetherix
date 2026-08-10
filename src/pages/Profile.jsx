@@ -1,102 +1,140 @@
-import "./Profile.css";
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./profile.css";
+
+const API_URL = "https://aetherix-backend-eoj8.onrender.com";
 
 function Profile() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
-  const [profileImage, setProfileImage] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [membership, setMembership] = useState("User");
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    membership: "User",
+    profileImage: "",
+  });
 
-  const [editing, setEditing] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // =====================================================
+  // GET TOKEN
+  // =====================================================
+
+  const getToken = () => {
+    return (
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken") ||
+      localStorage.getItem("accessToken")
+    );
+  };
 
   // =====================================================
   // LOAD PROFILE
   // =====================================================
 
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          navigate("/login");
-          return;
-        }
-
-        const response = await fetch(
-          "https://aetherix-backend-eoj8.onrender.com/api/auth/profile",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          alert(data.message || "Unable to load profile");
-          return;
-        }
-
-        const user = data.user;
-
-        setName(user.name || "");
-        setEmail(user.email || "");
-        setPhone(user.phone || "");
-        setMembership(user.membership || "User");
-        setProfileImage(user.profileImage || "");
-
-        // Keep localStorage synchronized
-        localStorage.setItem(
-          "user",
-          JSON.stringify(user)
-        );
-
-      } catch (error) {
-        console.error(
-          "Profile loading error:",
-          error
-        );
-      }
-    };
-
     loadProfile();
-  }, [navigate]);
+  }, []);
+
+  const loadProfile = async () => {
+    const token = getToken();
+
+    if (!token) {
+      alert("Please login again.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/auth/profile`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("PROFILE RESPONSE:", data);
+
+      if (response.status === 401) {
+        alert("Session expired. Please login again.");
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("accessToken");
+
+        navigate("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        alert(data.message || "Unable to load profile.");
+        return;
+      }
+
+      setProfile({
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        membership: data.membership || "User",
+        profileImage: data.profileImage || "",
+      });
+    } catch (error) {
+      console.error("Profile loading error:", error);
+      alert("Unable to connect to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
+  // INPUT CHANGE
+  // =====================================================
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setProfile((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   // =====================================================
   // CHANGE PHOTO
   // =====================================================
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
-    // Only images
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file.");
+      alert("Please select an image.");
       return;
     }
 
-    // 2 MB limit
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Please select an image smaller than 2 MB.");
+    // Keep image size reasonable
+    if (file.size > 4 * 1024 * 1024) {
+      alert("Please select an image smaller than 4 MB.");
       return;
     }
 
     const reader = new FileReader();
 
-    reader.onloadend = () => {
-      setProfileImage(reader.result);
+    reader.onload = () => {
+      setProfile((prev) => ({
+        ...prev,
+        profileImage: reader.result,
+      }));
     };
 
     reader.readAsDataURL(file);
@@ -106,30 +144,35 @@ function Profile() {
   // SAVE PROFILE
   // =====================================================
 
-  const handleSave = async () => {
-    if (!name.trim()) {
-      alert("Name cannot be empty.");
+  const saveProfile = async () => {
+    const token = getToken();
+
+    if (!token) {
+      alert("Please login again.");
+      navigate("/login");
       return;
     }
 
-    if (!email.trim()) {
-      alert("Email cannot be empty.");
+    if (!profile.name.trim()) {
+      alert("Please enter your name.");
       return;
     }
 
-    setSaving(true);
+    if (
+      profile.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        profile.email.trim()
+      )
+    ) {
+      alert("Please enter a valid email.");
+      return;
+    }
 
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        alert("Please login again.");
-        navigate("/login");
-        return;
-      }
+      setSaving(true);
 
       const response = await fetch(
-        "https://aetherix-backend-eoj8.onrender.com/api/auth/profile",
+        `${API_URL}/api/auth/profile`,
         {
           method: "PUT",
 
@@ -139,53 +182,63 @@ function Profile() {
           },
 
           body: JSON.stringify({
-            name: name.trim(),
-            email: email.trim().toLowerCase(),
-            phone: phone.trim(),
-            profileImage,
+            name: profile.name.trim(),
+            email: profile.email.trim() || null,
+            phone: profile.phone.trim() || null,
+            profileImage: profile.profileImage || "",
           }),
         }
       );
 
       const data = await response.json();
 
-      if (!response.ok) {
-        alert(
-          data.message ||
-            "Failed to update profile."
-        );
+      console.log("SAVE PROFILE RESPONSE:", data);
+
+      if (response.status === 401) {
+        alert("Invalid or expired token. Please login again.");
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("accessToken");
+
+        navigate("/login");
         return;
       }
 
-      // Save updated user locally
+      if (!response.ok) {
+        alert(data.message || "Unable to update profile.");
+        return;
+      }
+
+      // =================================================
+      // UPDATE STATE WITH DATABASE RESPONSE
+      // =================================================
+
+      setProfile({
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        membership: data.membership || "User",
+        profileImage: data.profileImage || "",
+      });
+
+      // =================================================
+      // SAVE LOCAL USER DATA
+      // =================================================
+
       localStorage.setItem(
         "user",
-        JSON.stringify(data.user)
+        JSON.stringify(data)
       );
 
-      // Update screen
-      setName(data.user.name || "");
-      setEmail(data.user.email || "");
-      setPhone(data.user.phone || "");
-      setMembership(
-        data.user.membership || "User"
-      );
-      setProfileImage(
-        data.user.profileImage || ""
-      );
+      setEditMode(false);
 
-      setEditing(false);
-
-      alert("Profile updated successfully!");
-
+      alert("Profile updated successfully.");
     } catch (error) {
-      console.error(
-        "Profile update error:",
-        error
-      );
+      console.error("Profile update error:", error);
 
       alert(
-        "Unable to update profile. Please try again."
+        "Unable to save profile. Please try again."
       );
     } finally {
       setSaving(false);
@@ -196,191 +249,194 @@ function Profile() {
   // LOGOUT
   // =====================================================
 
-  const handleLogout = () => {
+  const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
 
     navigate("/login");
   };
 
   // =====================================================
-  // PROFILE IMAGE
+  // LOADING
   // =====================================================
 
-  const defaultImage =
-    "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  if (loading) {
+    return (
+      <div className="profile-page">
+        <div className="profile-loading">
+          Loading profile...
+        </div>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // UI
+  // =====================================================
 
   return (
     <div className="profile-page">
 
-      {/* ================= BACK ================= */}
+      <div className="profile-card">
 
-      <div className="profile-back">
-        <Link
-          to="/"
-          className="home-btn"
-        >
-          ← Home
-        </Link>
-      </div>
+        {/* ================= PHOTO ================= */}
 
-      {/* ================= PROFILE ================= */}
+        <div className="profile-photo-section">
 
-      <section className="profile-container">
+          <img
+            src={
+              profile.profileImage ||
+              "/default-profile.png"
+            }
+            alt="Profile"
+            className="profile-photo"
+          />
 
-        <div className="profile-card">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            style={{ display: "none" }}
+          />
 
-          {/* ================= PHOTO ================= */}
+          <button
+            type="button"
+            className="change-photo-btn"
+            onClick={() =>
+              fileInputRef.current?.click()
+            }
+          >
+            Change Photo
+          </button>
 
-          <div className="profile-image-section">
+        </div>
 
-            <img
-              src={
-                profileImage ||
-                defaultImage
-              }
-              alt="Profile"
-              className="profile-image"
-            />
+        {/* ================= TITLE ================= */}
 
-            <label
-              htmlFor="profileUpload"
-              className="change-photo-btn"
-            >
-              Change Photo
-            </label>
+        <h1>My Profile</h1>
 
-            <input
-              id="profileUpload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              style={{
-                display: "none",
-              }}
-            />
+        {/* ================= VIEW MODE ================= */}
 
-          </div>
+        {!editMode ? (
+          <>
+            <div className="profile-details">
 
-          {/* ================= TITLE ================= */}
+              <h2>
+                {profile.name || "Your Name"}
+              </h2>
 
-          <h1>My Profile</h1>
+              <p>
+                {profile.email || "No email"}
+              </p>
 
-          {/* ================= NAME ================= */}
+              <p>
+                {profile.phone
+                  ? `+${profile.phone}`
+                  : "No phone number"}
+              </p>
 
-          {editing ? (
-            <input
-              type="text"
-              value={name}
-              onChange={(e) =>
-                setName(e.target.value)
-              }
-              className="profile-input"
-              placeholder="Enter your name"
-            />
-          ) : (
-            <h2>
-              {name || "Your Name"}
-            </h2>
-          )}
+            </div>
 
-          {/* ================= EMAIL ================= */}
+            {/* ================= MEMBERSHIP ================= */}
 
-          {editing ? (
-            <input
-              type="email"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              className="profile-input"
-              placeholder="Enter your email"
-            />
-          ) : (
-            <p className="profile-email">
-              {email || "No email"}
-            </p>
-          )}
+            <div className="membership-box">
 
-          {/* ================= PHONE ================= */}
+              <h3>Membership</h3>
 
-          {editing ? (
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) =>
-                setPhone(e.target.value)
-              }
-              className="profile-input"
-              placeholder="Enter phone number"
-            />
-          ) : (
-            <p className="profile-phone">
-              {phone || "No phone number"}
-            </p>
-          )}
+              <span className="membership-badge">
+                ⭐ {profile.membership || "User"}
+              </span>
 
-          {/* ================= MEMBERSHIP ================= */}
+            </div>
 
-          <div className="membership-card">
+            {/* ================= EDIT ================= */}
 
-            <h3>Membership</h3>
-
-            <span className="membership">
-              ⭐ {membership}
-            </span>
-
-          </div>
-
-          {/* ================= ACTION BUTTONS ================= */}
-
-          {!editing ? (
             <button
+              type="button"
               className="edit-profile-btn"
-              onClick={() =>
-                setEditing(true)
-              }
+              onClick={() => setEditMode(true)}
             >
               Edit Profile
             </button>
-          ) : (
-            <div className="profile-actions">
+          </>
+        ) : (
+          /* ================= EDIT MODE ================= */
+
+          <div className="profile-edit-form">
+
+            <label>Name</label>
+
+            <input
+              type="text"
+              name="name"
+              value={profile.name}
+              onChange={handleChange}
+              placeholder="Enter your name"
+            />
+
+            <label>Email</label>
+
+            <input
+              type="email"
+              name="email"
+              value={profile.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+            />
+
+            <label>Phone Number</label>
+
+            <input
+              type="tel"
+              name="phone"
+              value={profile.phone}
+              onChange={handleChange}
+              placeholder="Enter your phone number"
+            />
+
+            <div className="profile-action-buttons">
 
               <button
+                type="button"
                 className="save-profile-btn"
-                onClick={handleSave}
+                onClick={saveProfile}
                 disabled={saving}
               >
                 {saving
                   ? "Saving..."
-                  : "Save Changes"}
+                  : "Save Profile"}
               </button>
 
               <button
+                type="button"
                 className="cancel-profile-btn"
-                onClick={() =>
-                  window.location.reload()
-                }
-                disabled={saving}
+                onClick={() => {
+                  setEditMode(false);
+                  loadProfile();
+                }}
               >
                 Cancel
               </button>
 
             </div>
-          )}
 
-          {/* ================= LOGOUT ================= */}
+          </div>
+        )}
 
-          <button
-            className="logout-btn"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+        {/* ================= LOGOUT ================= */}
 
-        </div>
+        <button
+          type="button"
+          className="logout-btn"
+          onClick={logout}
+        >
+          Logout
+        </button>
 
-      </section>
+      </div>
 
     </div>
   );
