@@ -304,14 +304,27 @@ export const verifyOTP = async (req, res) => {
   }
 };
 // ================= GET PROFILE =================
-
-export const getProfile = async (req, res) => {
+  export const getProfile = async (req, res) => {
   try {
+    console.log("=================================");
+    console.log("PROFILE REQUEST");
+    console.log("JWT USER:", req.user);
+    console.log("JWT USER ID:", req.user?.id);
+    console.log("=================================");
+
     const user = await User.findById(req.user.id).select("-password");
 
+    console.log("FOUND USER:", user);
+
     if (!user) {
+      console.log(
+        "❌ USER NOT FOUND IN MONGODB:",
+        req.user.id
+      );
+
       return res.status(404).json({
         message: "User not found",
+        userId: req.user.id,
       });
     }
 
@@ -321,7 +334,7 @@ export const getProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ GET PROFILE ERROR:", error);
 
     return res.status(500).json({
       message: "Server Error",

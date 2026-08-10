@@ -81,9 +81,11 @@ function Login() {
           }),
         }
       );
+     const data = await response.json();
 
-      const data =
-        await response.json();
+console.log("LOGIN STATUS:", response.status);
+console.log("LOGIN RESPONSE:", data);
+console.log("TOKEN FROM BACKEND:", data.token);
 
       if (response.ok) {
 
