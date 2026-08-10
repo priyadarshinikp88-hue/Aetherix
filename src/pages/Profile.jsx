@@ -33,6 +33,27 @@ function Profile() {
   };
 
   // =====================================================
+  // NORMALIZE USER DATA
+  // =====================================================
+
+  const normalizeUser = (data) => {
+    // Backend may return:
+    // { user: {...} }
+    // OR directly:
+    // { name, email, phone, ... }
+
+    const user = data?.user || data;
+
+    return {
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      membership: user?.membership || "User",
+      profileImage: user?.profileImage || "",
+    };
+  };
+
+  // =====================================================
   // LOAD PROFILE
   // =====================================================
 
@@ -80,13 +101,17 @@ function Profile() {
         return;
       }
 
-      setProfile({
-        name: data.name || "",
-        email: data.email || "",
-        phone: data.phone || "",
-        membership: data.membership || "User",
-        profileImage: data.profileImage || "",
-      });
+      const user = normalizeUser(data);
+
+      console.log("NORMALIZED USER:", user);
+
+      setProfile(user);
+
+      // Keep localStorage updated
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user || data)
+      );
     } catch (error) {
       console.error("Profile loading error:", error);
       alert("Unable to connect to server.");
@@ -122,7 +147,6 @@ function Profile() {
       return;
     }
 
-    // Keep image size reasonable
     if (file.size > 4 * 1024 * 1024) {
       alert("Please select an image smaller than 4 MB.");
       return;
@@ -168,6 +192,21 @@ function Profile() {
       return;
     }
 
+    // Remove spaces from phone
+    const cleanPhone = profile.phone
+      .replace(/\D/g, "")
+      .replace(/^91/, "");
+
+    if (
+      cleanPhone &&
+      !/^[6-9]\d{9}$/.test(cleanPhone)
+    ) {
+      alert(
+        "Please enter a valid 10-digit Indian phone number."
+      );
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -181,12 +220,18 @@ function Profile() {
             Authorization: `Bearer ${token}`,
           },
 
-         body: JSON.stringify({
-  name: profile.name.trim(),
-  email: profile.email.trim(),
-  phone: profile.phone.trim(),
-  profileImage: profile.profileImage || "",
-}),
+          body: JSON.stringify({
+            name: profile.name.trim(),
+
+            // IMPORTANT:
+            // Send undefined/empty string safely
+            email: profile.email.trim() || undefined,
+
+            phone: cleanPhone || undefined,
+
+            profileImage:
+              profile.profileImage || "",
+          }),
         }
       );
 
@@ -195,7 +240,9 @@ function Profile() {
       console.log("SAVE PROFILE RESPONSE:", data);
 
       if (response.status === 401) {
-        alert("Invalid or expired token. Please login again.");
+        alert(
+          "Invalid or expired token. Please login again."
+        );
 
         localStorage.removeItem("token");
         localStorage.removeItem("authToken");
@@ -206,36 +253,38 @@ function Profile() {
       }
 
       if (!response.ok) {
-        alert(data.message || "Unable to update profile.");
+        alert(
+          data.message ||
+            "Unable to update profile."
+        );
         return;
       }
 
-      // =================================================
-      // UPDATE STATE WITH DATABASE RESPONSE
-      // =================================================
+      // Backend may return { user: {...} }
+      // or directly return user
+      const updatedUser = normalizeUser(data);
 
-      setProfile({
-        name: data.name || "",
-        email: data.email || "",
-        phone: data.phone || "",
-        membership: data.membership || "User",
-        profileImage: data.profileImage || "",
-      });
+      console.log(
+        "UPDATED USER:",
+        updatedUser
+      );
 
-      // =================================================
-      // SAVE LOCAL USER DATA
-      // =================================================
+      setProfile(updatedUser);
 
       localStorage.setItem(
         "user",
-        JSON.stringify(data)
+        JSON.stringify(data.user || data)
       );
 
       setEditMode(false);
 
       alert("Profile updated successfully.");
+
     } catch (error) {
-      console.error("Profile update error:", error);
+      console.error(
+        "Profile update error:",
+        error
+      );
 
       alert(
         "Unable to save profile. Please try again."
@@ -285,14 +334,17 @@ function Profile() {
 
         <div className="profile-photo-section">
 
-          <img
-            src={
-              profile.profileImage ||
-              "/default-profile.png"
-            }
-            alt="Profile"
-            className="profile-photo"
-          />
+          {profile.profileImage ? (
+            <img
+              src={profile.profileImage}
+              alt="Profile"
+              className="profile-photo"
+            />
+          ) : (
+            <div className="profile-photo profile-photo-placeholder">
+              👤
+            </div>
+          )}
 
           <input
             ref={fileInputRef}
@@ -334,13 +386,13 @@ function Profile() {
 
               <p>
                 {profile.phone
-                  ? `+${profile.phone}`
+                  ? `+91 ${profile.phone.replace(/^91/, "")}`
                   : "No phone number"}
               </p>
 
             </div>
 
-            {/* ================= MEMBERSHIP ================= */}
+            {/* MEMBERSHIP */}
 
             <div className="membership-box">
 
@@ -352,17 +404,20 @@ function Profile() {
 
             </div>
 
-            {/* ================= EDIT ================= */}
+            {/* EDIT */}
 
             <button
               type="button"
               className="edit-profile-btn"
-              onClick={() => setEditMode(true)}
+              onClick={() =>
+                setEditMode(true)
+              }
             >
               Edit Profile
             </button>
           </>
         ) : (
+
           /* ================= EDIT MODE ================= */
 
           <div className="profile-edit-form">
@@ -394,7 +449,9 @@ function Profile() {
               name="phone"
               value={profile.phone}
               onChange={handleChange}
-              placeholder="Enter your phone number"
+              placeholder="Enter 10-digit phone number"
+              maxLength={10}
+              inputMode="numeric"
             />
 
             <div className="profile-action-buttons">
@@ -417,6 +474,7 @@ function Profile() {
                   setEditMode(false);
                   loadProfile();
                 }}
+                disabled={saving}
               >
                 Cancel
               </button>

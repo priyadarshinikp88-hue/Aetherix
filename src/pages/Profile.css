@@ -127,6 +127,18 @@
     border:3px solid #2d8cff;
     margin-bottom:20px;
 }
+.profile-photo-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #596783;
+  border: 3px solid #238cff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  margin: 0 auto 20px;
+}
  .change-photo-btn{
     display:inline-block;
     padding:12px 26px;
