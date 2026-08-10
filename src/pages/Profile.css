@@ -1,310 +1,452 @@
 /* ===============================
-        PROFILE PAGE
+   PROFILE PAGE
 ================================= */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:"Poppins",sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
 }
 
-.profile-page{
-
-    min-height:100vh;
-
-    background:
-    linear-gradient(
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(
     135deg,
     #04111f,
     #071d34,
-    #061320);
-
-    color:white;
-
+    #061320
+  );
+  color: white;
 }
 
 /* ===============================
-        HOME BUTTON
+   HOME BUTTON
 ================================= */
 
-.profile-back{
-
-    padding:30px 80px 10px;
-
+.profile-back {
+  padding: 30px 80px 10px;
 }
 
-.home-btn{
-
-    display:inline-block;
-
-    text-decoration:none;
-
-    background:#2388ff;
-
-    color:white;
-
-    padding:12px 28px;
-
-    border-radius:12px;
-
-    font-size:16px;
-
-    font-weight:600;
-
-    transition:.3s;
-
+.home-btn {
+  display: inline-block;
+  text-decoration: none;
+  background: #2388ff;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.3s;
 }
 
-.home-btn:hover{
-
-    background:#3aa0ff;
-
-    transform:translateY(-2px);
-
+.home-btn:hover {
+  background: #3aa0ff;
+  transform: translateY(-2px);
 }
 
 /* ===============================
-        PROFILE CARD
+   PROFILE CARD
 ================================= */
 
-.profile-container{
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    padding:40px 20px 80px;
-
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px 80px;
 }
 
-.profile-card{
-
-    width:450px;
-
-    background:rgba(15,35,60,.82);
-
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.08);
-
-    border-radius:25px;
-
-    padding:45px;
-
-    text-align:center;
-
-    transition:.35s;
-
+.profile-card {
+  width: 450px;
+  background: rgba(15, 35, 60, 0.82);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 25px;
+  padding: 45px;
+  text-align: center;
+  transition: 0.35s;
 }
 
-.profile-card:hover{
-
-    transform:translateY(-8px);
-
-    box-shadow:0 20px 45px rgba(0,183,255,.20);
-
+.profile-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px rgba(0, 183, 255, 0.2);
 }
 
 /* ===============================
-        PROFILE IMAGE
+   PROFILE IMAGE SECTION
 ================================= */
- 
- .profile-image{
-    transition:.3s;
+
+.profile-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-.profile-image:hover{
-    transform:scale(1.05);
+/* Actual uploaded image */
+
+.profile-photo {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border: 3px solid #2d8cff;
+  margin: 0 auto 20px;
+  transition: 0.3s;
 }
- .profile-image{
-    width:160px;
-    height:160px;
-    border-radius:50%;
-    object-fit:cover;
-    border:3px solid #2d8cff;
-    margin-bottom:20px;
+
+.profile-photo:hover {
+  transform: scale(1.05);
 }
+
+/* Default profile image */
+
 .profile-photo-placeholder {
   width: 180px;
   height: 180px;
   border-radius: 50%;
   background: #596783;
   border: 3px solid #238cff;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 80px;
-  margin: 0 auto 20px;
-}
- .change-photo-btn{
-    display:inline-block;
-    padding:12px 26px;
-    background:#2d8cff;
-    color:#fff;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:600;
-    transition:.3s;
-    margin-bottom:30px;
-}
 
-.change-photo-btn:hover{
-    background:#43a1ff;
+  font-size: 80px;
+
+  margin: 0 auto 20px;
 }
 
 /* ===============================
-        PROFILE DETAILS
+   CHANGE PHOTO BUTTON
 ================================= */
 
-.profile-card h1{
-
-    font-size:36px;
-
-    margin-bottom:20px;
-
+.change-photo-btn {
+  display: inline-block;
+  padding: 12px 26px;
+  background: #2d8cff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+  margin-bottom: 30px;
 }
 
-.profile-card h2{
+.change-photo-btn:hover {
+  background: #3aa0ff;
+  transform: translateY(-2px);
+}
 
-    font-size:28px;
+/* ===============================
+   PROFILE DETAILS
+================================= */
 
-    margin-bottom:12px;
+.profile-card h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
 
+.profile-card h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
 }
 
 .profile-email,
-.profile-phone{
-
-    color:#cfe8ff;
-
-    font-size:18px;
-
-    margin-bottom:10px;
-
-}
-     .profile-birthday{
-    color:#c8d9ef;
-    font-size:18px;
-    margin-top:10px;
-    margin-bottom:25px;
-}
-/* ===============================
-        MEMBERSHIP
-================================= */
- .membership-card{
-    margin-top:35px;
-    padding:25px;
-    border-radius:18px;
-    background:rgba(255,255,255,.05);
+.profile-phone {
+  color: #cfe8ff;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
-.membership-card h3{
-
-    color:#7fd8ff;
-
-    margin-bottom:15px;
-
-}
-  .membership{
-    display:inline-block;
-    padding:10px 22px;
-    border-radius:30px;
-    background:#1f6dff;
-    color:#fff;
-    font-weight:600;
+.profile-birthday {
+  color: #c8d9ef;
+  font-size: 18px;
+  margin-top: 10px;
+  margin-bottom: 25px;
 }
 
 /* ===============================
-        LOGOUT BUTTON
+   MEMBERSHIP
 ================================= */
 
-.logout-btn{
-
-    margin-top:35px;
-
-    width:100%;
-
-    padding:15px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:#ff4b5c;
-
-    color:white;
-
-    font-size:17px;
-
-    cursor:pointer;
-
-    transition:.3s;
-
+.membership-card {
+  margin-top: 35px;
+  padding: 25px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
 }
- .logout-btn:hover{
-    background:#ff3045;
-    transform:translateY(-2px);
+
+.membership-card h3 {
+  color: #7fd8ff;
+  margin-bottom: 15px;
+}
+
+.membership {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 30px;
+  background: #1f6dff;
+  color: #fff;
+  font-weight: 600;
 }
 
 /* ===============================
-        RESPONSIVE
+   LOGOUT BUTTON
 ================================= */
 
-@media(max-width:768px){
-
-.profile-back{
-
-    padding:20px;
-
+.logout-btn {
+  margin-top: 35px;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: #ff4b5c;
+  color: white;
+  font-size: 17px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.profile-card{
-
-    width:100%;
-
-    padding:30px;
-
+.logout-btn:hover {
+  background: #ff3045;
+  transform: translateY(-2px);
 }
 
-.profile-image{
+/* ===============================
+   EDIT PROFILE
+================================= */
 
-    width:110px;
-
-    height:110px;
-
-}
- 
-}
- .profile-image-section{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-.upload-btn{
-
-    display:inline-block;
-
-    margin-top:15px;
-
-    padding:10px 22px;
-
-    background:#1f6dff;
-
-    color:white;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-    transition:.3s;
-
+.edit-profile-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 10px;
+  background: #2388ff;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.upload-btn:hover{
+.edit-profile-btn:hover {
+  background: #3aa0ff;
+}
 
-    background:#3aa0ff;
+/* ===============================
+   PROFILE INPUTS
+================================= */
 
+.profile-edit-input {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+
+  background: #102b49;
+  color: white;
+
+  font-size: 16px;
+  outline: none;
+}
+
+.profile-edit-input:focus {
+  border-color: #2388ff;
+}
+
+/* ===============================
+   SAVE / CANCEL
+================================= */
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.save-profile-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  background: #2388ff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-profile-btn:hover {
+  background: #3aa0ff;
+}
+
+.cancel-profile-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  background: #555;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-profile-btn:hover {
+  background: #666;
+}
+
+/* ===============================
+   UPLOAD BUTTON
+================================= */
+
+.upload-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 22px;
+  background: #1f6dff;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.upload-btn:hover {
+  background: #3aa0ff;
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 768px) {
+  .profile-back {
+    padding: 20px;
+  }
+
+  .profile-container {
+    padding: 25px 15px 60px;
+  }
+
+  .profile-card {
+    width: 100%;
+    max-width: 450px;
+    padding: 30px 20px;
+  }
+
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-photo-placeholder {
+    width: 150px;
+    height: 150px;
+    font-size: 65px;
+  }
+
+  .profile-card h1 {
+    font-size: 30px;
+  }
+
+  .profile-card h2 {
+    font-size: 24px;
+  }
+
+  .profile-email,
+  .profile-phone,
+  .profile-birthday {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .profile-card {
+    padding: 25px 15px;
+  }
+
+  .profile-photo {
+    width: 130px;
+    height: 130px;
+  }
+
+  .profile-photo-placeholder {
+    width: 130px;
+    height: 130px;
+    font-size: 55px;
+  }
+}
+/* ===============================
+   PROFILE PHOTO - FIX
+================================= */
+
+.profile-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.profile-photo {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border: 3px solid #2d8cff;
+  margin: 0 auto 20px;
+  transition: 0.3s;
+}
+
+.profile-photo:hover {
+  transform: scale(1.05);
+}
+
+.profile-photo-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #596783;
+  border: 3px solid #238cff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 80px;
+  margin: 0 auto 20px;
+}
+
+@media (max-width: 768px) {
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-photo-placeholder {
+    width: 150px;
+    height: 150px;
+    font-size: 65px;
+  }
+}
+
+@media (max-width: 400px) {
+  .profile-photo {
+    width: 130px;
+    height: 130px;
+  }
+
+  .profile-photo-placeholder {
+    width: 130px;
+    height: 130px;
+    font-size: 55px;
+  }
 }
