@@ -344,10 +344,11 @@ const geocodeSearch = async (
 export const searchCities =
   async (req, res) => {
     try {
-      const query =
-        String(
-          req.query.q || ""
-        ).trim();
+     const query = String(
+  req.query.q ||
+  req.query.query ||
+  ""
+).trim();
 
       if (query.length < 2) {
         return res.json([]);
