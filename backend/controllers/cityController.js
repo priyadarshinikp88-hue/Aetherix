@@ -15,10 +15,10 @@ const TEXT_SEARCH_URL =
 const GEOCODE_URL =
   "https://maps.googleapis.com/maps/api/geocode/json";
 
-const MAX_RESULTS = 8;
+const MAX_RESULTS = 15;
 
 /* =======================================================
-   HELPERS
+   GOOGLE HEADERS
 ======================================================= */
 
 const headers = () => ({
@@ -30,23 +30,19 @@ const headers = () => ({
    PLACE DETAILS
 ======================================================= */
 
-const getPlaceDetails = async (
-  placeId
-) => {
+const getPlaceDetails = async (placeId) => {
   try {
-    const response =
-      await axios.get(
-        `https://places.googleapis.com/v1/${placeId}`,
-        {
-          headers: {
-            "X-Goog-Api-Key":
-              GOOGLE_API_KEY,
+    const response = await axios.get(
+      `https://places.googleapis.com/v1/${placeId}`,
+      {
+        headers: {
+          "X-Goog-Api-Key": GOOGLE_API_KEY,
 
-            "X-Goog-FieldMask":
-              "id,displayName,formattedAddress,location,addressComponents,addressDescriptor,types",
-          },
-        }
-      );
+          "X-Goog-FieldMask":
+            "id,displayName,formattedAddress,location,addressComponents,addressDescriptor,types",
+        },
+      }
+    );
 
     return response.data;
   } catch (error) {
@@ -64,13 +60,8 @@ const getPlaceDetails = async (
    FORMAT GOOGLE PLACE
 ======================================================= */
 
-const formatPlace = (
-  place
-) => {
-  if (
-    !place ||
-    !place.location
-  ) {
+const formatPlace = (place) => {
+  if (!place || !place.location) {
     return null;
   }
 
@@ -79,61 +70,56 @@ const formatPlace = (
   let country = "India";
 
   const components =
-    place.addressComponents ||
-    [];
+    place.addressComponents || [];
 
-  components.forEach(
-    (component) => {
-      const types =
-        component.types || [];
+  components.forEach((component) => {
+    const types =
+      component.types || [];
 
-      const name =
-        component.longText || "";
+    const name =
+      component.longText || "";
 
-      if (
-        types.includes(
-          "administrative_area_level_1"
-        )
-      ) {
-        state = name;
-      }
-
-      if (
-        types.includes(
-          "administrative_area_level_2"
-        )
-      ) {
-        district = name;
-      }
-
-      if (
-        types.includes("country")
-      ) {
-        country = name;
-      }
+    if (
+      types.includes(
+        "administrative_area_level_1"
+      )
+    ) {
+      state = name;
     }
-  );
+
+    if (
+      types.includes(
+        "administrative_area_level_2"
+      )
+    ) {
+      district = name;
+    }
+
+    if (
+      types.includes("country")
+    ) {
+      country = name;
+    }
+  });
 
   const name =
-    place.displayName?.text ||
-    "";
+    place.displayName?.text || "";
 
   const address =
-    place.formattedAddress ||
-    "";
+    place.formattedAddress || "";
 
   return {
-    value: `${place.location.latitude},${place.location.longitude}`,
+    value:
+      `${place.location.latitude},${place.location.longitude}`,
 
     label:
-      address ||
-      name,
+      address || name,
 
     name,
 
-    state,
-
     district,
+
+    state,
 
     country,
 
@@ -159,12 +145,10 @@ const formatPlace = (
 };
 
 /* =======================================================
-   TEXT SEARCH FALLBACK
+   TEXT SEARCH
 ======================================================= */
 
-const textSearch = async (
-  query
-) => {
+const textSearch = async (query) => {
   try {
     const response =
       await axios.post(
@@ -177,7 +161,7 @@ const textSearch = async (
 
           regionCode: "IN",
 
-          maxResultCount: 10,
+          maxResultCount: 20,
         },
         {
           headers: {
@@ -208,9 +192,7 @@ const textSearch = async (
    GEOCODING FALLBACK
 ======================================================= */
 
-const geocodeSearch = async (
-  query
-) => {
+const geocodeSearch = async (query) => {
   try {
     const response =
       await axios.get(
@@ -220,7 +202,8 @@ const geocodeSearch = async (
             address:
               `${query}, India`,
 
-            key: GOOGLE_API_KEY,
+            key:
+              GOOGLE_API_KEY,
 
             language: "en",
 
@@ -239,8 +222,8 @@ const geocodeSearch = async (
     return (
       response.data.results ||
       []
-    ).map(
-      (item) => {
+    )
+      .map((item) => {
         const location =
           item.geometry?.location;
 
@@ -255,64 +238,64 @@ const geocodeSearch = async (
         (
           item.address_components ||
           []
-        ).forEach(
-          (component) => {
-            const types =
-              component.types ||
-              [];
+        ).forEach((component) => {
+          const types =
+            component.types || [];
 
-            if (
-              types.includes(
-                "administrative_area_level_1"
-              )
-            ) {
-              state =
-                component.long_name;
-            }
-
-            if (
-              types.includes(
-                "administrative_area_level_2"
-              )
-            ) {
-              district =
-                component.long_name;
-            }
-
-            if (
-              types.includes(
-                "country"
-              )
-            ) {
-              country =
-                component.long_name;
-            }
+          if (
+            types.includes(
+              "administrative_area_level_1"
+            )
+          ) {
+            state =
+              component.long_name;
           }
-        );
+
+          if (
+            types.includes(
+              "administrative_area_level_2"
+            )
+          ) {
+            district =
+              component.long_name;
+          }
+
+          if (
+            types.includes(
+              "country"
+            )
+          ) {
+            country =
+              component.long_name;
+          }
+        });
+
+        const name =
+          item.address_components?.[0]
+            ?.long_name ||
+          query;
 
         return {
-          value: `${location.lat},${location.lng}`,
+          value:
+            `${location.lat},${location.lng}`,
 
           label:
             item.formatted_address ||
-            item.address_components?.[0]
-              ?.long_name ||
-            query,
+            name,
 
-          name:
-            item.address_components?.[0]
-              ?.long_name ||
-            query,
-
-          state,
+          name,
 
           district,
 
+          state,
+
           country,
 
-          lat: Number(location.lat),
+          lat:
+            Number(location.lat),
 
-          lon: Number(location.lng),
+          lon:
+            Number(location.lng),
 
           placeId:
             item.place_id || "",
@@ -324,8 +307,9 @@ const geocodeSearch = async (
           types:
             item.types || [],
         };
-      }
-    ).filter(Boolean);
+      })
+      .filter(Boolean);
+
   } catch (error) {
     console.error(
       "GOOGLE GEOCODING ERROR:",
@@ -338,17 +322,18 @@ const geocodeSearch = async (
 };
 
 /* =======================================================
-   MAIN SEARCH
+   MAIN CITY SEARCH
 ======================================================= */
 
 export const searchCities =
   async (req, res) => {
     try {
-     const query = String(
-  req.query.q ||
-  req.query.query ||
-  ""
-).trim();
+      const query =
+        String(
+          req.query.q ||
+          req.query.query ||
+          ""
+        ).trim();
 
       if (query.length < 2) {
         return res.json([]);
@@ -393,20 +378,18 @@ export const searchCities =
           );
 
         const suggestions =
-          response.data
-            ?.suggestions ||
+          response.data?.suggestions ||
           [];
 
         /*
-         * Get details for the
-         * best autocomplete results.
+         * Get more suggestions so
+         * villages with the same
+         * name can appear.
          */
 
         for (
-          const suggestion of suggestions.slice(
-            0,
-            6
-          )
+          const suggestion of
+          suggestions.slice(0, 10)
         ) {
           const prediction =
             suggestion.placePrediction;
@@ -425,12 +408,17 @@ export const searchCities =
           const formatted =
             formatPlace(place);
 
-          if (formatted) {
+          if (
+            formatted &&
+            formatted.lat != null &&
+            formatted.lon != null
+          ) {
             results.push(
               formatted
             );
           }
         }
+
       } catch (error) {
         console.error(
           "GOOGLE AUTOCOMPLETE ERROR:",
@@ -440,43 +428,32 @@ export const searchCities =
       }
 
       /* =================================================
-         2. TEXT SEARCH FALLBACK
+         2. TEXT SEARCH
       ================================================= */
 
-      if (
-        results.length <
-        MAX_RESULTS
-      ) {
-        const places =
-          await textSearch(
-            query
+      const places =
+        await textSearch(query);
+
+      places.forEach((place) => {
+        const formatted =
+          formatPlace(place);
+
+        if (
+          formatted &&
+          formatted.lat != null &&
+          formatted.lon != null
+        ) {
+          results.push(
+            formatted
           );
-
-        places.forEach(
-          (place) => {
-            const formatted =
-              formatPlace(place);
-
-            if (
-              formatted &&
-              formatted.lat != null &&
-              formatted.lon != null
-            ) {
-              results.push(
-                formatted
-              );
-            }
-          }
-        );
-      }
+        }
+      });
 
       /* =================================================
          3. GEOCODING FALLBACK
       ================================================= */
 
-      if (
-        results.length === 0
-      ) {
+      if (results.length === 0) {
         const geocoded =
           await geocodeSearch(
             query
@@ -488,44 +465,121 @@ export const searchCities =
       }
 
       /* =================================================
-         4. REMOVE DUPLICATES
+         4. REMOVE TRUE DUPLICATES
+         
+         IMPORTANT:
+         Do NOT deduplicate by village name.
+         
+         Same village name in different
+         districts must remain.
       ================================================= */
 
-      const unique =
-        results.filter(
-          (item, index, array) => {
-            return (
-              index ===
-              array.findIndex(
-                (other) => {
-                  if (
-                    item.placeId &&
-                    other.placeId
-                  ) {
-                    return (
-                      item.placeId ===
-                      other.placeId
-                    );
-                  }
+      const unique = [];
 
-                  return (
-                    Math.abs(
-                      item.lat -
-                        other.lat
-                    ) < 0.0001 &&
-                    Math.abs(
-                      item.lon -
-                        other.lon
-                    ) < 0.0001
-                  );
-                }
-              )
-            );
-          }
-        );
+      for (
+        const item of results
+      ) {
+        const duplicate =
+          unique.some(
+            (existing) => {
+
+              // Same Google place
+              if (
+                item.placeId &&
+                existing.placeId &&
+                item.placeId ===
+                  existing.placeId
+              ) {
+                return true;
+              }
+
+              // Same coordinates
+              const sameLocation =
+                Math.abs(
+                  item.lat -
+                    existing.lat
+                ) < 0.00001 &&
+                Math.abs(
+                  item.lon -
+                    existing.lon
+                ) < 0.00001;
+
+              return sameLocation;
+            }
+          );
+
+        if (!duplicate) {
+          unique.push(item);
+        }
+      }
 
       /* =================================================
-         5. RETURN BEST RESULTS
+         5. RANK RESULTS
+         
+         Exact village name first.
+         Then partial matches.
+      ================================================= */
+
+      const queryLower =
+        query.toLowerCase();
+
+      unique.sort(
+        (a, b) => {
+
+          const aName =
+            String(
+              a.name || ""
+            ).toLowerCase();
+
+          const bName =
+            String(
+              b.name || ""
+            ).toLowerCase();
+
+          const aExact =
+            aName ===
+            queryLower
+              ? 0
+              : 1;
+
+          const bExact =
+            bName ===
+            queryLower
+              ? 0
+              : 1;
+
+          if (
+            aExact !== bExact
+          ) {
+            return (
+              aExact -
+              bExact
+            );
+          }
+
+          const aStarts =
+            aName.startsWith(
+              queryLower
+            )
+              ? 0
+              : 1;
+
+          const bStarts =
+            bName.startsWith(
+              queryLower
+            )
+              ? 0
+              : 1;
+
+          return (
+            aStarts -
+            bStarts
+          );
+        }
+      );
+
+      /* =================================================
+         6. RETURN 15 RESULTS
       ================================================= */
 
       return res.json(
@@ -534,6 +588,7 @@ export const searchCities =
           MAX_RESULTS
         )
       );
+
     } catch (error) {
       console.error(
         "CITY SEARCH ERROR:",

@@ -38,67 +38,50 @@ const API =
 type WeatherIconName =
   keyof typeof Ionicons.glyphMap;
 
-type City = {
+ type City = {
   name: string;
-  state?: string;
-  country?: string;
+  state: string;
+  district: string;
+  country: string;
   lat: number;
   lon: number;
 };
 
-type WeatherData = {
-  name?: string;
+ type WeatherData = {
+  temperature?: number | null;
+  feels_like?: number | null;
+  humidity?: number | null;
+  pressure?: number | null;
+  wind_speed?: number | null;
+  wind_direction?: number | null;
+  visibility?: number | null;
+  cloud_cover?: number | null;
+  precipitation_probability?: number | null;
+  precipitation_type?: number | null;
+  rain_intensity?: number | null;
+  weather_code?: number | null;
+  condition?: string | null;
+  sunrise?: string | number | null;
+  sunset?: string | number | null;
+
+  lat?: number | null;
+  lon?: number | null;
+
   city?: string;
-
-  location?: {
-    city?: string;
-    name?: string;
-  };
-
-  sys?: {
-    country?: string;
-    sunrise?: number;
-    sunset?: number;
-  };
-
-  coord?: {
-    lat?: number;
-    lon?: number;
-  };
-
-  main?: {
-    temp?: number;
-    feels_like?: number;
-    humidity?: number;
-    pressure?: number;
-  };
-
-  visibility?: number;
-
-  wind?: {
-    speed?: number;
-    deg?: number;
-  };
-
-  weather?: Array<{
-    main?: string;
-    description?: string;
-    icon?: string;
-  }>;
+  district?: string;
+  state?: string;
+  country?: string;
 };
 
 type ForecastItem = {
   dt?: number;
   dt_txt?: string;
-
-  main?: {
-    temp?: number;
-  };
-
-  weather?: Array<{
-    main?: string;
-    description?: string;
-  }>;
+  main?: { temp?: number };
+  weather?: Array<{ main?: string; description?: string }>;
+  temperature?: number;
+  condition?: string;
+  time?: string;
+  date?: string;
 };
 
 /* =========================================================
@@ -392,15 +375,26 @@ function formatDate(date: Date) {
 }
 
 function formatSunTime(
-  timestamp?: number
+  value?: string | number | null
 ) {
-  if (!timestamp) {
+  if (value == null || value === '') {
     return '--:--';
   }
 
-  return new Date(
-    timestamp * 1000
-  ).toLocaleTimeString(
+  const date =
+    typeof value === 'number'
+      ? new Date(
+          value < 100000000000
+            ? value * 1000
+            : value
+        )
+      : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '--:--';
+  }
+
+  return date.toLocaleTimeString(
     'en-IN',
     {
       hour: 'numeric',
@@ -951,6 +945,10 @@ export default function DashboardScreen() {
   const [locating, setLocating] =
     useState(false);
 
+  // Prevent an older city-search response from replacing newer results.
+  const searchRequestRef =
+    useRef(0);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -972,100 +970,167 @@ export default function DashboardScreen() {
   }, []);
 
   /* =======================================================
-     FORECAST
-  ======================================================= */
+   FORECAST
+======================================================= */
+const fetchForecast = async (
+  lat: number,
+  lon: number
+) => {
+  try {
+    console.log(
+      "FETCHING 5-DAY FORECAST:",
+      lat,
+      lon
+    );
 
-  const fetchForecast =
-    async (
-      lat: number,
-      lon: number
-    ) => {
-      try {
-        const response =
-          await fetch(
-            `${API}/api/forecast?lat=${encodeURIComponent(
-              lat
-            )}&lon=${encodeURIComponent(
-              lon
-            )}`
-          );
+    const response = await fetch(
+      `${API}/api/forecast?lat=${encodeURIComponent(
+        lat
+      )}&lon=${encodeURIComponent(lon)}`
+    );
 
-        const data =
-          await response.json();
+    const data = await response.json();
 
-        if (
-          response.ok &&
-          Array.isArray(
-            data?.list
-          )
-        ) {
-          setForecast(
-            data.list
-          );
-        } else {
-          setForecast([]);
-        }
-      } catch (error) {
-        console.log(
-          'Forecast error:',
-          error
-        );
+    console.log(
+      "TOMORROW 5-DAY FORECAST RESPONSE:",
+      data
+    );
 
-        setForecast([]);
-      }
-    };
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+          "Unable to fetch 5-day forecast"
+      );
+    }
 
+    const dailyForecast =
+      Array.isArray(
+        data?.data?.timelines?.daily
+      )
+        ? data.data.timelines.daily
+        : [];
+
+    console.log(
+      "DAILY FORECAST:",
+      dailyForecast
+    );
+
+    setForecast(dailyForecast);
+
+  } catch (error) {
+    console.log(
+      "Forecast API error:",
+      error
+    );
+
+    setForecast([]);
+  }
+};
   /* =======================================================
-     WEATHER
-  ======================================================= */
+   WEATHER
+======================================================= */
 
-  const fetchWeather =
-    async (
-      lat: number,
-      lon: number
-    ) => {
-      try {
-        setLoading(true);
+const fetchWeather = async (
+  lat: number,
+  lon: number,
+  selectedCity?: City
+) => {
+  try {
+    setLoading(true);
 
-        const response =
-          await fetch(
-            `${API}/api/weather?lat=${encodeURIComponent(
-              lat
-            )}&lon=${encodeURIComponent(
-              lon
-            )}`
-          );
+    console.log(
+      "🌤️ FETCH WEATHER FOR COORDINATES:",
+      lat,
+      lon,
+      selectedCity?.name || "current location"
+    );
 
-        const data =
-          await response.json();
+    const response = await fetch(
+      `${API}/api/weather?lat=${encodeURIComponent(
+        lat
+      )}&lon=${encodeURIComponent(lon)}`
+    );
 
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              'Unable to fetch weather'
-          );
-        }
+    const data = await response.json();
 
-        setWeather(data);
+    console.log(
+      "🌤️ WEATHER RESPONSE:",
+      data
+    );
 
-        await fetchForecast(
-          lat,
-          lon
-        );
-      } catch (error) {
-        console.log(
-          'Weather fetch error:',
-          error
-        );
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+          "Unable to fetch weather"
+      );
+    }
 
-        Alert.alert(
-          'Weather Error',
-          'Unable to fetch weather data. Please try again.'
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+   setWeather({
+  temperature: data.temperature ?? null,
+  feels_like: data.feels_like ?? null,
+  humidity: data.humidity ?? null,
+  pressure: data.pressure ?? null,
+  wind_speed: data.wind_speed ?? null,
+  wind_direction: data.wind_direction ?? null,
+  visibility: data.visibility ?? null,
+  cloud_cover: data.cloud_cover ?? null,
+  precipitation_probability:
+    data.precipitation_probability ?? null,
+  precipitation_type:
+    data.precipitation_type ?? null,
+  rain_intensity:
+    data.rain_intensity ?? null,
+  weather_code:
+    data.weather_code ?? null,
+  condition:
+    data.condition ?? "Unknown",
+  sunrise:
+    data.sunrise ?? null,
+  sunset:
+    data.sunset ?? null,
+
+  city:
+    selectedCity?.name ??
+    data.city ??
+    undefined,
+
+  district:
+    selectedCity?.district ??
+    data.district ??
+    undefined,
+
+  state:
+    selectedCity?.state ??
+    data.state ??
+    undefined,
+
+  country:
+    selectedCity?.country ??
+    data.country ??
+    undefined,
+
+  lat,
+  lon,
+});
+
+    await fetchForecast(lat, lon);
+
+  } catch (error) {
+    console.log(
+      "❌ Weather fetch error:",
+      error
+    );
+
+    Alert.alert(
+      "Weather Error",
+      error instanceof Error
+        ? error.message
+        : "Unable to fetch weather"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* =======================================================
      INITIAL WEATHER
@@ -1078,338 +1143,419 @@ export default function DashboardScreen() {
     );
   }, []);
 
-  /* =======================================================
-     AUTO UPDATE EVERY MINUTE
-  ======================================================= */
+   /* =======================================================
+   AUTO UPDATE EVERY MINUTE
+======================================================= */
 
-  useEffect(() => {
-    const lat =
-      weather?.coord?.lat;
+useEffect(() => {
+  const lat = weather?.lat;
+  const lon = weather?.lon;
 
-    const lon =
-      weather?.coord?.lon;
+  if (
+    lat == null ||
+    lon == null
+  ) {
+    return;
+  }
 
-    if (
-      lat == null ||
-      lon == null
-    ) {
-      return;
-    }
+  const interval =
+    setInterval(async () => {
+      try {
+        const response =
+          await fetch(
+            `${API}/api/weather?lat=${encodeURIComponent(
+              lat
+            )}&lon=${encodeURIComponent(
+              lon
+            )}`
+          );
 
-    const interval =
-      setInterval(
-        async () => {
-          try {
-            const response =
-              await fetch(
-                `${API}/api/weather?lat=${lat}&lon=${lon}`
-              );
+        const data =
+          await response.json();
 
-            const data =
-              await response.json();
+        if (response.ok) {
+          setWeather(
+            (previous) => ({
+              ...previous,
+              ...data,
+              lat,
+              lon,
+            })
+          );
+        }
+      } catch (error) {
+        console.log(
+          "Weather auto update failed:",
+          error
+        );
+      }
+    }, 60000);
 
-            if (response.ok) {
-              setWeather(data);
-
-              await fetchForecast(
-                lat,
-                lon
-              );
-            }
-          } catch (error) {
-            console.log(
-              'Weather auto update failed:',
-              error
-            );
-          }
-        },
-        60000
-      );
-
-    return () =>
-      clearInterval(
-        interval
-      );
-  }, [
-    weather?.coord?.lat,
-    weather?.coord?.lon,
-  ]);
+  return () =>
+    clearInterval(interval);
+}, [
+  weather?.lat,
+  weather?.lon,
+]);
 
   /* =======================================================
      CITY SEARCH
   ======================================================= */
 
-  const searchCities =
-    async (
-      value: string
-    ) => {
-      const text =
-        value.trim();
+  const searchCities = async (
+    value: string
+  ) => {
+    const text = value.trim();
 
-      if (text.length < 2) {
-        setCityOptions([]);
-        return;
-      }
-
-      try {
-        setSearching(true);
-    const response = await fetch(
-  `${API}/api/cities?q=${encodeURIComponent(text)}`
-);
-
-        const data =
-          await response.json();
-
-        if (
-          !response.ok ||
-          !Array.isArray(data)
-        ) {
-          setCityOptions([]);
-          return;
-        }
-
-        const options: City[] =
-          data
-            .filter(
-              (item: any) =>
-                item?.name &&
-                item?.lat != null &&
-                item?.lon != null
-            )
-            .map(
-              (item: any) => ({
-                name:
-                  item.name,
-                state:
-                  item.state ||
-                  '',
-                country:
-                  item.country ||
-                  '',
-                lat: Number(
-                  item.lat
-                ),
-                lon: Number(
-                  item.lon
-                ),
-              })
-            )
-            .slice(0, 6);
-
-        setCityOptions(
-          options
-        );
-      } catch (error) {
-        console.log(
-          'City search error:',
-          error
-        );
-
-        setCityOptions([]);
-      } finally {
-        setSearching(false);
-      }
-    };
-
-  useEffect(() => {
-    const value =
-      search.trim();
-
-    if (value.length < 2) {
+    if (text.length < 2) {
       setCityOptions([]);
+      setSearching(false);
       return;
     }
 
-    const timer =
-      setTimeout(() => {
-        searchCities(value);
-      }, 450);
+    const requestId =
+      ++searchRequestRef.current;
 
-    return () =>
-      clearTimeout(timer);
-  }, [search]);
+    try {
+      setSearching(true);
+
+      const url =
+        `${API}/api/cities?q=${encodeURIComponent(text)}`;
+
+      console.log(
+        "🔎 CITY SEARCH:",
+        text,
+        url
+      );
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      console.log(
+        "🔎 CITY SEARCH RESPONSE:",
+        response.status,
+        data
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Unable to search cities"
+        );
+      }
+
+      // Support the common response formats: array, {cities: []}, or {results: []}.
+      const rawList =
+        Array.isArray(data)
+          ? data
+          : Array.isArray(data?.cities)
+            ? data.cities
+            : Array.isArray(data?.results)
+              ? data.results
+              : [];
+
+      const options: City[] =
+        rawList
+          .map((item: any) => {
+            const lat =
+              Number(
+                item?.lat ??
+                  item?.latitude ??
+                  item?.geometry?.lat ??
+                  item?.geometry?.location?.lat
+              );
+
+            const lon =
+              Number(
+                item?.lon ??
+                  item?.lng ??
+                  item?.longitude ??
+                  item?.geometry?.lon ??
+                  item?.geometry?.location?.lng
+              );
+
+            const name =
+              item?.name ??
+              item?.city ??
+              item?.locality ??
+              item?.address?.city ??
+              item?.formatted_address;
+
+          return {
+  name: name ? String(name) : "",
+
+  state: String(
+    item?.state ??
+    item?.region ??
+    item?.address?.state ??
+    ""
+  ),
+
+  district: String(
+    item?.district ??
+    item?.address?.district ??
+    item?.county ??
+    ""
+  ),
+
+  country: String(
+  item?.country ??
+  item?.address?.country ??
+  ""
+),
+
+  lat,
+  lon,
+};
+          })
+          .filter(
+            (item: City) =>
+              Boolean(item.name) &&
+              Number.isFinite(item.lat) &&
+              Number.isFinite(item.lon)
+          );
+
+      // Ignore an old response if the user has typed something newer.
+      if (requestId !== searchRequestRef.current) {
+        return;
+      }
+
+      console.log(
+        "✅ CITY OPTIONS:",
+        options
+      );
+
+      setCityOptions(
+        options.slice(0, 20)
+      );
+
+    } catch (error) {
+      console.log(
+        "❌ City search error:",
+        error
+      );
+
+      if (requestId === searchRequestRef.current) {
+        setCityOptions([]);
+      }
+    } finally {
+      if (requestId === searchRequestRef.current) {
+        setSearching(false);
+      }
+    }
+  };
+
+  const handleSearchText = (
+    value: string
+  ) => {
+    setSearch(value);
+
+    if (value.trim().length < 2) {
+      ++searchRequestRef.current;
+      setCityOptions([]);
+      setSearching(false);
+      return;
+    }
+
+    // Search as the user types.
+    searchCities(value);
+  };
 
   /* =======================================================
      SELECT CITY
   ======================================================= */
 
-  const selectCity =
-    async (city: City) => {
-      Keyboard.dismiss();
+  const selectCity = async (
+    selectedCity: City
+  ) => {
+    console.log(
+      "📍 CITY SELECTED:",
+      selectedCity.name,
+      selectedCity.lat,
+      selectedCity.lon
+    );
 
-      setSearch(
-        city.name
-      );
+    // Invalidate any pending search response.
+    ++searchRequestRef.current;
 
-      setCityOptions([]);
+    Keyboard.dismiss();
+    setCityOptions([]);
+    setSearching(false);
+    setSearch(selectedCity.name);
 
-      await fetchWeather(
-        city.lat,
-        city.lon
-      );
-    };
+    // IMPORTANT: fetch weather using the selected city's coordinates.
+    // This is the same coordinate-based endpoint used by Live Location.
+    await fetchWeather(
+      selectedCity.lat,
+      selectedCity.lon,
+      selectedCity
+    );
+  };
 
   /* =======================================================
      CURRENT LOCATION
   ======================================================= */
 
-  const getLiveLocation =
-    async () => {
-      if (locating) {
+  const getLiveLocation = async () => {
+    if (locating) {
+      return;
+    }
+
+    try {
+      setLocating(true);
+      Keyboard.dismiss();
+
+      const permission =
+        await Location.requestForegroundPermissionsAsync();
+
+      if (permission.status !== "granted") {
+        Alert.alert(
+          "Location Permission",
+          "Please allow location access to use your current location."
+        );
         return;
       }
 
+      const position =
+        await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+      const {
+        latitude,
+        longitude,
+      } = position.coords;
+
+    let liveCity = "Current Location";
+let liveDistrict = "";
+let liveState = "";
+let liveCountry = "";
+
       try {
-        setLocating(true);
+        const places =
+          await Location.reverseGeocodeAsync({
+            latitude,
+            longitude,
+          });
 
-        Keyboard.dismiss();
+        const place = places?.[0];
 
-        const permission =
-          await Location.requestForegroundPermissionsAsync();
+        liveCity =
+          place?.city ||
+          place?.district ||
+          place?.subregion ||
+          place?.region ||
+          "Current Location";
 
-        if (
-          permission.status !==
-          'granted'
-        ) {
-          Alert.alert(
-            'Location Permission',
-            'Please allow location access to use your current location.'
-          );
-
-          return;
-        }
-
-        const position =
-          await Location.getCurrentPositionAsync(
-            {
-              accuracy:
-                Location.Accuracy.Balanced,
-            }
-          );
-
-        const {
-          latitude,
-          longitude,
-        } = position.coords;
-
-        let liveCity =
-          'Current Location';
-
-        try {
-          const places =
-            await Location.reverseGeocodeAsync(
-              {
-                latitude,
-                longitude,
-              }
-            );
-
-          const place =
-            places?.[0];
-
-          liveCity =
-            place?.city ||
-            place?.district ||
-            place?.subregion ||
-            place?.region ||
-            'Current Location';
-        } catch (error) {
-          console.log(
-            'Reverse geocode error:',
-            error
-          );
-        }
-
-        setSearch(
-          liveCity
-        );
-
-        setCityOptions([]);
-
-        await fetchWeather(
-          latitude,
-          longitude
-        );
+        liveCountry =
+          place?.country ||
+          "";
       } catch (error) {
         console.log(
-          'Location error:',
+          "Reverse geocode error:",
           error
         );
-
-        Alert.alert(
-          'Location Error',
-          'Unable to get your current location. Please try again.'
-        );
-      } finally {
-        setLocating(false);
       }
-    };
+
+   const liveCityObject: City = {
+  name: liveCity,
+  state: liveState,
+  district: liveDistrict,
+  country: liveCountry || "",
+  lat: latitude,
+  lon: longitude,
+};
+      setSearch(liveCity);
+      setCityOptions([]);
+
+      await fetchWeather(
+        latitude,
+        longitude,
+        liveCityObject
+      );
+
+    } catch (error) {
+      console.log(
+        "Location error:",
+        error
+      );
+
+      Alert.alert(
+        "Location Error",
+        "Unable to get your current location. Please try again."
+      );
+    } finally {
+      setLocating(false);
+    }
+  };
 
   /* =======================================================
-     VALUES
-  ======================================================= */
+   VALUES
+======================================================= */
 
-  const condition =
-    weather?.weather?.[0]
-      ?.main ||
-    'Clouds';
+const condition =
+  weather?.condition ||
+  "Unknown";
 
-  const description =
-    weather?.weather?.[0]
-      ?.description ||
-    'Current conditions';
+const description =
+  weather?.condition ||
+  "Current conditions";
 
-  const accent =
-    getConditionAccent(
-      condition,
-      description
-    );
+const accent =
+  getConditionAccent(
+    condition,
+    description
+  );
+ const city =
+  weather?.city ||
+  search ||
+  "Current Location";
 
-  const city =
-    weather?.city ||
-    weather?.location?.city ||
-    weather?.location?.name ||
-    weather?.name ||
-    'Mysore';
+const district =
+  weather?.district ||
+  "";
 
-  const country =
-    weather?.sys?.country ||
-    'IN';
+const state =
+  weather?.state ||
+  "";
 
-  const temperature =
-    weather?.main?.temp;
+const country =
+  weather?.country ||
+  "";
 
-  const feelsLike =
-    weather?.main?.feels_like;
+const temperature =
+  weather?.temperature;
 
-  const humidity =
-    weather?.main?.humidity;
+const feelsLike =
+  weather?.feels_like;
 
-  const pressure =
-    weather?.main?.pressure;
+const humidity =
+  weather?.humidity;
 
-  const visibility =
-    weather?.visibility;
+const pressure =
+  weather?.pressure;
 
-  const windSpeed =
-    weather?.wind?.speed;
+const visibility =
+  weather?.visibility;
 
-  const windDeg =
-    weather?.wind?.deg;
+const windSpeed =
+  weather?.wind_speed;
 
-  const moon =
-    useMemo(
-      () =>
-        getMoonPhase(now),
-      [now]
-    );
+const windDeg =
+  weather?.wind_direction;
 
-  const visibilityText =
-    visibility == null
-      ? '--'
-      : `${(
-          visibility / 1000
-        ).toFixed(1)} km`;
+const moon =
+  useMemo(
+    () => getMoonPhase(now),
+    [now]
+  );
+
+const visibilityText =
+  visibility == null
+    ? "--"
+    : `${Number(
+        visibility
+      ).toFixed(1)} km`;
 
   /* =======================================================
      LOADING
@@ -1511,7 +1657,7 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={
           false
         }
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         contentContainerStyle={{
           paddingTop:
             insets.top + 7,
@@ -1562,8 +1708,8 @@ export default function DashboardScreen() {
                 styles.headerAction
               }
              onPress={() => {
-  const lat = weather?.coord?.lat;
-  const lon = weather?.coord?.lon;
+  const lat = weather?.lat;
+  const lon = weather?.lon;
 
   if (lat == null || lon == null) {
     Alert.alert(
@@ -1612,8 +1758,8 @@ export default function DashboardScreen() {
    <Pressable
   style={styles.headerAction}
   onPress={() => {
-    const lat = weather?.coord?.lat;
-    const lon = weather?.coord?.lon;
+    const lat = weather?.lat;
+    const lon = weather?.lon;
 
     if (lat == null || lon == null) {
       Alert.alert(
@@ -1667,8 +1813,16 @@ export default function DashboardScreen() {
           <TextInput
             value={search}
             onChangeText={
-              setSearch
+              handleSearchText
             }
+            onSubmitEditing={() => {
+              if (cityOptions.length > 0) {
+                selectCity(cityOptions[0]);
+              } else {
+                searchCities(search);
+              }
+            }}
+            returnKeyType="search"
             placeholder="Search city..."
             placeholderTextColor="#6E89A4"
             style={
@@ -1727,124 +1881,84 @@ export default function DashboardScreen() {
             </View>
           )}
 
-        {/* SEARCH RESULTS */}
+{/* SEARCH RESULTS */}
 
-        {cityOptions.length >
-          0 && (
-          <View
-            style={
-              styles.searchResults
-            }
-          >
-            {cityOptions.map(
-              (
-                item,
-                index
-              ) => (
-                <Pressable
-                  key={`${item.name}-${item.lat}-${index}`}
-                  onPress={() =>
-                    selectCity(
-                      item
-                    )
-                  }
-                  style={
-                    styles.cityResult
-                  }
-                >
-                  <View
-                    style={
-                      styles.resultIcon
-                    }
-                  >
-                    <Ionicons
-                      name="location-outline"
-                      size={21}
-                      color="#68D8FF"
-                    />
-                  </View>
+{cityOptions.length > 0 && (
+  <View
+    style={styles.searchResults}
+  >
+    {cityOptions.map((item, index) => (
+      <Pressable
+        key={`${item.name}-${item.lat}-${item.lon}-${index}`}
+        onPress={() => selectCity(item)}
+        style={styles.cityResult}
+      >
+        <View style={styles.resultIcon}>
+          <Ionicons
+            name="location-outline"
+            size={26}
+            color="#63D5FF"
+          />
+        </View>
 
-                  <View
-                    style={{
-                      flex: 1,
-                    }}
-                  >
-                    <Text
-                      style={
-                        styles.resultCity
-                      }
-                    >
-                      {item.name}
-                    </Text>
-
-                    <Text
-                      style={
-                        styles.resultCountry
-                      }
-                    >
-                      {[
-                        item.state,
-                        item.country,
-                      ]
-                        .filter(
-                          Boolean
-                        )
-                        .join(
-                          ', '
-                        )}
-                    </Text>
-                  </View>
-
-                  <Ionicons
-                    name="chevron-forward"
-                    size={19}
-                    color="#68859E"
-                  />
-                </Pressable>
-              )
-            )}
-          </View>
-        )}
-
-        {/* =================================================
-            CITY
-        ================================================= */}
-
-        <View
-          style={
-            styles.cityHeader
-          }
-        >
-          <View
-            style={
-              styles.cityIcon
-            }
-          >
-            <Ionicons
-              name="location"
-              size={24}
-              color="#68D8FF"
-            />
-          </View>
-
-          <Text
-            style={
-              styles.cityTitle
-            }
-            numberOfLines={1}
-          >
-            {city}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.cityResultName}>
+            {item.name}
           </Text>
 
-          <Text
-            style={
-              styles.countryText
-            }
-          >
-            {country}
+          <Text style={styles.cityResultLocation}>
+            {[
+              item.district,
+              item.state,
+              item.country,
+            ]
+              .filter(Boolean)
+              .join(", ")}
           </Text>
         </View>
 
+        <Ionicons
+          name="chevron-forward"
+          size={24}
+          color="#8CA3B8"
+        />
+      </Pressable>
+    ))}
+  </View>
+)}
+
+  {/* =================================================
+            CITY
+        ================================================= */}
+
+      <View style={styles.cityHeader}>
+  <View style={styles.cityIcon}>
+    <Ionicons
+      name="location"
+      size={24}
+      color="#68D8FF"
+    />
+  </View>
+
+  <View style={{ flex: 1 }}>
+    <Text
+      style={styles.cityTitle}
+      numberOfLines={1}
+    >
+      {city}
+    </Text>
+
+    <Text style={styles.locationSubText}>
+      {[
+        district,
+        state,
+        country,
+      ]
+        .filter(Boolean)
+        .join(", ")}
+    </Text>
+  </View>
+</View>
         {/* =================================================
             HERO CARD
             TEMPERATURE LEFT • PRESENT CONDITION RIGHT
@@ -2031,11 +2145,10 @@ export default function DashboardScreen() {
                 : '--'
             }
             subtitle={
-              windDirection(
-                windDeg
-              ) ||
-              'Wind speed'
-            }
+  weather?.wind_direction != null
+    ? windDirection(weather.wind_direction)
+    : 'Wind speed'
+}
             accent="#63E5A6"
           />
 
@@ -2053,8 +2166,7 @@ export default function DashboardScreen() {
             icon="sunny-outline"
             title="Sunrise"
             value={formatSunTime(
-              weather?.sys
-                ?.sunrise
+              weather?.sunrise
             )}
             subtitle="Morning"
             accent="#FFC857"
@@ -2064,8 +2176,7 @@ export default function DashboardScreen() {
             icon="moon-outline"
             title="Sunset"
             value={formatSunTime(
-              weather?.sys
-                ?.sunset
+              weather?.sunset
             )}
             subtitle="Evening"
             accent="#E59AFF"
@@ -2488,6 +2599,17 @@ const styles =
       fontSize: 10,
       marginTop: 3,
     },
+     cityResultName: {
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#FFFFFF",
+  marginBottom: 4,
+},
+
+cityResultLocation: {
+  fontSize: 14,
+  color: "#8FA8BC",
+},
 
     /* =====================================================
        CITY
@@ -2533,6 +2655,12 @@ const styles =
       marginLeft: 7,
     },
 
+    locationSubText: {
+  color: "#67D8FF",
+  fontSize: 12,
+  fontWeight: "700",
+  marginTop: 3,
+},
     /* =====================================================
        HERO
     ===================================================== */

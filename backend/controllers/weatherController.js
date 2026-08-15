@@ -3,12 +3,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+console.log("🔥 AETHERIX WEATHER CONTROLLER: TOMORROW.IO VERSION");
+
 const TOMORROW_API_URL =
   "https://api.tomorrow.io/v4/weather/realtime";
 
 const TOMORROW_API_KEY =
   process.env.TOMORROW_API_KEY;
-console.log("🔥 AETHERIX WEATHER CONTROLLER: TOMORROW.IO VERSION");
+
 // =======================================================
 // CURRENT WEATHER
 // =======================================================
@@ -17,17 +19,29 @@ export const getWeather = async (req, res) => {
   try {
     const { lat, lon } = req.query;
 
+    // ---------------------------------------------------
+    // VALIDATE LOCATION
+    // ---------------------------------------------------
+
     if (!lat || !lon) {
       return res.status(400).json({
         message: "Latitude and Longitude are required",
       });
     }
 
+    // ---------------------------------------------------
+    // VALIDATE API KEY
+    // ---------------------------------------------------
+
     if (!TOMORROW_API_KEY) {
       return res.status(500).json({
         message: "Tomorrow.io API key is not configured",
       });
     }
+
+    // ---------------------------------------------------
+    // TOMORROW.IO REALTIME API
+    // ---------------------------------------------------
 
     const response = await axios.get(
       TOMORROW_API_URL,
@@ -43,11 +57,22 @@ export const getWeather = async (req, res) => {
     const values =
       response.data?.data?.values || {};
 
+    // ---------------------------------------------------
+    // WEATHER CODE
+    // ---------------------------------------------------
+
     const weatherCode =
       values.weatherCode ?? null;
 
+    // ---------------------------------------------------
+    // RESPONSE
+    // ---------------------------------------------------
+
     res.json({
-      temperature: values.temperature ?? null,
+      // ================= CURRENT WEATHER =================
+
+      temperature:
+        values.temperature ?? null,
 
       feels_like:
         values.temperatureApparent ?? null,
@@ -79,10 +104,13 @@ export const getWeather = async (req, res) => {
       rain_intensity:
         values.rainIntensity ?? null,
 
-      weather_code: weatherCode,
+      weather_code:
+        weatherCode,
 
       condition:
         getWeatherCondition(weatherCode),
+
+      // ================= SUN =================
 
       sunrise:
         values.sunriseTime ?? null,
@@ -90,11 +118,34 @@ export const getWeather = async (req, res) => {
       sunset:
         values.sunsetTime ?? null,
 
-      raw: response.data,
+      // ================= AIR QUALITY =================
+
+      air_quality_index:
+        values.epaIndex ?? null,
+
+      air_quality_level:
+        values.epaHealthConcern ?? null,
+
+      air_quality_primary_pollutant:
+        values.epaPrimaryPollutant ?? null,
+
+      // ================= LOCATION =================
+
+      latitude:
+        Number(lat),
+
+      longitude:
+        Number(lon),
+
+      // ================= DEBUG =================
+
+      raw:
+        response.data,
     });
+
   } catch (error) {
     console.error(
-      "TOMORROW WEATHER ERROR:",
+      "❌ TOMORROW WEATHER ERROR:",
       error.response?.data ||
         error.message
     );
