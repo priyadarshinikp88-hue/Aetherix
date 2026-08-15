@@ -57,56 +57,153 @@ const getPlaceDetails = async (placeId) => {
 };
 
 /* =======================================================
+   GET ADDRESS COMPONENT
+======================================================= */
+
+const getComponentName = (
+  components,
+  type
+) => {
+  const component =
+    components.find((item) =>
+      (item.types || []).includes(type)
+    );
+
+  return (
+    component?.longText ||
+    component?.shortText ||
+    ""
+  );
+};
+
+/* =======================================================
+   FIND DISTRICT
+======================================================= */
+
+const getDistrict = (components) => {
+  /*
+   * Google may return:
+   *
+   * administrative_area_level_2
+   * administrative_area_level_3
+   * administrative_area_level_4
+   *
+   * depending on the location.
+   *
+   * We should NOT blindly use a value
+   * containing "Division" as the district.
+   */
+
+  const level2 = getComponentName(
+    components,
+    "administrative_area_level_2"
+  );
+
+  if (
+    level2 &&
+    !level2
+      .toLowerCase()
+      .includes("division")
+  ) {
+    return level2;
+  }
+
+  const level3 = getComponentName(
+    components,
+    "administrative_area_level_3"
+  );
+
+  if (
+    level3 &&
+    !level3
+      .toLowerCase()
+      .includes("division")
+  ) {
+    return level3;
+  }
+
+  const level4 = getComponentName(
+    components,
+    "administrative_area_level_4"
+  );
+
+  if (
+    level4 &&
+    !level4
+      .toLowerCase()
+      .includes("division")
+  ) {
+    return level4;
+  }
+
+  /*
+   * If Google only provides a division,
+   * don't incorrectly call it a district.
+   */
+
+  return "";
+};
+
+/* =======================================================
    FORMAT GOOGLE PLACE
 ======================================================= */
 
 const formatPlace = (place) => {
-  if (!place || !place.location) {
+  if (
+    !place ||
+    !place.location
+  ) {
     return null;
   }
-
-  let state = "";
-  let district = "";
-  let country = "India";
 
   const components =
     place.addressComponents || [];
 
-  components.forEach((component) => {
-    const types =
-      component.types || [];
+  const state =
+    getComponentName(
+      components,
+      "administrative_area_level_1"
+    );
 
-    const name =
-      component.longText || "";
+  const country =
+    getComponentName(
+      components,
+      "country"
+    ) || "India";
 
-    if (
-      types.includes(
-        "administrative_area_level_1"
-      )
-    ) {
-      state = name;
-    }
+  const district =
+    getDistrict(
+      components
+    );
 
-    if (
-      types.includes(
-        "administrative_area_level_2"
-      )
-    ) {
-      district = name;
-    }
+  const locality =
+    getComponentName(
+      components,
+      "locality"
+    );
 
-    if (
-      types.includes("country")
-    ) {
-      country = name;
-    }
-  });
+  const sublocality =
+    getComponentName(
+      components,
+      "sublocality"
+    );
+
+  const postalTown =
+    getComponentName(
+      components,
+      "postal_town"
+    );
 
   const name =
-    place.displayName?.text || "";
+    place.displayName?.text ||
+    locality ||
+    sublocality ||
+    postalTown ||
+    "";
 
   const address =
-    place.formattedAddress || "";
+    place.formattedAddress ||
+    "";
 
   return {
     value:
@@ -145,10 +242,133 @@ const formatPlace = (place) => {
 };
 
 /* =======================================================
+   LOCATION TYPE CHECK
+======================================================= */
+
+const geographicTypes = new Set([
+  "locality",
+  "administrative_area_level_1",
+  "administrative_area_level_2",
+  "administrative_area_level_3",
+  "administrative_area_level_4",
+  "administrative_area_level_5",
+  "sublocality",
+  "sublocality_level_1",
+  "sublocality_level_2",
+  "postal_town",
+  "neighborhood",
+  "route",
+  "premise",
+]);
+
+const unwantedTypes = new Set([
+  "establishment",
+  "point_of_interest",
+  "service",
+  "housing_complex",
+  "association_or_organization",
+  "store",
+  "restaurant",
+  "cafe",
+  "bar",
+  "lodging",
+  "school",
+  "hospital",
+  "church",
+]);
+
+/* =======================================================
+   LOCATION SCORE
+======================================================= */
+
+const getLocationScore = (
+  item,
+  query
+) => {
+  const types =
+    item.types || [];
+
+  const queryLower =
+    query
+      .trim()
+      .toLowerCase();
+
+  const name =
+    String(
+      item.name || ""
+    ).toLowerCase();
+
+  let score = 0;
+
+  /* Exact name */
+  if (
+    name === queryLower
+  ) {
+    score += 100;
+  }
+
+  /* Starts with query */
+  if (
+    name.startsWith(
+      queryLower
+    )
+  ) {
+    score += 50;
+  }
+
+  /* Geographic result */
+  if (
+    types.some((type) =>
+      geographicTypes.has(type)
+    )
+  ) {
+    score += 40;
+  }
+
+  /* Actual locality */
+  if (
+    types.includes("locality")
+  ) {
+    score += 30;
+  }
+
+  /* Has district */
+  if (
+    item.district
+  ) {
+    score += 20;
+  }
+
+  /* Has state */
+  if (
+    item.state
+  ) {
+    score += 10;
+  }
+
+  /*
+   * Penalize business / POI
+   * results.
+   */
+
+  if (
+    types.some((type) =>
+      unwantedTypes.has(type)
+    )
+  ) {
+    score -= 100;
+  }
+
+  return score;
+};
+
+/* =======================================================
    TEXT SEARCH
 ======================================================= */
 
-const textSearch = async (query) => {
+const textSearch = async (
+  query
+) => {
   try {
     const response =
       await axios.post(
@@ -192,7 +412,9 @@ const textSearch = async (query) => {
    GEOCODING FALLBACK
 ======================================================= */
 
-const geocodeSearch = async (query) => {
+const geocodeSearch = async (
+  query
+) => {
   try {
     const response =
       await axios.get(
@@ -231,46 +453,49 @@ const geocodeSearch = async (query) => {
           return null;
         }
 
-        let state = "";
-        let district = "";
-        let country = "India";
-
-        (
+        const components =
           item.address_components ||
-          []
-        ).forEach((component) => {
-          const types =
-            component.types || [];
+          [];
 
-          if (
-            types.includes(
-              "administrative_area_level_1"
-            )
-          ) {
-            state =
-              component.long_name;
-          }
+        const state =
+          getComponentName(
+            components,
+            "administrative_area_level_1"
+          );
 
-          if (
-            types.includes(
-              "administrative_area_level_2"
-            )
-          ) {
-            district =
-              component.long_name;
-          }
+        const country =
+          getComponentName(
+            components,
+            "country"
+          ) || "India";
 
-          if (
-            types.includes(
-              "country"
-            )
-          ) {
-            country =
-              component.long_name;
-          }
-        });
+        const district =
+          getDistrict(
+            components
+          );
+
+        const locality =
+          getComponentName(
+            components,
+            "locality"
+          );
+
+        const sublocality =
+          getComponentName(
+            components,
+            "sublocality"
+          );
+
+        const postalTown =
+          getComponentName(
+            components,
+            "postal_town"
+          );
 
         const name =
+          locality ||
+          sublocality ||
+          postalTown ||
           item.address_components?.[0]
             ?.long_name ||
           query;
@@ -292,10 +517,14 @@ const geocodeSearch = async (query) => {
           country,
 
           lat:
-            Number(location.lat),
+            Number(
+              location.lat
+            ),
 
           lon:
-            Number(location.lng),
+            Number(
+              location.lng
+            ),
 
           placeId:
             item.place_id || "",
@@ -335,7 +564,9 @@ export const searchCities =
           ""
         ).trim();
 
-      if (query.length < 2) {
+      if (
+        query.length < 2
+      ) {
         return res.json([]);
       }
 
@@ -381,15 +612,9 @@ export const searchCities =
           response.data?.suggestions ||
           [];
 
-        /*
-         * Get more suggestions so
-         * villages with the same
-         * name can appear.
-         */
-
         for (
           const suggestion of
-          suggestions.slice(0, 10)
+          suggestions
         ) {
           const prediction =
             suggestion.placePrediction;
@@ -434,26 +659,30 @@ export const searchCities =
       const places =
         await textSearch(query);
 
-      places.forEach((place) => {
-        const formatted =
-          formatPlace(place);
+      places.forEach(
+        (place) => {
+          const formatted =
+            formatPlace(place);
 
-        if (
-          formatted &&
-          formatted.lat != null &&
-          formatted.lon != null
-        ) {
-          results.push(
-            formatted
-          );
+          if (
+            formatted &&
+            formatted.lat != null &&
+            formatted.lon != null
+          ) {
+            results.push(
+              formatted
+            );
+          }
         }
-      });
+      );
 
       /* =================================================
          3. GEOCODING FALLBACK
       ================================================= */
 
-      if (results.length === 0) {
+      if (
+        results.length === 0
+      ) {
         const geocoded =
           await geocodeSearch(
             query
@@ -466,12 +695,11 @@ export const searchCities =
 
       /* =================================================
          4. REMOVE TRUE DUPLICATES
-         
-         IMPORTANT:
-         Do NOT deduplicate by village name.
-         
-         Same village name in different
-         districts must remain.
+
+         SAME NAME ≠ DUPLICATE
+
+         Same village in different
+         districts MUST remain.
       ================================================= */
 
       const unique = [];
@@ -483,7 +711,6 @@ export const searchCities =
           unique.some(
             (existing) => {
 
-              // Same Google place
               if (
                 item.placeId &&
                 existing.placeId &&
@@ -493,7 +720,6 @@ export const searchCities =
                 return true;
               }
 
-              // Same coordinates
               const sameLocation =
                 Math.abs(
                   item.lat -
@@ -514,66 +740,26 @@ export const searchCities =
       }
 
       /* =================================================
-         5. RANK RESULTS
-         
-         Exact village name first.
-         Then partial matches.
+         5. SCORE AND SORT
       ================================================= */
-
-      const queryLower =
-        query.toLowerCase();
 
       unique.sort(
         (a, b) => {
-
-          const aName =
-            String(
-              a.name || ""
-            ).toLowerCase();
-
-          const bName =
-            String(
-              b.name || ""
-            ).toLowerCase();
-
-          const aExact =
-            aName ===
-            queryLower
-              ? 0
-              : 1;
-
-          const bExact =
-            bName ===
-            queryLower
-              ? 0
-              : 1;
-
-          if (
-            aExact !== bExact
-          ) {
-            return (
-              aExact -
-              bExact
+          const scoreA =
+            getLocationScore(
+              a,
+              query
             );
-          }
 
-          const aStarts =
-            aName.startsWith(
-              queryLower
-            )
-              ? 0
-              : 1;
-
-          const bStarts =
-            bName.startsWith(
-              queryLower
-            )
-              ? 0
-              : 1;
+          const scoreB =
+            getLocationScore(
+              b,
+              query
+            );
 
           return (
-            aStarts -
-            bStarts
+            scoreB -
+            scoreA
           );
         }
       );
