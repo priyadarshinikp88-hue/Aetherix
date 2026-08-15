@@ -1326,7 +1326,7 @@ useEffect(() => {
       );
 
       setCityOptions(
-        options.slice(0, 20)
+        options.slice(0, 15)
       );
 
     } catch (error) {

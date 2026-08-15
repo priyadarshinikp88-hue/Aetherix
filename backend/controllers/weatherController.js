@@ -3,13 +3,19 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-console.log("🔥 AETHERIX WEATHER CONTROLLER: TOMORROW.IO VERSION");
+console.log(
+  "🔥 AETHERIX WEATHER CONTROLLER: TOMORROW.IO VERSION"
+);
 
-const TOMORROW_API_URL =
+const TOMORROW_REALTIME_URL =
   "https://api.tomorrow.io/v4/weather/realtime";
+
+const TOMORROW_TIMELINE_URL =
+  "https://api.tomorrow.io/v4/timelines";
 
 const TOMORROW_API_KEY =
   process.env.TOMORROW_API_KEY;
+
 
 // =======================================================
 // CURRENT WEATHER
@@ -25,7 +31,8 @@ export const getWeather = async (req, res) => {
 
     if (!lat || !lon) {
       return res.status(400).json({
-        message: "Latitude and Longitude are required",
+        message:
+          "Latitude and Longitude are required",
       });
     }
 
@@ -35,99 +42,289 @@ export const getWeather = async (req, res) => {
 
     if (!TOMORROW_API_KEY) {
       return res.status(500).json({
-        message: "Tomorrow.io API key is not configured",
+        message:
+          "Tomorrow.io API key is not configured",
       });
     }
 
-    // ---------------------------------------------------
-    // TOMORROW.IO REALTIME API
-    // ---------------------------------------------------
+    const location = `${lat},${lon}`;
 
-    const response = await axios.get(
-      TOMORROW_API_URL,
-      {
-        params: {
-          location: `${lat},${lon}`,
-          apikey: TOMORROW_API_KEY,
-          units: "metric",
-        },
-      }
-    );
+    // ===================================================
+    // 1. REALTIME WEATHER
+    // ===================================================
 
-    const values =
-      response.data?.data?.values || {};
+    const weatherResponse =
+      await axios.get(
+        TOMORROW_REALTIME_URL,
+        {
+          params: {
+            location,
+            apikey:
+              TOMORROW_API_KEY,
+            units: "metric",
+          },
+        }
+      );
 
-    // ---------------------------------------------------
-    // WEATHER CODE
-    // ---------------------------------------------------
+    const weatherValues =
+      weatherResponse.data?.data?.values ||
+      {};
 
     const weatherCode =
-      values.weatherCode ?? null;
+      weatherValues.weatherCode ??
+      null;
 
-    // ---------------------------------------------------
+
+    // ===================================================
+    // 2. TIMELINE FOR SUN + AQI
+    // ===================================================
+
+    let sunValues = {};
+    let airValues = {};
+
+    try {
+      const timelineResponse =
+        await axios.post(
+          TOMORROW_TIMELINE_URL,
+          {
+            location,
+
+            fields: [
+              "sunriseTime",
+              "sunsetTime",
+
+              "epaIndex",
+              "epaHealthConcern",
+              "epaPrimaryPollutant",
+
+              "particulateMatter25",
+              "particulateMatter10",
+              "pollutantO3",
+              "pollutantNO2",
+              "pollutantCO",
+              "pollutantSO2",
+            ],
+
+            units: "metric",
+
+            timesteps: [
+              "1h",
+            ],
+
+            startTime: "now",
+
+            endTime:
+              "nowPlus1h",
+
+            timezone: "auto",
+          },
+          {
+            params: {
+              apikey:
+                TOMORROW_API_KEY,
+            },
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+          }
+        );
+
+
+      const timelines =
+        timelineResponse.data
+          ?.data
+          ?.timelines || [];
+
+
+      /*
+       * Find the first timeline.
+       */
+
+      const timeline =
+        timelines[0];
+
+
+      const interval =
+        timeline?.intervals?.[0];
+
+
+      const timelineValues =
+        interval?.values || {};
+
+
+      sunValues =
+        timelineValues;
+
+      airValues =
+        timelineValues;
+
+
+    } catch (timelineError) {
+
+      console.error(
+        "⚠️ TOMORROW SUN/AQI TIMELINE ERROR:",
+        timelineError.response
+          ?.data ||
+          timelineError.message
+      );
+
+      /*
+       * Don't fail the whole weather
+       * request if the optional
+       * Sun/AQI data isn't available.
+       */
+    }
+
+
+    // ===================================================
+    // SUNRISE / SUNSET
+    // ===================================================
+
+    const sunrise =
+      sunValues.sunriseTime ??
+      weatherValues.sunriseTime ??
+      null;
+
+    const sunset =
+      sunValues.sunsetTime ??
+      weatherValues.sunsetTime ??
+      null;
+
+
+    // ===================================================
+    // AQI
+    // ===================================================
+
+    const airQualityIndex =
+      airValues.epaIndex ??
+      weatherValues.epaIndex ??
+      null;
+
+    const airQualityLevel =
+      airValues.epaHealthConcern ??
+      weatherValues.epaHealthConcern ??
+      null;
+
+    const airQualityPrimaryPollutant =
+      airValues.epaPrimaryPollutant ??
+      weatherValues.epaPrimaryPollutant ??
+      null;
+
+
+    // ===================================================
     // RESPONSE
-    // ---------------------------------------------------
+    // ===================================================
 
-    res.json({
+    return res.json({
+
       // ================= CURRENT WEATHER =================
 
       temperature:
-        values.temperature ?? null,
+        weatherValues.temperature ??
+        null,
 
       feels_like:
-        values.temperatureApparent ?? null,
+        weatherValues.temperatureApparent ??
+        null,
 
       humidity:
-        values.humidity ?? null,
+        weatherValues.humidity ??
+        null,
 
       pressure:
-        values.pressureSurfaceLevel ?? null,
+        weatherValues.pressureSurfaceLevel ??
+        null,
 
       wind_speed:
-        values.windSpeed ?? null,
+        weatherValues.windSpeed ??
+        null,
 
       wind_direction:
-        values.windDirection ?? null,
+        weatherValues.windDirection ??
+        null,
 
       visibility:
-        values.visibility ?? null,
+        weatherValues.visibility ??
+        null,
 
       cloud_cover:
-        values.cloudCover ?? null,
+        weatherValues.cloudCover ??
+        null,
 
       precipitation_probability:
-        values.precipitationProbability ?? null,
+        weatherValues.precipitationProbability ??
+        null,
 
       precipitation_type:
-        values.precipitationType ?? null,
+        weatherValues.precipitationType ??
+        null,
 
       rain_intensity:
-        values.rainIntensity ?? null,
+        weatherValues.rainIntensity ??
+        null,
 
       weather_code:
         weatherCode,
 
       condition:
-        getWeatherCondition(weatherCode),
+        getWeatherCondition(
+          weatherCode
+        ),
+
 
       // ================= SUN =================
 
-      sunrise:
-        values.sunriseTime ?? null,
+      sunrise,
 
-      sunset:
-        values.sunsetTime ?? null,
+      sunset,
+
 
       // ================= AIR QUALITY =================
 
       air_quality_index:
-        values.epaIndex ?? null,
+        airQualityIndex,
 
       air_quality_level:
-        values.epaHealthConcern ?? null,
+        airQualityLevel,
 
       air_quality_primary_pollutant:
-        values.epaPrimaryPollutant ?? null,
+        airQualityPrimaryPollutant,
+
+
+      // ================= POLLUTANTS =================
+
+      pm25:
+        airValues.particulateMatter25 ??
+        weatherValues.particulateMatter25 ??
+        null,
+
+      pm10:
+        airValues.particulateMatter10 ??
+        weatherValues.particulateMatter10 ??
+        null,
+
+      ozone:
+        airValues.pollutantO3 ??
+        weatherValues.pollutantO3 ??
+        null,
+
+      nitrogen_dioxide:
+        airValues.pollutantNO2 ??
+        weatherValues.pollutantNO2 ??
+        null,
+
+      carbon_monoxide:
+        airValues.pollutantCO ??
+        weatherValues.pollutantCO ??
+        null,
+
+      sulfur_dioxide:
+        airValues.pollutantSO2 ??
+        weatherValues.pollutantSO2 ??
+        null,
+
 
       // ================= LOCATION =================
 
@@ -137,21 +334,24 @@ export const getWeather = async (req, res) => {
       longitude:
         Number(lon),
 
+
       // ================= DEBUG =================
 
       raw:
-        response.data,
+        weatherResponse.data,
     });
 
   } catch (error) {
+
     console.error(
       "❌ TOMORROW WEATHER ERROR:",
       error.response?.data ||
         error.message
     );
 
-    res.status(
-      error.response?.status || 500
+    return res.status(
+      error.response?.status ||
+      500
     ).json({
       message:
         error.response?.data?.message ||
@@ -166,52 +366,77 @@ export const getWeather = async (req, res) => {
 // =======================================================
 
 function getWeatherCondition(code) {
+
   const conditions = {
-    1000: "Clear",
 
-    1001: "Cloudy",
+    1000:
+      "Clear",
 
-    1100: "Mostly Clear",
+    1001:
+      "Cloudy",
 
-    1101: "Partly Cloudy",
+    1100:
+      "Mostly Clear",
 
-    1102: "Mostly Cloudy",
+    1101:
+      "Partly Cloudy",
 
-    2000: "Fog",
+    1102:
+      "Mostly Cloudy",
 
-    2100: "Light Fog",
+    2000:
+      "Fog",
 
-    4000: "Drizzle",
+    2100:
+      "Light Fog",
 
-    4001: "Rain",
+    4000:
+      "Drizzle",
 
-    4200: "Light Rain",
+    4001:
+      "Rain",
 
-    4201: "Heavy Rain",
+    4200:
+      "Light Rain",
 
-    5000: "Snow",
+    4201:
+      "Heavy Rain",
 
-    5001: "Flurries",
+    5000:
+      "Snow",
 
-    5100: "Light Snow",
+    5001:
+      "Flurries",
 
-    5101: "Heavy Snow",
+    5100:
+      "Light Snow",
 
-    6000: "Freezing Drizzle",
+    5101:
+      "Heavy Snow",
 
-    6001: "Freezing Rain",
+    6000:
+      "Freezing Drizzle",
 
-    6200: "Light Freezing Rain",
+    6001:
+      "Freezing Rain",
 
-    6201: "Heavy Freezing Rain",
+    6200:
+      "Light Freezing Rain",
 
-    7000: "Ice Pellets",
+    6201:
+      "Heavy Freezing Rain",
 
-    7101: "Heavy Ice Pellets",
+    7000:
+      "Ice Pellets",
 
-    7102: "Light Ice Pellets",
+    7101:
+      "Heavy Ice Pellets",
 
-    8000: "Thunderstorm",
+    7102:
+      "Light Ice Pellets",
+
+    8000:
+      "Thunderstorm",
   };
 
   return (
