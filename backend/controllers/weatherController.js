@@ -74,144 +74,215 @@ export const getWeather = async (req, res) => {
       weatherValues.weatherCode ??
       null;
 
+  // ===================================================
+// 2. SUNRISE / SUNSET
+//    Use 1d timeline
+// ===================================================
 
-    // ===================================================
-    // 2. TIMELINE FOR SUN + AQI
-    // ===================================================
+let sunrise = null;
+let sunset = null;
 
-    let sunValues = {};
-    let airValues = {};
+try {
+  const sunResponse = await axios.post(
+    TOMORROW_TIMELINE_URL,
+    {
+      location,
 
-    try {
-      const timelineResponse =
-        await axios.post(
-          TOMORROW_TIMELINE_URL,
-          {
-            location,
+      fields: [
+        "sunriseTime",
+        "sunsetTime",
+      ],
 
-            fields: [
-              "sunriseTime",
-              "sunsetTime",
+      units: "metric",
 
-              "epaIndex",
-              "epaHealthConcern",
-              "epaPrimaryPollutant",
+      timesteps: [
+        "1d",
+      ],
 
-              "particulateMatter25",
-              "particulateMatter10",
-              "pollutantO3",
-              "pollutantNO2",
-              "pollutantCO",
-              "pollutantSO2",
-            ],
+      startTime: "now",
 
-            units: "metric",
+      endTime: "nowPlus1d",
 
-            timesteps: [
-              "1h",
-            ],
+      timezone: "auto",
+    },
+    {
+      params: {
+        apikey:
+          TOMORROW_API_KEY,
+      },
 
-            startTime: "now",
-
-            endTime:
-              "nowPlus1h",
-
-            timezone: "auto",
-          },
-          {
-            params: {
-              apikey:
-                TOMORROW_API_KEY,
-            },
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
-
-
-      const timelines =
-        timelineResponse.data
-          ?.data
-          ?.timelines || [];
-
-
-      /*
-       * Find the first timeline.
-       */
-
-      const timeline =
-        timelines[0];
-
-
-      const interval =
-        timeline?.intervals?.[0];
-
-
-      const timelineValues =
-        interval?.values || {};
-
-
-      sunValues =
-        timelineValues;
-
-      airValues =
-        timelineValues;
-
-
-    } catch (timelineError) {
-
-      console.error(
-        "⚠️ TOMORROW SUN/AQI TIMELINE ERROR:",
-        timelineError.response
-          ?.data ||
-          timelineError.message
-      );
-
-      /*
-       * Don't fail the whole weather
-       * request if the optional
-       * Sun/AQI data isn't available.
-       */
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
     }
+  );
+
+  console.log(
+    "🌅 SUN TIMELINE RESPONSE:",
+    JSON.stringify(
+      sunResponse.data,
+      null,
+      2
+    )
+  );
+
+  const sunTimeline =
+    sunResponse.data?.data?.timelines?.find(
+      (item) =>
+        item.timestep === "1d"
+    );
+
+  const sunInterval =
+    sunTimeline?.intervals?.[0];
+
+  const sunValues =
+    sunInterval?.values || {};
+
+  sunrise =
+    sunValues.sunriseTime ??
+    null;
+
+  sunset =
+    sunValues.sunsetTime ??
+    null;
+
+} catch (error) {
+
+  console.error(
+    "❌ SUNRISE/SUNSET ERROR:",
+    error.response?.data ||
+      error.message
+  );
+}
 
 
-    // ===================================================
-    // SUNRISE / SUNSET
-    // ===================================================
+// ===================================================
+// 3. AIR QUALITY
+//    Use 1h timeline
+// ===================================================
 
-    const sunrise =
-      sunValues.sunriseTime ??
-      weatherValues.sunriseTime ??
-      null;
+let airQualityIndex = null;
+let airQualityLevel = null;
+let airQualityPrimaryPollutant = null;
 
-    const sunset =
-      sunValues.sunsetTime ??
-      weatherValues.sunsetTime ??
-      null;
+let pm25 = null;
+let pm10 = null;
+let ozone = null;
+let nitrogenDioxide = null;
+let carbonMonoxide = null;
+let sulfurDioxide = null;
 
+try {
+  const airResponse = await axios.post(
+    TOMORROW_TIMELINE_URL,
+    {
+      location,
 
-    // ===================================================
-    // AQI
-    // ===================================================
+      fields: [
+        "epaIndex",
+        "epaHealthConcern",
+        "epaPrimaryPollutant",
 
-    const airQualityIndex =
-      airValues.epaIndex ??
-      weatherValues.epaIndex ??
-      null;
+        "particulateMatter25",
+        "particulateMatter10",
 
-    const airQualityLevel =
-      airValues.epaHealthConcern ??
-      weatherValues.epaHealthConcern ??
-      null;
+        "pollutantO3",
+        "pollutantNO2",
+        "pollutantCO",
+        "pollutantSO2",
+      ],
 
-    const airQualityPrimaryPollutant =
-      airValues.epaPrimaryPollutant ??
-      weatherValues.epaPrimaryPollutant ??
-      null;
+      units: "metric",
 
+      timesteps: [
+        "1h",
+      ],
+
+      startTime: "now",
+
+      endTime: "nowPlus1h",
+
+      timezone: "auto",
+    },
+    {
+      params: {
+        apikey:
+          TOMORROW_API_KEY,
+      },
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+    }
+  );
+
+  console.log(
+    "🌫️ AIR QUALITY RESPONSE:",
+    JSON.stringify(
+      airResponse.data,
+      null,
+      2
+    )
+  );
+
+  const airTimeline =
+    airResponse.data?.data?.timelines?.find(
+      (item) =>
+        item.timestep === "1h"
+    );
+
+  const airInterval =
+    airTimeline?.intervals?.[0];
+
+  const airValues =
+    airInterval?.values || {};
+
+  airQualityIndex =
+    airValues.epaIndex ??
+    null;
+
+  airQualityLevel =
+    airValues.epaHealthConcern ??
+    null;
+
+  airQualityPrimaryPollutant =
+    airValues.epaPrimaryPollutant ??
+    null;
+
+  pm25 =
+    airValues.particulateMatter25 ??
+    null;
+
+  pm10 =
+    airValues.particulateMatter10 ??
+    null;
+
+  ozone =
+    airValues.pollutantO3 ??
+    null;
+
+  nitrogenDioxide =
+    airValues.pollutantNO2 ??
+    null;
+
+  carbonMonoxide =
+    airValues.pollutantCO ??
+    null;
+
+  sulfurDioxide =
+    airValues.pollutantSO2 ??
+    null;
+
+} catch (error) {
+
+  console.error(
+    "❌ AIR QUALITY ERROR:",
+    error.response?.data ||
+      error.message
+  );
+}
 
     // ===================================================
     // RESPONSE
@@ -273,59 +344,41 @@ export const getWeather = async (req, res) => {
           weatherCode
         ),
 
+// ================= SUN =================
 
-      // ================= SUN =================
+sunrise,
 
-      sunrise,
-
-      sunset,
-
-
-      // ================= AIR QUALITY =================
-
-      air_quality_index:
-        airQualityIndex,
-
-      air_quality_level:
-        airQualityLevel,
-
-      air_quality_primary_pollutant:
-        airQualityPrimaryPollutant,
+sunset,
 
 
-      // ================= POLLUTANTS =================
+// ================= AIR QUALITY =================
 
-      pm25:
-        airValues.particulateMatter25 ??
-        weatherValues.particulateMatter25 ??
-        null,
+air_quality_index:
+  airQualityIndex,
 
-      pm10:
-        airValues.particulateMatter10 ??
-        weatherValues.particulateMatter10 ??
-        null,
+air_quality_level:
+  airQualityLevel,
 
-      ozone:
-        airValues.pollutantO3 ??
-        weatherValues.pollutantO3 ??
-        null,
-
-      nitrogen_dioxide:
-        airValues.pollutantNO2 ??
-        weatherValues.pollutantNO2 ??
-        null,
-
-      carbon_monoxide:
-        airValues.pollutantCO ??
-        weatherValues.pollutantCO ??
-        null,
-
-      sulfur_dioxide:
-        airValues.pollutantSO2 ??
-        weatherValues.pollutantSO2 ??
-        null,
+air_quality_primary_pollutant:
+  airQualityPrimaryPollutant,
 
 
+// ================= POLLUTANTS =================
+
+pm25,
+
+pm10,
+
+ozone,
+
+nitrogen_dioxide:
+  nitrogenDioxide,
+
+carbon_monoxide:
+  carbonMonoxide,
+
+sulfur_dioxide:
+  sulfurDioxide,
       // ================= LOCATION =================
 
       latitude:
