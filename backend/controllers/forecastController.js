@@ -3,12 +3,16 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const TOMORROW_TIMELINE_URL =
-  "https://api.tomorrow.io/v4/timelines";
+const TOMORROW_FORECAST_URL =
+  "https://api.tomorrow.io/v4/weather/forecast";
 
 export const getForecast = async (req, res) => {
   try {
     const { lat, lon } = req.query;
+
+    // ============================================
+    // VALIDATE LOCATION
+    // ============================================
 
     if (!lat || !lon) {
       return res.status(400).json({
@@ -16,101 +20,161 @@ export const getForecast = async (req, res) => {
       });
     }
 
-    if (!process.env.TOMORROW_API_KEY) {
+    // ============================================
+    // API KEY
+    // ============================================
+
+    const apiKey =
+      process.env.TOMORROW_API_KEY;
+
+    if (!apiKey) {
       return res.status(500).json({
-        message: "Tomorrow.io API key is not configured",
+        message:
+          "Tomorrow.io API key is not configured",
       });
     }
 
-    const response = await axios.post(
-      TOMORROW_TIMELINE_URL,
-      {
-        location: `${lat},${lon}`,
+    console.log(
+      "======================================"
+    );
 
-        fields: [
-          "temperature",
-          "humidity",
-          "windSpeed",
-          "precipitationProbability",
-          "weatherCodeFullDay",
-        ],
+    console.log(
+      "TOMORROW 5-DAY FORECAST REQUEST"
+    );
 
-        units: "metric",
+    console.log(
+      "LOCATION:",
+      lat,
+      lon
+    );
 
-        timesteps: ["1d"],
+    // ============================================
+    // TOMORROW.IO FORECAST API
+    // ============================================
 
-        startTime: "now",
-
-        endTime: "nowPlus15d",
-
-        timezone: "auto",
-      },
+    const response = await axios.get(
+      TOMORROW_FORECAST_URL,
       {
         params: {
-          apikey: process.env.TOMORROW_API_KEY,
+          location: `${lat},${lon}`,
+          timesteps: "1d",
+          units: "metric",
+          apikey: apiKey,
         },
 
         headers: {
-          "Content-Type": "application/json",
+          Accept: "application/json",
         },
+
+        timeout: 15000,
       }
     );
 
-    const timeline =
-      response.data?.data?.timelines?.find(
-        (item) => item.timestep === "1d"
-      );
+    // ============================================
+    // RAW TOMORROW RESPONSE
+    // ============================================
 
-    const intervals =
-      timeline?.intervals || [];
+    const tomorrowData =
+      response.data;
 
-    const daily = intervals
-      .slice(0, 15)
-      .map((item) => ({
-        time: item.startTime,
+    console.log(
+      "TOMORROW FORECAST STATUS:",
+      response.status
+    );
 
-        values: {
-          temperatureAvg:
-            item.values?.temperatureAvg ??
-            item.values?.temperature ??
-            null,
+    console.log(
+      "TOMORROW FORECAST RECEIVED"
+    );
 
-          temperatureMin:
-            item.values?.temperatureMin ??
-            null,
+    // ============================================
+    // DAILY DATA
+    // ============================================
 
-          temperatureMax:
-            item.values?.temperatureMax ??
-            null,
+    const daily =
+      tomorrowData?.timelines?.daily || [];
 
-          humidityAvg:
-            item.values?.humidityAvg ??
-            item.values?.humidity ??
-            null,
+    console.log(
+      "FORECAST DAYS:",
+      daily.length
+    );
 
-          windSpeedAvg:
-            item.values?.windSpeedAvg ??
-            item.values?.windSpeed ??
-            null,
+    // ============================================
+    // FORMAT DATA FOR AETHERIX
+    // ============================================
 
-          precipitationProbabilityAvg:
-            item.values
-              ?.precipitationProbabilityAvg ??
-            item.values
-              ?.precipitationProbability ??
-            0,
+    const formattedDaily =
+      daily
+        .slice(0, 5)
+        .map((item) => {
+          const values =
+            item?.values || {};
 
-          weatherCodeFullDay:
-            item.values?.weatherCodeFullDay ??
-            item.values?.weatherCode ??
-            1000,
-        },
-      }));
+          const weatherCode =
+            values.weatherCodeFullDay ??
+            values.weatherCodeMax ??
+            values.weatherCodeMin ??
+            1000;
 
-    res.json({
+          return {
+            time:
+              item.time,
+
+            values: {
+              temperatureAvg:
+                values.temperatureAvg ??
+                null,
+
+              temperatureMin:
+                values.temperatureMin ??
+                null,
+
+              temperatureMax:
+                values.temperatureMax ??
+                null,
+
+              humidityAvg:
+                values.humidityAvg ??
+                null,
+
+              windSpeedAvg:
+                values.windSpeedAvg ??
+                null,
+
+              windDirectionAvg:
+                values.windDirectionAvg ??
+                null,
+
+              precipitationProbabilityAvg:
+                values.precipitationProbabilityAvg ??
+                0,
+
+              weatherCodeFullDay:
+                weatherCode,
+
+              condition:
+                getWeatherCondition(
+                  weatherCode
+                ),
+
+              sunriseTime:
+                values.sunriseTime ??
+                null,
+
+              sunsetTime:
+                values.sunsetTime ??
+                null,
+            },
+          };
+        });
+
+    // ============================================
+    // SEND RESPONSE
+    // ============================================
+
+    return res.status(200).json({
       data: {
         timelines: {
-          daily,
+          daily: formattedDaily,
         },
       },
 
@@ -119,22 +183,122 @@ export const getForecast = async (req, res) => {
         lon: Number(lon),
       },
 
-      days: daily.length,
+      days:
+        formattedDaily.length,
     });
+
   } catch (error) {
+
+    // ============================================
+    // IMPORTANT ERROR LOGGING
+    // ============================================
+
     console.error(
-      "TOMORROW 15-DAY FORECAST ERROR:",
-      error.response?.data ||
-        error.message
+      "======================================"
     );
 
-    res.status(
+    console.error(
+      "TOMORROW FORECAST ERROR"
+    );
+
+    console.error(
+      "STATUS:",
+      error.response?.status
+    );
+
+    console.error(
+      "DATA:",
+      JSON.stringify(
+        error.response?.data,
+        null,
+        2
+      )
+    );
+
+    console.error(
+      "MESSAGE:",
+      error.message
+    );
+
+    console.error(
+      "======================================"
+    );
+
+    return res.status(
       error.response?.status || 500
     ).json({
       message:
         error.response?.data?.message ||
         error.response?.data?.error ||
-        "Unable to fetch 15-day forecast",
+        "Unable to fetch 5-day forecast",
+
+      status:
+        error.response?.status || 500,
+
+      details:
+        error.response?.data || null,
     });
   }
 };
+
+
+// ============================================
+// WEATHER CONDITION
+// ============================================
+
+function getWeatherCondition(code) {
+
+  const conditions = {
+
+    1000: "Clear",
+
+    1001: "Cloudy",
+
+    1100: "Mostly Clear",
+
+    1101: "Partly Cloudy",
+
+    1102: "Mostly Cloudy",
+
+    2000: "Fog",
+
+    2100: "Light Fog",
+
+    4000: "Drizzle",
+
+    4001: "Rain",
+
+    4200: "Light Rain",
+
+    4201: "Heavy Rain",
+
+    5000: "Snow",
+
+    5001: "Flurries",
+
+    5100: "Light Snow",
+
+    5101: "Heavy Snow",
+
+    6000: "Freezing Drizzle",
+
+    6001: "Freezing Rain",
+
+    6200: "Light Freezing Rain",
+
+    6201: "Heavy Freezing Rain",
+
+    7000: "Ice Pellets",
+
+    7101: "Heavy Ice Pellets",
+
+    7102: "Light Ice Pellets",
+
+    8000: "Thunderstorm",
+  };
+
+  return (
+    conditions[code] ||
+    "Unknown"
+  );
+}
