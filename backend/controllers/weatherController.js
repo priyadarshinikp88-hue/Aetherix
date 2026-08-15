@@ -8,7 +8,7 @@ const TOMORROW_API_URL =
 
 const TOMORROW_API_KEY =
   process.env.TOMORROW_API_KEY;
-
+console.log("🔥 AETHERIX WEATHER CONTROLLER: TOMORROW.IO VERSION");
 // =======================================================
 // CURRENT WEATHER
 // =======================================================
