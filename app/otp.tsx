@@ -38,22 +38,6 @@ export default function OTP() {
     try {
       setLoading(true);
 
-      // Connect your OTP API here later
-      // Example:
-      //
-      // await fetch(
-      //   'YOUR_BACKEND_URL/api/auth/send-otp',
-      //   {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //       phone: `+91${phone}`,
-      //     }),
-      //   }
-      // );
-
       setOtpSent(true);
 
       Alert.alert(
@@ -86,21 +70,6 @@ export default function OTP() {
     try {
       setLoading(true);
 
-      // Connect your OTP verification API here later
-      //
-      // const response = await fetch(
-      //   'YOUR_BACKEND_URL/api/auth/verify-otp',
-      //   {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //       phone: `+91${phone}`,
-      //       otp,
-      //     }),
-      //   }
-      // );
 
       Alert.alert(
         'OTP Verified',

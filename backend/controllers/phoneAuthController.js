@@ -2,9 +2,19 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+
+// =======================================================
+// PHONE LOGIN
+// MSG91 APP WIDGET ACCESS TOKEN VERIFICATION
+// =======================================================
+
 export const phoneLogin = async (req, res) => {
   try {
     const { accessToken } = req.body;
+
+    // ---------------------------------------------------
+    // VALIDATE ACCESS TOKEN
+    // ---------------------------------------------------
 
     if (!accessToken) {
       return res.status(400).json({
@@ -12,35 +22,71 @@ export const phoneLogin = async (req, res) => {
         message: "Access Token Missing",
       });
     }
-   
+
+    // ---------------------------------------------------
+    // VALIDATE MSG91 SERVER AUTHKEY
+    // ---------------------------------------------------
+
+    const msg91AuthKey =
+      process.env.MSG91_AUTH_KEY;
+
+    if (!msg91AuthKey) {
+      console.error(
+        "❌ MSG91_AUTH_KEY is missing on Render"
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "MSG91 server authentication is not configured",
+      });
+    }
+
     console.log(
-  "MSG91 AUTH KEY EXISTS:",
-  !!process.env.MSG91_AUTH_KEY
-);
-
-    const params = new URLSearchParams();
-
-    params.append(
-      "authkey",
-      process.env.MSG91_AUTH_KEY
+      "✅ MSG91 SERVER AUTHKEY EXISTS:",
+      true
     );
 
-    params.append(
-      "access-token",
-      accessToken
+    console.log(
+      "🔐 MSG91 ACCESS TOKEN RECEIVED:",
+      true
     );
 
-    const verifyResponse = await axios.post(
-      "https://control.msg91.com/api/v5/widget/verifyAccessToken",
-      params.toString(),
-      {
-        headers: {
-          "Content-Type":
-            "application/x-www-form-urlencoded",
-          Accept: "application/json",
+
+    // ===================================================
+    // VERIFY MSG91 ACCESS TOKEN
+    // ===================================================
+
+    const verifyResponse =
+      await axios.post(
+
+        "https://control.msg91.com/api/v5/widget/verifyAccessToken",
+
+        {
+          "access-token":
+            accessToken,
         },
-      }
-    );
+
+        {
+          headers: {
+            authkey:
+              msg91AuthKey,
+
+            Accept:
+              "application/json",
+
+            "Content-Type":
+              "application/json",
+          },
+
+          timeout: 15000,
+        }
+      );
+
+
+    // ---------------------------------------------------
+    // LOG RESPONSE
+    // ---------------------------------------------------
 
     console.log(
       "MSG91 VERIFY STATUS:",
@@ -56,97 +102,175 @@ export const phoneLogin = async (req, res) => {
       )
     );
 
-    /*
-     * Check MSG91 verification
-     */
+
+    // ===================================================
+    // CHECK MSG91 RESPONSE
+    // ===================================================
 
     if (
-      verifyResponse.data?.type !== "success"
+      verifyResponse.data?.type !==
+      "success"
     ) {
+
       return res.status(400).json({
         success: false,
+
         message:
           verifyResponse.data?.message ||
           "MSG91 access token verification failed.",
+
+        msg91:
+          verifyResponse.data,
       });
     }
 
-    /*
-     * Get verified phone
-     */
+
+    // ===================================================
+    // GET VERIFIED PHONE
+    // ===================================================
 
     const phone =
       verifyResponse.data?.message ||
       verifyResponse.data?.phone ||
-      verifyResponse.data?.mobile;
+      verifyResponse.data?.mobile ||
+      verifyResponse.data?.data?.phone ||
+      verifyResponse.data?.data?.mobile;
+
 
     if (!phone) {
+
+      console.error(
+        "❌ MSG91 VERIFIED PHONE NOT FOUND"
+      );
+
+      console.error(
+        "MSG91 RESPONSE:",
+        JSON.stringify(
+          verifyResponse.data,
+          null,
+          2
+        )
+      );
+
       return res.status(400).json({
         success: false,
-        message: "Phone Number Not Found",
-        msg91: verifyResponse.data,
+
+        message:
+          "Phone Number Not Found",
+
+        msg91:
+          verifyResponse.data,
       });
     }
 
+
     console.log(
-      "Verified Phone:",
+      "✅ VERIFIED PHONE:",
       phone
     );
 
-    /*
-     * Find existing user
-     */
 
-    let user = await User.findOne({
-      phone,
-    });
+    // ===================================================
+    // FIND EXISTING USER
+    // ===================================================
 
-    /*
-     * Create user if not found
-     */
-
-    if (!user) {
-      user = await User.create({
+    let user =
+      await User.findOne({
         phone,
-        name: "Phone User",
       });
 
+
+    // ===================================================
+    // CREATE USER IF NOT FOUND
+    // ===================================================
+
+    if (!user) {
+
+      user =
+        await User.create({
+          phone,
+          name:
+            "Phone User",
+        });
+
       console.log(
-        "Created User:",
+        "✅ CREATED PHONE USER:",
         user._id
       );
+
     } else {
+
       console.log(
-        "Existing User:",
+        "✅ EXISTING PHONE USER:",
         user._id
       );
     }
 
-    /*
-     * Generate Aetherix JWT
-     */
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    // ===================================================
+    // GENERATE AETHERIX JWT
+    // ===================================================
+
+    if (!process.env.JWT_SECRET) {
+
+      console.error(
+        "❌ JWT_SECRET is missing"
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "JWT authentication is not configured",
+      });
+    }
+
+
+    const token =
+      jwt.sign(
+
+        {
+          id:
+            user._id,
+        },
+
+        process.env.JWT_SECRET,
+
+        {
+          expiresIn:
+            "7d",
+        }
+      );
+
+
+    // ===================================================
+    // SUCCESS
+    // ===================================================
 
     return res.status(200).json({
-      success: true,
+
+      success:
+        true,
+
+      message:
+        "Phone Login Successful",
+
       token,
+
       user,
+
     });
+
 
   } catch (error) {
 
     console.error(
-      "=========== MSG91 ERROR ==========="
+      "=========== MSG91 PHONE LOGIN ERROR ==========="
     );
+
+
+    // ---------------------------------------------------
+    // MSG91 / AXIOS ERROR
+    // ---------------------------------------------------
 
     if (error.response) {
 
@@ -164,20 +288,47 @@ export const phoneLogin = async (req, res) => {
         )
       );
 
-      return res.status(400).json({
-        success: false,
+
+      return res.status(
+        error.response.status >= 400 &&
+        error.response.status < 500
+          ? error.response.status
+          : 500
+      ).json({
+
+        success:
+          false,
+
         message:
           error.response.data?.message ||
           "MSG91 Verification Failed",
-        error: error.response.data,
+
+        error:
+          error.response.data,
+
       });
     }
 
-    console.error(error);
+
+    // ---------------------------------------------------
+    // OTHER ERROR
+    // ---------------------------------------------------
+
+    console.error(
+      "ERROR:",
+      error.message
+    );
+
 
     return res.status(500).json({
-      success: false,
-      message: error.message,
+
+      success:
+        false,
+
+      message:
+        error.message ||
+        "Phone login failed",
+
     });
   }
 };
