@@ -24,6 +24,11 @@ router.get("/test", (req, res) => {
   });
 });
 
+router.get("/google-test", (req, res) => {
+  res.json({
+    message: "Google route is loaded",
+  });
+});
 // Register
 router.post("/register", register);
 
