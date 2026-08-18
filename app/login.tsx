@@ -15,8 +15,16 @@ import {
 import { Image } from 'expo-image';
 import Svg, { Path } from 'react-native-svg';
 
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+
 const { width } = Dimensions.get('window');
 
+GoogleSignin.configure({
+  webClientId:
+    '967802988577-0g61e4oe1vc3oa86pubiedquqk00tj6v.apps.googleusercontent.com',
+});
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +48,7 @@ export default function LoginScreen() {
       setLoading(true);
 
       const response = await fetch(
-        'https://aetherix-backend-eoj8.onrender.com/api/auth/login',
+  'https://aetherix-y0rr.onrender.com/api/auth/login',
         {
           method: 'POST',
           headers: {
@@ -78,17 +86,108 @@ export default function LoginScreen() {
     }
   };
 
-  // =====================================================
-  // GOOGLE LOGIN
-  // =====================================================
+ // =====================================================
+// GOOGLE LOGIN
+// =====================================================
+const handleGoogleLogin = async () => {
+  try {
+    setLoading(true);
 
-  const handleGoogleLogin = () => {
-    Alert.alert(
-      'Google Login',
-      'Google authentication will be connected to the existing Aetherix Firebase authentication.'
+    await GoogleSignin.hasPlayServices({
+      showPlayServicesUpdateDialog: true,
+    });
+
+    const signInResult = await GoogleSignin.signIn();
+
+    console.log("GOOGLE SIGN-IN RESULT:", signInResult);
+
+    // Get Google ID token
+    const googleIdToken = signInResult.data?.idToken;
+
+    if (!googleIdToken) {
+      throw new Error("Google ID token not received");
+    }
+
+    console.log("Google ID token received");
+
+    // Google ID token → Firebase credential
+    const credential =
+      GoogleAuthProvider.credential(googleIdToken);
+
+    // Sign in to Firebase
+    const firebaseResult =
+      await signInWithCredential(auth, credential);
+
+    console.log(
+      "Firebase sign-in successful:",
+      firebaseResult.user.email
     );
-  };
 
+    // Get Firebase Authentication ID token
+    const firebaseIdToken =
+      await firebaseResult.user.getIdToken(true);
+
+    console.log("Firebase ID token received");
+
+    // Send Firebase ID token to backend
+    const response = await fetch(
+      "https://aetherix-y0rr.onrender.com/api/auth/google",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken: firebaseIdToken,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    console.log(
+      "GOOGLE BACKEND STATUS:",
+      response.status
+    );
+
+    console.log(
+      "GOOGLE BACKEND RESPONSE:",
+      data
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          "Unable to authenticate with Google."
+      );
+    }
+
+    if (!data.token) {
+      throw new Error(
+        "Authentication token was not returned."
+      );
+    }
+
+    console.log("GOOGLE LOGIN SUCCESS");
+
+    router.replace("/home");
+
+  } catch (error: any) {
+    console.error(
+      "GOOGLE LOGIN ERROR:",
+      error
+    );
+
+    Alert.alert(
+      "Google Login",
+      error?.message ||
+        "Google authentication failed."
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
   // =====================================================
   // UI
   // =====================================================
