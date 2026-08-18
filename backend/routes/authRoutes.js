@@ -16,7 +16,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 console.log("✅ authRoutes.js Loaded");
-
+console.log("🔥 GOOGLE ROUTES FILE LOADED");
 // Test Route
 router.get("/test", (req, res) => {
   res.json({
@@ -51,5 +51,12 @@ router.post("/forgot-password", forgotPassword);
 
 // Reset Password
 router.post("/reset-password/:token", resetPassword);
+
+console.log(
+  "🔥 AUTH ROUTES:",
+  router.stack
+    .filter((r) => r.route)
+    .map((r) => `${Object.keys(r.route.methods).join(",").toUpperCase()} ${r.route.path}`)
+);
 
 export default router;
