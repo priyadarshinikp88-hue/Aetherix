@@ -2,6 +2,7 @@ import express from "express";
 import {
   register,
   login,
+ googleLogin,
   forgotPassword,
   resetPassword,
   sendOTP,
@@ -25,6 +26,9 @@ router.get("/test", (req, res) => {
 
 // Register
 router.post("/register", register);
+
+// Google Login
+router.post("/google", googleLogin);
 
 // Login
 router.post("/login", login);

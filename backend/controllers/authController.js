@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
+import { adminAuth } from "../config/firebaseAdmin.js";
 
 // ================= LOGIN =================
 export const login = async (req, res) => {
@@ -54,6 +55,81 @@ export const login = async (req, res) => {
   }
 };
 
+// ================= GOOGLE LOGIN =================
+export const googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({
+        message: "Google ID token is required",
+      });
+    }
+
+    // Verify Firebase ID token
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+
+    const {
+      uid,
+      email,
+      name,
+      picture,
+    } = decodedToken;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Google account email not available",
+      });
+    }
+
+    // Find existing user
+    let user = await User.findOne({
+      email: email.toLowerCase(),
+    });
+
+    // Create user if not already registered
+    if (!user) {
+      user = new User({
+        name: name || "Google User",
+        email: email.toLowerCase(),
+        password: null,
+        membership: "User",
+        profileImage: picture || "",
+      });
+
+      await user.save();
+    }
+
+    // Create Aetherix JWT
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
+      message: "Google Login Successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        membership: user.membership,
+        profileImage: user.profileImage,
+      },
+    });
+
+  } catch (error) {
+    console.error("Google Login Error:", error);
+
+    return res.status(401).json({
+      message: "Google authentication failed",
+      error: error.message,
+    });
+  }
+};
+ 
 // ================= REGISTER =================
 export const register = async (req, res) => {
   try {
@@ -83,7 +159,7 @@ export const register = async (req, res) => {
       message: "Registration Successful",
     });
 
-  } catch (error) {
+  } catch (error) { 
     console.error(error);
 
     return res.status(500).json({
